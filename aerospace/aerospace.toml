@@ -8,7 +8,7 @@ config-version = 2
 after-startup-command = [
     'workspace 1',
     'layout tiles horizontal',
-    'exec-and-forget borders active_color=0xff7e9cd8 inactive_color=0xff2a2a37 width=3.0'
+    'exec-and-forget borders active_color=0xffFF9E64 inactive_color=0xff2a2a37 width=7.0'
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
@@ -23,12 +23,12 @@ exec-on-workspace-change = ['/bin/bash', '-c', 'sketchybar --trigger aerospace_w
 
 # Gaps between windows
 [gaps]
-inner.horizontal = 8
-inner.vertical =   8
-outer.left =       8
-outer.bottom =     8
-outer.top =       36
-outer.right =      8
+inner.horizontal = 12
+inner.vertical =   12
+outer.left =       12
+outer.bottom =     12
+outer.top =       40
+outer.right =      12
 
 # Mode indicator
 [mode.main.binding]
