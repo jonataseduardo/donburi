@@ -14,7 +14,7 @@ if [ "$SPACE_NUM" = "$CURRENT_WORKSPACE" ]; then
     # Active workspace - vibrant highlight
     sketchybar --set "$NAME" \
         icon.color="$KANAGAWA_BG_DARK" \
-        background.color="$KANAGAWA_PURPLE" \
+        background.color="$KANAGAWA_ORANGE" \
         background.border_color="$KANAGAWA_BLUE" \
         background.border_width=1
 else

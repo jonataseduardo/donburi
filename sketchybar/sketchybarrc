@@ -64,7 +64,7 @@ sketchybar --add item separator left \
 sketchybar --add item front_app center \
     --set front_app \
         icon.drawing=off \
-        label.color=$KANAGAWA_CYAN \
+        label.color=$KANAGAWA_ORANGE \
         script="$PLUGIN_DIR/front_app.sh" \
     --subscribe front_app front_app_switched
 
