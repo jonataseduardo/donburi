@@ -70,6 +70,16 @@ sketchybar --add item front_app center \
 
 # Right side items (from right to left)
 
+# Spotify
+sketchybar --add item spotify right \
+    --set spotify \
+        icon="" \
+        icon.color=$KANAGAWA_GREEN \
+        label.color=$KANAGAWA_FG \
+        update_freq=5 \
+        script="$PLUGIN_DIR/spotify.sh" \
+        click_script="osascript -e 'tell application \"Spotify\" to playpause'"
+
 # Clock
 sketchybar --add item clock right \
     --set clock \
