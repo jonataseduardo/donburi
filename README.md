@@ -36,10 +36,12 @@ Installation is **non-destructive**—existing configurations are automatically 
 ## Quick Start
 
 ```bash
-git clone https://github.com/jonatas/donburi.git ~/.config/donburi
-cd ~/.config/donburi
+git clone https://github.com/jonatas/donburi.git ~/donburi
+cd ~/donburi
 ./setup.sh
 ```
+
+Clone to any directory you prefer—the setup script creates symlinks to the standard config locations listed in [Components](#components).
 
 ## Components
 
