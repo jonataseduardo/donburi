@@ -342,6 +342,6 @@ if [[ "$COMMAND" != "status" ]]; then
         echo -e "${YELLOW}Dry run complete. No changes were made.${NC}"
     else
         echo -e "${GREEN}Done!${NC}"
-        [[ -d "$BACKUP_DIR" ]] && echo "Backups: $BACKUP_DIR"
+        [[ -d "$BACKUP_DIR" ]] && echo "Backups: $BACKUP_DIR" || true
     fi
 fi
