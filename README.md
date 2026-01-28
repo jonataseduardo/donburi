@@ -35,13 +35,24 @@ Installation is **non-destructive**—existing configurations are automatically 
 
 ## Quick Start
 
+**One-liner installation:**
 ```bash
-git clone https://github.com/jonatas/donburi.git ~/donburi
-cd ~/donburi
-./setup.sh
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
 ```
 
-Clone to any directory you prefer—the setup script creates symlinks to the standard config locations listed in [Components](#components).
+This installs donburi to `~/.donburi` and adds the `donburi` command to your PATH.
+
+**Or clone manually:**
+```bash
+git clone https://github.com/jonatas/donburi.git ~/.donburi
+~/.donburi/donburi setup
+```
+
+After installation:
+```bash
+donburi brew apps       # Install applications (nvim, ghostty, aerospace, etc.)
+donburi setup           # Install all configurations
+```
 
 ## Components
 
@@ -66,24 +77,43 @@ Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as 
 | Toggle layout | `Alt + /` | `Ctrl + /` |
 | Switch workspace | `Alt + 1-9` | — |
 
-## Installation Options
+## CLI Reference
 
 ```bash
-./setup.sh              # Install all components
-./setup.sh nvim         # Install a single component
-./setup.sh --dry-run    # Preview changes without applying
-./setup.sh status       # Check symlink status
-./setup.sh brew         # Install applications via Homebrew
+donburi setup [component]     # Install configurations
+donburi status                # Check symlink status
+donburi brew [category]       # Install packages via Homebrew
+donburi update                # Update donburi (git pull)
+donburi help                  # Show help
 ```
 
-Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar`, `brew`
+### Setup Options
+
+```bash
+donburi setup              # Install all components
+donburi setup nvim         # Install a single component
+donburi setup --dry-run    # Preview changes without applying
+```
+
+Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar`
+
+### Brew Categories
+
+```bash
+donburi brew               # Install apps only (default)
+donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq)
+donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash)
+donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
+donburi brew all           # Install everything
+donburi brew --list        # Show all packages without installing
+```
 
 ## Post-Installation
 
 Verify the installation:
 
 ```bash
-./setup.sh status       # Check all symlinks (shows OK/WRONG/MISSING)
+donburi status          # Check all symlinks (shows OK/WRONG/MISSING)
 source ~/.zshrc         # Reload shell configuration
 ```
 
@@ -126,6 +156,9 @@ brew services start sketchybar
 
 **Finding backed-up configs**
 - Backups are stored in `~/.config/donburi-backup-<timestamp>/`
+
+**donburi command not found**
+- Restart your terminal or run: `export PATH="$HOME/.local/bin:$PATH"`
 
 ## License
 

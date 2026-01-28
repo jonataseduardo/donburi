@@ -7,15 +7,17 @@ For general documentation, installation, keybindings, and usage, see [README.md]
 ## Quick Reference
 
 ```bash
-./setup.sh              # Install all configs
-./setup.sh <component>  # Install single component (nvim|ghostty|aerospace|tmux|zsh|sketchybar|brew)
-./setup.sh --dry-run    # Preview changes
-./setup.sh status       # Check symlink status
+donburi setup              # Install all configs
+donburi setup <component>  # Install single component (nvim|ghostty|aerospace|tmux|zsh|sketchybar)
+donburi setup --dry-run    # Preview changes
+donburi status             # Check symlink status
+donburi brew [category]    # Install packages (apps|cli|docker|all)
+donburi update             # Update donburi (git pull)
 ```
 
 ## Project Structure
 
-Each tool lives in its own directory and is symlinked to its config location by `setup.sh`:
+Each tool lives in its own directory and is symlinked to its config location by `donburi`:
 
 | Directory | Symlink Target |
 |-----------|----------------|
@@ -26,13 +28,20 @@ Each tool lives in its own directory and is symlinked to its config location by 
 | `tmux/` | `~/.tmux.conf` |
 | `zsh/` | `~/.zshrc` |
 
+## CLI Files
+
+| File | Purpose |
+|------|---------|
+| `donburi` | Main CLI script (multi-command tool) |
+| `install.sh` | Curl-friendly installer for one-liner installation |
+
 ## Development Guidelines
 
 ### Design Principles
 
 1. **Consistent hjkl navigation** — Aerospace uses `Alt`, Neovim uses `Ctrl`. Adding `Shift` = resize in both.
 2. **Kanagawa theme** — Maintain color consistency across all components.
-3. **Non-destructive setup** — `setup.sh` backs up existing configs to `~/.config/donburi-backup-<timestamp>/`.
+3. **Non-destructive setup** — `donburi` backs up existing configs to `~/.config/donburi-backup-<timestamp>/`.
 
 ### Component-Specific Notes
 
