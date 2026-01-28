@@ -24,4 +24,4 @@ if [ -z "$MEMORY" ]; then
     fi
 fi
 
-sketchybar --set "$NAME" label="${MEMORY}%"
+sketchybar --set "$NAME" label=" ${MEMORY}%"

@@ -6,17 +6,7 @@
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
 # Kanagawa color palette
-export KANAGAWA_BG="#1F1F28"
-export KANAGAWA_BG_DARK="#16161D"
-export KANAGAWA_FG="#DCD7BA"
-export KANAGAWA_FG_DIM="#727169"
-export KANAGAWA_BLUE="#7E9CD8"
-export KANAGAWA_CYAN="#A3D4D5"
-export KANAGAWA_GREEN="#98BB6C"
-export KANAGAWA_YELLOW="#FF9E3B"
-export KANAGAWA_RED="#E82424"
-export KANAGAWA_PURPLE="#938AA9"
-export KANAGAWA_HIGHLIGHT="#2D4F67"
+source "$CONFIG_DIR/colors.sh"
 
 # Bar appearance
 sketchybar --bar \
@@ -30,9 +20,9 @@ sketchybar --bar \
 
 # Default item settings
 sketchybar --default \
-    icon.font="JetBrains Mono:Bold:14.0" \
+    icon.font="JetBrainsMono Nerd Font:Bold:14.0" \
     icon.color=$KANAGAWA_FG \
-    label.font="JetBrains Mono:Regular:12.0" \
+    label.font="JetBrainsMono Nerd Font:Regular:12.0" \
     label.color=$KANAGAWA_FG \
     background.color=$KANAGAWA_BG \
     background.corner_radius=5 \
@@ -70,8 +60,8 @@ sketchybar --add item separator left \
         label.drawing=off \
         background.drawing=off
 
-# Current application (left side)
-sketchybar --add item front_app left \
+# Current application (center)
+sketchybar --add item front_app center \
     --set front_app \
         icon.drawing=off \
         label.color=$KANAGAWA_CYAN \
@@ -114,6 +104,15 @@ sketchybar --add item cpu right \
         label.color=$KANAGAWA_FG \
         update_freq=15 \
         script="$PLUGIN_DIR/cpu.sh"
+
+# VPN (to the left of CPU)
+sketchybar --add item vpn right \
+    --set vpn \
+        icon="󰒄" \
+        icon.color=$KANAGAWA_GREEN \
+        label.color=$KANAGAWA_FG \
+        update_freq=10 \
+        script="$PLUGIN_DIR/vpn.sh"
 
 # Initialize bar
 sketchybar --update

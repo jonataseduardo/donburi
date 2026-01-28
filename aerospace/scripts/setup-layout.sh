@@ -1,39 +1,62 @@
 #!/bin/bash
-# Setup 30/70 layout for workspace 1 (Slack 30% left, terminal 70% right)
+# Setup workspace 1 layout:
+# ┌─────────┬────────────┬───────────┐
+# │         │ Terminal 2  │           │
+# │ Browser ├────────────┤ Terminal 1 │
+# │  (1/3)  │ Terminal 3  │           │
+# │         │            │           │
+# └─────────┴────────────┴───────────┘
 
-# Switch to workspace 1
 aerospace workspace 1
 sleep 0.3
 
-# Flatten any nested containers to simplify layout
+# Flatten to start clean — all windows become horizontal siblings
 aerospace flatten-workspace-tree
 sleep 0.2
-
-# Ensure horizontal layout
 aerospace layout tiles horizontal
 sleep 0.2
 
-# Balance all windows to equal sizes first
-aerospace balance-sizes
+# Find window IDs by app
+BROWSER_ID=$(aerospace list-windows --workspace 1 --format '%{window-id} %{app-bundle-id}' | grep -i 'com.google.Chrome' | head -1 | awk '{print $1}')
+TERMINALS=$(aerospace list-windows --workspace 1 --format '%{window-id} %{app-bundle-id}' | grep -i 'com.mitchellh.ghostty' | awk '{print $1}')
+TERM1=$(echo "$TERMINALS" | sed -n '1p')
+TERM2=$(echo "$TERMINALS" | sed -n '2p')
+TERM3=$(echo "$TERMINALS" | sed -n '3p')
+
+if [ -z "$BROWSER_ID" ] || [ -z "$TERM1" ] || [ -z "$TERM2" ] || [ -z "$TERM3" ]; then
+    osascript -e 'display notification "Need 1 Chrome + 3 Ghostty windows on workspace 1" with title "Aerospace Layout"'
+    exit 1
+fi
+
+# Step 1: Move browser to far left
+aerospace focus --window-id "$BROWSER_ID"
+sleep 0.1
+aerospace move left
+sleep 0.1
+aerospace move left
+sleep 0.1
+aerospace move left
 sleep 0.2
 
-# Count windows to determine which is which
-# Focus leftmost window (should be Slack after flattening)
-aerospace focus left
-aerospace focus left
-aerospace focus left
+# Step 2: Move Term1 to far right
+aerospace focus --window-id "$TERM1"
 sleep 0.1
-
-# Get screen width (approximate calculation for resize)
-# In AeroSpace, we resize by pixels. For a typical monitor:
-# - If total width is ~2560px, each window at 50/50 would be ~1280px
-# - For 30/70 split: Slack needs -512px, terminal needs +512px
-# This creates a 30/70 ratio
-
-# Resize left window (Slack) to be smaller
-aerospace resize width -512
+aerospace move right
 sleep 0.1
+aerospace move right
+sleep 0.1
+aerospace move right
+sleep 0.2
 
-# Move to right window (terminal) and make it larger
-aerospace focus right
-aerospace resize width +512
+# Now order should be: Browser, Term2, Term3, Term1
+# Step 3: Focus Term2, then move it down — this creates a vertical split with Term3
+aerospace focus --window-id "$TERM2"
+sleep 0.1
+aerospace move down
+sleep 0.3
+
+# Step 4: Resize browser to ~1/3 width
+aerospace focus --window-id "$BROWSER_ID"
+sleep 0.1
+aerospace resize width -400
+sleep 0.1
