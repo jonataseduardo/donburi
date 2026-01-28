@@ -26,28 +26,28 @@ inner.horizontal = 8
 inner.vertical =   8
 outer.left =       8
 outer.bottom =     8
-outer.top =        8
+outer.top =       36
 outer.right =      8
 
 # Mode indicator
 [mode.main.binding]
-# Window navigation using Ctrl+hjkl (primary keybinding)
-ctrl-h = 'focus left'
-ctrl-j = 'focus down'
-ctrl-k = 'focus up'
-ctrl-l = 'focus right'
+# Window navigation using Alt+hjkl
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
 
-# Window movement using Alt+Shift+hjkl
-alt-shift-h = 'move left'
-alt-shift-j = 'move down'
-alt-shift-k = 'move up'
-alt-shift-l = 'move right'
+# Window resizing using Alt+Shift+hjkl
+alt-shift-h = 'resize width -50'
+alt-shift-j = 'resize height +50'
+alt-shift-k = 'resize height -50'
+alt-shift-l = 'resize width +50'
 
-# Window resizing using Alt+Cmd+hjkl
-alt-cmd-h = 'resize width -50'
-alt-cmd-j = 'resize height +50'
-alt-cmd-k = 'resize height -50'
-alt-cmd-l = 'resize width +50'
+# Window movement using Alt+Ctrl+hjkl
+alt-ctrl-h = 'move left'
+alt-ctrl-j = 'move down'
+alt-ctrl-k = 'move up'
+alt-ctrl-l = 'move right'
 
 # Layout control
 alt-slash = 'layout tiles horizontal vertical'

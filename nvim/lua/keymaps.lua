@@ -70,11 +70,11 @@ end
 
 -- Window navigation keymaps - ensure they work reliably
 -- Use <C-w> commands directly for maximum compatibility
--- Using Ctrl+Shift+jklh for navigation (primary mappings)
-vim.keymap.set('n', '<C-S-j>', '<C-w>j', { desc = 'Navigate down (Ctrl+Shift+J)', noremap = true, silent = true })
-vim.keymap.set('n', '<C-S-k>', '<C-w>k', { desc = 'Navigate up (Ctrl+Shift+K)', noremap = true, silent = true })
-vim.keymap.set('n', '<C-S-l>', '<C-w>l', { desc = 'Navigate right (Ctrl+Shift+L)', noremap = true, silent = true })
-vim.keymap.set('n', '<C-S-h>', '<C-w>h', { desc = 'Navigate left (Ctrl+Shift+H)', noremap = true, silent = true })
+-- Using Ctrl+hjkl for navigation (primary mappings)
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Navigate left (Ctrl+H)', noremap = true, silent = true })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Navigate down (Ctrl+J)', noremap = true, silent = true })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Navigate up (Ctrl+K)', noremap = true, silent = true })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Navigate right (Ctrl+L)', noremap = true, silent = true })
 
 -- Alternative key codes for better terminal compatibility
 -- Note: <C-h/j/k/l> keymaps removed to avoid conflicts with smart-splits plugin
@@ -91,11 +91,11 @@ vim.keymap.set('n', '<C-Right>', '<C-w>l', { desc = 'Navigate right (alternative
 -- Some terminals might not send Ctrl+hjkl properly
 -- Note: <leader>hjkl keymaps removed to avoid conflicts with smart-splits plugin
 
--- Terminal mode navigation - primary mappings (Ctrl+Shift+jklh)
-vim.keymap.set('t', '<C-S-h>', [[<C-\><C-n><C-w>h]], { desc = 'Navigate left from terminal (Ctrl+Shift+H)', noremap = true, silent = true })
-vim.keymap.set('t', '<C-S-j>', [[<C-\><C-n><C-w>j]], { desc = 'Navigate down from terminal (Ctrl+Shift+J)', noremap = true, silent = true })
-vim.keymap.set('t', '<C-S-k>', [[<C-\><C-n><C-w>k]], { desc = 'Navigate up from terminal (Ctrl+Shift+K)', noremap = true, silent = true })
-vim.keymap.set('t', '<C-S-l>', [[<C-\><C-n><C-w>l]], { desc = 'Navigate right from terminal (Ctrl+Shift+L)', noremap = true, silent = true })
+-- Terminal mode navigation - primary mappings (Ctrl+hjkl)
+vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { desc = 'Navigate left from terminal (Ctrl+H)', noremap = true, silent = true })
+vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { desc = 'Navigate down from terminal (Ctrl+J)', noremap = true, silent = true })
+vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { desc = 'Navigate up from terminal (Ctrl+K)', noremap = true, silent = true })
+vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { desc = 'Navigate right from terminal (Ctrl+L)', noremap = true, silent = true })
 
 -- Alternative syntax for terminal mode (Ctrl+jklh)
 -- Note: <C-h/j/k/l> terminal keymaps removed to avoid conflicts with smart-splits plugin
@@ -127,7 +127,7 @@ vim.api.nvim_create_autocmd('WinEnter', {
 function _G.verify_navigation_keys()
   print("Verifying navigation keybindings...")
   local mappings = {
-    '<C-S-j>', '<C-S-k>', '<C-S-l>', '<C-S-h>',  -- Primary Ctrl+Shift mappings
+    '<C-h>', '<C-j>', '<C-k>', '<C-l>',  -- Primary Ctrl+hjkl mappings
     '<C-Left>', '<C-Down>', '<C-Up>', '<C-Right>' -- Arrow key alternatives
   }
   
@@ -149,32 +149,39 @@ function _G.verify_navigation_keys()
   end
 end
 
--- Window resizing keymaps (Alt + hjkl)
-vim.keymap.set('n', '<A-h>', '<C-w><', { desc = 'Resize window left', noremap = true, silent = true })
-vim.keymap.set('n', '<A-j>', '<C-w>-', { desc = 'Resize window down', noremap = true, silent = true })
-vim.keymap.set('n', '<A-k>', '<C-w>+', { desc = 'Resize window up', noremap = true, silent = true })
-vim.keymap.set('n', '<A-l>', '<C-w>>', { desc = 'Resize window right', noremap = true, silent = true })
+-- Window resizing keymaps (Ctrl+Shift + hjkl)
+vim.keymap.set('n', '<C-S-h>', '<C-w><', { desc = 'Resize window left', noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-j>', '<C-w>-', { desc = 'Resize window down', noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-k>', '<C-w>+', { desc = 'Resize window up', noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-l>', '<C-w>>', { desc = 'Resize window right', noremap = true, silent = true })
 
--- Terminal mode window resizing
-vim.keymap.set('t', '<A-h>', function()
+-- Terminal mode window resizing (Ctrl+Shift + hjkl)
+vim.keymap.set('t', '<C-S-h>', function()
   vim.cmd 'stopinsert'
   vim.cmd 'wincmd <'
 end, { desc = 'Resize window left from terminal', noremap = true, silent = true })
 
-vim.keymap.set('t', '<A-j>', function()
+vim.keymap.set('t', '<C-S-j>', function()
   vim.cmd 'stopinsert'
   vim.cmd 'wincmd -'
 end, { desc = 'Resize window down from terminal', noremap = true, silent = true })
 
-vim.keymap.set('t', '<A-k>', function()
+vim.keymap.set('t', '<C-S-k>', function()
   vim.cmd 'stopinsert'
   vim.cmd 'wincmd +'
 end, { desc = 'Resize window up from terminal', noremap = true, silent = true })
 
-vim.keymap.set('t', '<A-l>', function()
+vim.keymap.set('t', '<C-S-l>', function()
   vim.cmd 'stopinsert'
   vim.cmd 'wincmd >'
 end, { desc = 'Resize window right from terminal', noremap = true, silent = true })
+
+-- Layout toggle (Ctrl+/) - rotate window layout
+vim.keymap.set('n', '<C-/>', '<C-w>r', { desc = 'Toggle split layout', noremap = true, silent = true })
+vim.keymap.set('t', '<C-/>', function()
+  vim.cmd 'stopinsert'
+  vim.cmd 'wincmd r'
+end, { desc = 'Toggle split layout from terminal', noremap = true, silent = true })
 
 -- Ghostty terminal specific keymaps
 -- Open terminal in current directory

@@ -45,7 +45,7 @@ Functional checks after restarting the terminal:
 1. `source ~/.zshrc` loads without errors
 2. Config aliases work: `nconf`, `aconf`, `gconf`, `tconf`, `zconf`, `sconf`
 3. `nvim` opens without plugin errors (run `:checkhealth` inside Neovim)
-4. `Ctrl+hjkl` moves focus between Aerospace windows
+4. `Alt+hjkl` moves focus between Aerospace windows
 5. `Alt+1-9` switches workspaces
 6. `brew services start sketchybar` shows the bar with workspace indicators
 
@@ -59,10 +59,11 @@ If `setup.sh` backed up existing configs, they are saved in `~/.config/donburi-b
 
 ### Navigation Consistency
 
-All tools use hjkl-based navigation with different modifier keys to avoid conflicts:
-- **Aerospace (window manager):** `Ctrl+hjkl` for focus, `Alt+Shift+hjkl` for move, `Alt+Cmd+hjkl` for resize
-- **Neovim splits:** `Ctrl+Shift+hjkl` (avoids Aerospace's `Ctrl+hjkl`)
+All tools use hjkl-based navigation with consistent modifier patterns:
+- **Aerospace (window manager):** `Alt+hjkl` for focus, `Alt+Shift+hjkl` for resize, `Alt+Ctrl+hjkl` for move, `Alt+/` for layout toggle
+- **Neovim splits:** `Ctrl+hjkl` for navigation, `Ctrl+Shift+hjkl` for resize, `Ctrl+/` for layout toggle
 - **Workspace switching:** `Alt+1-9`
+- **Pattern:** Aerospace uses `Alt` as base modifier, Neovim uses `Ctrl`. Adding `Shift` = resize in both.
 
 ### Kanagawa Theme
 
