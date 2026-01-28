@@ -195,7 +195,7 @@ make_executable() {
 # ---------------------------------------------------------------------------
 
 # Apps: UI applications managed by donburi
-BREW_APPS_FORMULA=(neovim tmux sketchybar jq)
+BREW_APPS_FORMULA=(neovim tmux sketchybar jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 # CLI: Essential command-line tools
