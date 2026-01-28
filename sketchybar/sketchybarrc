@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# Sketchybar configuration with Kanagawa color scheme
+# Integrates with Aerospace window manager
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+
+# Kanagawa color palette
+export KANAGAWA_BG="#1F1F28"
+export KANAGAWA_BG_DARK="#16161D"
+export KANAGAWA_FG="#DCD7BA"
+export KANAGAWA_FG_DIM="#727169"
+export KANAGAWA_BLUE="#7E9CD8"
+export KANAGAWA_CYAN="#A3D4D5"
+export KANAGAWA_GREEN="#98BB6C"
+export KANAGAWA_YELLOW="#FF9E3B"
+export KANAGAWA_RED="#E82424"
+export KANAGAWA_PURPLE="#938AA9"
+export KANAGAWA_HIGHLIGHT="#2D4F67"
+
+# Bar appearance
+sketchybar --bar \
+    height=28 \
+    blur_radius=30 \
+    position=top \
+    sticky=on \
+    padding_left=10 \
+    padding_right=10 \
+    color=$KANAGAWA_BG_DARK
+
+# Default item settings
+sketchybar --default \
+    icon.font="JetBrains Mono:Bold:14.0" \
+    icon.color=$KANAGAWA_FG \
+    label.font="JetBrains Mono:Regular:12.0" \
+    label.color=$KANAGAWA_FG \
+    background.color=$KANAGAWA_BG \
+    background.corner_radius=5 \
+    background.height=22 \
+    padding_left=5 \
+    padding_right=5
+
+# Aerospace workspace indicators (left side)
+for i in $(seq 1 9); do
+    sketchybar --add item space.$i left \
+        --set space.$i \
+            icon=$i \
+            icon.padding_left=8 \
+            icon.padding_right=8 \
+            background.color=$KANAGAWA_BG \
+            background.drawing=on \
+            label.drawing=off \
+            click_script="aerospace workspace $i"
+done
+
+# Listen for aerospace workspace changes
+sketchybar --add event aerospace_workspace_change
+
+# Update workspace highlighting on change
+for i in $(seq 1 9); do
+    sketchybar --subscribe space.$i aerospace_workspace_change \
+        --set space.$i script="$PLUGIN_DIR/aerospace.sh"
+done
+
+# Separator
+sketchybar --add item separator left \
+    --set separator \
+        icon="|" \
+        icon.color=$KANAGAWA_FG_DIM \
+        label.drawing=off \
+        background.drawing=off
+
+# Current application (left side)
+sketchybar --add item front_app left \
+    --set front_app \
+        icon.drawing=off \
+        label.color=$KANAGAWA_CYAN \
+        script="$PLUGIN_DIR/front_app.sh" \
+    --subscribe front_app front_app_switched
+
+# Right side items (from right to left)
+
+# Clock
+sketchybar --add item clock right \
+    --set clock \
+        icon.drawing=off \
+        label.color=$KANAGAWA_FG \
+        update_freq=30 \
+        script="$PLUGIN_DIR/clock.sh"
+
+# Battery
+sketchybar --add item battery right \
+    --set battery \
+        icon.color=$KANAGAWA_GREEN \
+        label.color=$KANAGAWA_FG \
+        update_freq=120 \
+        script="$PLUGIN_DIR/battery.sh" \
+    --subscribe battery system_woke power_source_change
+
+# Memory
+sketchybar --add item memory right \
+    --set memory \
+        icon="MEM" \
+        icon.color=$KANAGAWA_PURPLE \
+        label.color=$KANAGAWA_FG \
+        update_freq=30 \
+        script="$PLUGIN_DIR/memory.sh"
+
+# CPU
+sketchybar --add item cpu right \
+    --set cpu \
+        icon="CPU" \
+        icon.color=$KANAGAWA_BLUE \
+        label.color=$KANAGAWA_FG \
+        update_freq=15 \
+        script="$PLUGIN_DIR/cpu.sh"
+
+# Initialize bar
+sketchybar --update

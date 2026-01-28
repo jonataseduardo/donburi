@@ -1,0 +1,164 @@
+# AeroSpace Configuration
+# Reference: https://github.com/nikitabobko/AeroSpace/blob/main/docs/config-reference.md
+
+# Config version (required for latest AeroSpace features)
+config-version = 2
+
+# Core settings
+after-startup-command = [
+    'workspace 1',
+    'layout tiles horizontal'
+]
+
+# Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+# Mouse behavior
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Sketchybar integration
+exec-on-workspace-change = ['/bin/bash', '-c', 'sketchybar --trigger aerospace_workspace_change']
+
+# Gaps between windows
+[gaps]
+inner.horizontal = 8
+inner.vertical =   8
+outer.left =       8
+outer.bottom =     8
+outer.top =        8
+outer.right =      8
+
+# Mode indicator
+[mode.main.binding]
+# Window navigation using Ctrl+hjkl (primary keybinding)
+ctrl-h = 'focus left'
+ctrl-j = 'focus down'
+ctrl-k = 'focus up'
+ctrl-l = 'focus right'
+
+# Window movement using Alt+Shift+hjkl
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+# Window resizing using Alt+Cmd+hjkl
+alt-cmd-h = 'resize width -50'
+alt-cmd-j = 'resize height +50'
+alt-cmd-k = 'resize height -50'
+alt-cmd-l = 'resize width +50'
+
+# Layout control
+alt-slash = 'layout tiles horizontal vertical'
+alt-comma = 'layout accordion horizontal vertical'
+
+# Force horizontal layout (useful for workspace 1)
+alt-shift-slash = 'layout tiles horizontal'
+
+# Fullscreen
+alt-shift-f = 'fullscreen'
+
+# Float/unfloat window
+alt-shift-space = 'layout floating tiling'
+
+# Workspace navigation
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+
+# Move window to workspace
+alt-shift-1 = 'move-node-to-workspace 1'
+alt-shift-2 = 'move-node-to-workspace 2'
+alt-shift-3 = 'move-node-to-workspace 3'
+alt-shift-4 = 'move-node-to-workspace 4'
+alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+alt-shift-8 = 'move-node-to-workspace 8'
+alt-shift-9 = 'move-node-to-workspace 9'
+
+# Move workspace to monitor
+alt-shift-left = 'move-workspace-to-monitor --wrap-around prev'
+alt-shift-right = 'move-workspace-to-monitor --wrap-around next'
+
+# Enter service mode (for advanced operations)
+alt-shift-semicolon = 'mode service'
+
+# Reload configuration
+alt-shift-r = 'reload-config'
+
+# Quick layout setup for 30/70 split (Slack left 30%, terminal right 70%)
+alt-shift-0 = 'exec-and-forget /Users/jonatas/c/donburi/aerospace/scripts/setup-layout.sh'
+
+# Service mode - for advanced window management
+[mode.service.binding]
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main']
+f = ['layout floating tiling', 'mode main']
+backspace = ['close-all-windows-but-current', 'mode main']
+
+# Join with window
+alt-shift-h = ['join-with left', 'mode main']
+alt-shift-j = ['join-with down', 'mode main']
+alt-shift-k = ['join-with up', 'mode main']
+alt-shift-l = ['join-with right', 'mode main']
+
+# Window management shortcuts
+h = ['focus left', 'mode main']
+j = ['focus down', 'mode main']
+k = ['focus up', 'mode main']
+l = ['focus right', 'mode main']
+
+# Balance windows
+b = ['balance-sizes', 'mode main']
+
+# Workspace assignment for apps
+# Workspace 1: Main workspace with Slack (30% left) and terminal (70% right)
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+# Ghostty windows - move to workspace 1 for terminal work
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.github.atom'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.mail'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.spotify.client'
+run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Music'
+run = 'move-node-to-workspace 9'
+
+# Floating windows for dialogs and preferences
+[[on-window-detected]]
+if.window-title-regex-substring = 'Preferences|Settings|About'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.window-title-regex-substring = 'Archive Utility'
+run = 'layout floating'
