@@ -66,10 +66,11 @@ chmod +x "$DONBURI_HOME/donburi"
 
 # Create bin directory and symlink
 mkdir -p "$BIN_DIR"
-if [ -L "$BIN_DIR/donburi" ]; then
-    rm "$BIN_DIR/donburi"
+# Remove existing file/symlink/directory at target path
+if [ -e "$BIN_DIR/donburi" ] || [ -L "$BIN_DIR/donburi" ]; then
+    rm -rf "$BIN_DIR/donburi"
 fi
-ln -sf "$DONBURI_HOME/donburi" "$BIN_DIR/donburi"
+ln -s "$DONBURI_HOME/donburi" "$BIN_DIR/donburi"
 log_info "Created symlink: $BIN_DIR/donburi -> $DONBURI_HOME/donburi"
 
 # ---------------------------------------------------------------------------
@@ -80,19 +81,23 @@ add_to_path() {
     local path_line='export PATH="$HOME/.local/bin:$PATH"'
 
     if [ -f "$shell_rc" ]; then
-        if ! grep -q '\.local/bin' "$shell_rc" 2>/dev/null; then
-            echo "" >> "$shell_rc"
-            echo "# Added by donburi installer" >> "$shell_rc"
-            echo "$path_line" >> "$shell_rc"
-            log_info "Added ~/.local/bin to PATH in $shell_rc"
-            return 0
+        # Skip if .local/bin is already referenced in the file
+        if grep -q '\.local/bin' "$shell_rc" 2>/dev/null; then
+            log_info "PATH already configured in $shell_rc"
+            return 1
         fi
+        echo "" >> "$shell_rc"
+        echo "# Added by donburi installer" >> "$shell_rc"
+        echo "$path_line" >> "$shell_rc"
+        log_info "Added ~/.local/bin to PATH in $shell_rc"
+        return 0
     fi
     return 1
 }
 
 # Update shell configuration if needed
 PATH_UPDATED=false
+# Only modify shell config if .local/bin is not in current PATH
 if [[ ! ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
     # Detect shell and update appropriate rc file
     if [ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ] || [ -f "$HOME/.zshrc" ]; then
@@ -111,6 +116,8 @@ if [[ ! ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
             fi
         fi
     fi
+else
+    log_info "PATH already includes ~/.local/bin"
 fi
 
 # ---------------------------------------------------------------------------
