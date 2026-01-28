@@ -1,0 +1,335 @@
+#!/opt/homebrew/bin/bash
+# Aerospace Keybindings Helper
+# Displays keybindings in a formatted table with Kanagawa-inspired colors
+
+# Kanagawa-inspired colors
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+
+# Kanagawa palette
+BLUE='\033[38;5;110m'      # waveBlue
+CYAN='\033[38;5;73m'       # springGreen
+GREEN='\033[38;5;114m'     # springGreen
+YELLOW='\033[38;5;220m'    # carpYellow
+ORANGE='\033[38;5;208m'    # surimiOrange
+MAGENTA='\033[38;5;175m'   # sakuraPink
+RED='\033[38;5;203m'       # peachRed
+GRAY='\033[38;5;243m'      # fujiGray
+WHITE='\033[38;5;223m'     # fujiWhite
+
+# Box drawing characters
+BOX_TL='┌'
+BOX_TR='┐'
+BOX_BL='└'
+BOX_BR='┘'
+BOX_H='─'
+BOX_V='│'
+BOX_ML='├'
+BOX_MR='┤'
+BOX_TM='┬'
+BOX_BM='┴'
+BOX_X='┼'
+
+# Table dimensions
+KEY_WIDTH=20
+CMD_WIDTH=47
+TOTAL_WIDTH=$((KEY_WIDTH + CMD_WIDTH + 1))  # +1 for middle separator only
+
+# Helper: repeat a character n times
+repeat_char() {
+    local char="$1"
+    local count="$2"
+    printf '%*s' "$count" '' | tr ' ' "$char"
+}
+
+# Helper: format key syntax to readable format
+format_key() {
+    local key="$1"
+    # Convert dashes to + and capitalize modifiers
+    local result
+    result=$(echo "$key" | sed -E \
+        -e 's/^alt-/Alt+/g' \
+        -e 's/^ctrl-/Ctrl+/g' \
+        -e 's/^shift-/Shift+/g' \
+        -e 's/\+alt-/+Alt+/g' \
+        -e 's/\+ctrl-/+Ctrl+/g' \
+        -e 's/\+shift-/+Shift+/g' \
+        -e 's/-alt\+/+Alt+/g' \
+        -e 's/-ctrl\+/+Ctrl+/g' \
+        -e 's/-shift\+/+Shift+/g' \
+        -e 's/Alt\+shift\+/Alt+Shift+/g' \
+        -e 's/Alt\+ctrl\+/Alt+Ctrl+/g' \
+        -e 's/Ctrl\+shift\+/Ctrl+Shift+/g' \
+        -e 's/semicolon/;/g' \
+        -e 's/slash/\//g' \
+        -e 's/comma/,/g' \
+        -e 's/backspace/Backspace/g')
+    # Uppercase the last character if it's a single letter/number after +
+    if [[ "$result" =~ \+([a-z0-9])$ ]]; then
+        local last_char="${BASH_REMATCH[1]}"
+        result="${result%?}${last_char^^}"
+    fi
+    echo "$result"
+}
+
+# Draw horizontal line
+draw_line() {
+    local left="$1"
+    local mid="$2"
+    local right="$3"
+    printf "${GRAY}%s%s%s%s%s${RESET}\n" \
+        "$left" \
+        "$(repeat_char "$BOX_H" "$KEY_WIDTH")" \
+        "$mid" \
+        "$(repeat_char "$BOX_H" "$CMD_WIDTH")" \
+        "$right"
+}
+
+# Draw header
+draw_header() {
+    local title="$1"
+    local title_len=${#title}
+    local padding=$(( (TOTAL_WIDTH - title_len) / 2 ))
+    local padding_right=$(( TOTAL_WIDTH - title_len - padding ))
+
+    # Top border
+    printf "${GRAY}%s%s%s${RESET}\n" "$BOX_TL" "$(repeat_char "$BOX_H" "$TOTAL_WIDTH")" "$BOX_TR"
+
+    # Title row
+    printf "${GRAY}%s${RESET}%*s${BOLD}${CYAN}%s${RESET}%*s${GRAY}%s${RESET}\n" \
+        "$BOX_V" "$padding" "" "$title" "$padding_right" "" "$BOX_V"
+
+    # Separator
+    draw_line "$BOX_ML" "$BOX_TM" "$BOX_MR"
+}
+
+# Draw category header
+draw_category() {
+    local category="$1"
+    local color="$2"
+
+    printf "${GRAY}%s${RESET} ${color}${BOLD}%-*s${RESET}${GRAY}%s${RESET}\n" \
+        "$BOX_V" "$((TOTAL_WIDTH - 1))" "$category" "$BOX_V"
+    draw_line "$BOX_ML" "$BOX_X" "$BOX_MR"
+}
+
+# Draw key-command row
+draw_row() {
+    local key="$1"
+    local cmd="$2"
+    local formatted_key
+    formatted_key=$(format_key "$key")
+
+    # Truncate command if too long
+    local max_cmd_len=$((CMD_WIDTH - 2))
+    if [[ ${#cmd} -gt $max_cmd_len ]]; then
+        cmd="${cmd:0:$((max_cmd_len - 3))}..."
+    fi
+
+    printf "${GRAY}%s${RESET} ${YELLOW}%-*s${RESET}${GRAY}%s${RESET} ${WHITE}%-*s${RESET}${GRAY}%s${RESET}\n" \
+        "$BOX_V" "$((KEY_WIDTH - 1))" "$formatted_key" "$BOX_V" "$((CMD_WIDTH - 1))" "$cmd" "$BOX_V"
+}
+
+# Draw footer
+draw_footer() {
+    printf "${GRAY}%s%s%s%s%s${RESET}\n" \
+        "$BOX_BL" \
+        "$(repeat_char "$BOX_H" "$KEY_WIDTH")" \
+        "$BOX_BM" \
+        "$(repeat_char "$BOX_H" "$CMD_WIDTH")" \
+        "$BOX_BR"
+}
+
+# Categorize a binding based on its command
+get_category() {
+    local cmd="$1"
+    case "$cmd" in
+        focus\ *)           echo "Focus Navigation" ;;
+        resize\ *)          echo "Window Resize" ;;
+        move\ left*|move\ right*|move\ up*|move\ down*)  echo "Window Movement" ;;
+        workspace\ [0-9]*)  echo "Workspaces" ;;
+        move-node-to-workspace*)  echo "Move to Workspace" ;;
+        move-workspace-to-monitor*)  echo "Monitor" ;;
+        layout*)            echo "Layout" ;;
+        fullscreen*)        echo "Layout" ;;
+        mode*)              echo "Mode" ;;
+        reload-config*)     echo "Config" ;;
+        exec*)              echo "Scripts" ;;
+        join-with*)         echo "Join Windows" ;;
+        flatten*)           echo "Workspace" ;;
+        close-all*)         echo "Windows" ;;
+        balance*)           echo "Layout" ;;
+        *)                  echo "Other" ;;
+    esac
+}
+
+# Get category color
+get_category_color() {
+    local category="$1"
+    case "$category" in
+        "Focus Navigation")   echo "$BLUE" ;;
+        "Window Resize")      echo "$GREEN" ;;
+        "Window Movement")    echo "$CYAN" ;;
+        "Workspaces")         echo "$YELLOW" ;;
+        "Move to Workspace")  echo "$ORANGE" ;;
+        "Monitor")            echo "$MAGENTA" ;;
+        "Layout")             echo "$GREEN" ;;
+        "Mode")               echo "$RED" ;;
+        "Config")             echo "$GRAY" ;;
+        "Scripts")            echo "$CYAN" ;;
+        "Join Windows")       echo "$MAGENTA" ;;
+        "Workspace")          echo "$BLUE" ;;
+        "Windows")            echo "$RED" ;;
+        *)                    echo "$WHITE" ;;
+    esac
+}
+
+# Category display order
+CATEGORY_ORDER=(
+    "Focus Navigation"
+    "Window Resize"
+    "Window Movement"
+    "Workspaces"
+    "Move to Workspace"
+    "Monitor"
+    "Layout"
+    "Join Windows"
+    "Workspace"
+    "Windows"
+    "Mode"
+    "Config"
+    "Scripts"
+    "Other"
+)
+
+# Parse and display bindings for a mode
+display_mode() {
+    local mode="$1"
+    local mode_display
+
+    if [[ "$mode" == "main" ]]; then
+        mode_display="main mode"
+    else
+        mode_display="$mode mode"
+    fi
+
+    draw_header "Aerospace Keybindings [$mode_display]"
+
+    # Get bindings from aerospace
+    local bindings
+    bindings=$(aerospace config --get "mode.$mode.binding" --json 2>/dev/null)
+
+    if [[ -z "$bindings" || "$bindings" == "null" ]]; then
+        printf "${GRAY}%s${RESET} ${DIM}No bindings configured for this mode${RESET}%*s${GRAY}%s${RESET}\n" \
+            "$BOX_V" "$((TOTAL_WIDTH - 35))" "" "$BOX_V"
+        draw_footer
+        return
+    fi
+
+    # Declare associative arrays for categories
+    declare -A category_keys
+    declare -A category_cmds
+
+    # Parse bindings and categorize
+    while IFS='=' read -r key cmd; do
+        [[ -z "$key" ]] && continue
+
+        # Clean up the command (remove quotes, brackets for arrays)
+        cmd=$(echo "$cmd" | sed -E 's/^\[//; s/\]$//; s/"//g; s/,/, /g')
+
+        local category
+        category=$(get_category "$cmd")
+
+        # Append to category
+        if [[ -n "${category_keys[$category]}" ]]; then
+            category_keys[$category]+=$'\n'"$key"
+            category_cmds[$category]+=$'\n'"$cmd"
+        else
+            category_keys[$category]="$key"
+            category_cmds[$category]="$cmd"
+        fi
+    done < <(echo "$bindings" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')
+
+    # Display by category in order
+    local first_category=true
+    for category in "${CATEGORY_ORDER[@]}"; do
+        if [[ -n "${category_keys[$category]}" ]]; then
+            if [[ "$first_category" != true ]]; then
+                draw_line "$BOX_ML" "$BOX_X" "$BOX_MR"
+            fi
+            first_category=false
+
+            local color
+            color=$(get_category_color "$category")
+            draw_category "$category" "$color"
+
+            # Display each binding in this category
+            while IFS= read -r key && IFS= read -r cmd <&3; do
+                draw_row "$key" "$cmd"
+            done < <(echo "${category_keys[$category]}") 3< <(echo "${category_cmds[$category]}")
+        fi
+    done
+
+    draw_footer
+}
+
+# Show usage
+show_usage() {
+    echo "Usage: $(basename "$0") [mode]"
+    echo ""
+    echo "Display Aerospace keybindings in a formatted table."
+    echo ""
+    echo "Arguments:"
+    echo "  mode    The mode to display (default: all modes)"
+    echo "          Options: main, service, all"
+    echo ""
+    echo "Examples:"
+    echo "  $(basename "$0")           # Show all modes"
+    echo "  $(basename "$0") main      # Show only main mode"
+    echo "  $(basename "$0") service   # Show only service mode"
+}
+
+# Main
+main() {
+    # Check for aerospace
+    if ! command -v aerospace &>/dev/null; then
+        echo "Error: aerospace command not found"
+        echo "Install AeroSpace: brew install --cask nikitabobko/tap/aerospace"
+        exit 1
+    fi
+
+    # Check for jq
+    if ! command -v jq &>/dev/null; then
+        echo "Error: jq command not found"
+        echo "Install jq: brew install jq"
+        exit 1
+    fi
+
+    local mode="${1:-all}"
+
+    case "$mode" in
+        -h|--help)
+            show_usage
+            exit 0
+            ;;
+        main)
+            display_mode "main"
+            ;;
+        service)
+            display_mode "service"
+            ;;
+        all|"")
+            display_mode "main"
+            echo ""
+            display_mode "service"
+            ;;
+        *)
+            echo "Unknown mode: $mode"
+            show_usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

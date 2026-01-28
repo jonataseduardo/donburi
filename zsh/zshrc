@@ -130,6 +130,8 @@ alias aconf='cd $HOME/c/donburi/aerospace/ && $EDITOR aerospace.toml'
 alias gconf='cd $HOME/c/donburi/ghostty/ && $EDITOR config'
 alias sconf='cd $HOME/c/donburi/sketchybar/ && $EDITOR sketchybarrc'
 
+alias akeys='$HOME/c/donburi/aerospace/scripts/aerospace-keys-helper.sh'
+
 alias ipython="python -m IPython --no-autoindent"
 alias c=clear
 
