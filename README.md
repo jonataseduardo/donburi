@@ -1,7 +1,13 @@
-<p align="center">
-  <img src="img/donburi.png" alt="Donburi" width="200">
-</p>
-<h1 align="center">D O N B U R I</h1>
+<table>
+  <tr>
+    <td valign="middle">
+      <img src="img/donburi.png" alt="Donburi" width="180">
+    </td>
+    <td valign="middle">
+      <img src="img/donburi-ascii.svg" alt="DONBURI" width="600">
+    </td>
+  </tr>
+</table>
 <p align="center">A unified macOS dotfiles configuration</p>
 
 ---
@@ -30,12 +36,14 @@ Installation is **non-destructive**—existing configurations are automatically 
 - **Git** — for cloning the repository
 
 **Recommended:**
+
 - Oh My Zsh — zsh framework
 - Powerlevel10k — zsh theme
 
 ## Quick Start
 
 **One-liner installation:**
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
 ```
@@ -43,12 +51,14 @@ curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | b
 This installs donburi to `~/.donburi` and adds the `donburi` command to your PATH.
 
 **Or clone manually:**
+
 ```bash
 git clone https://github.com/jonatas/donburi.git ~/.donburi
 ~/.donburi/donburi setup
 ```
 
 After installation:
+
 ```bash
 donburi brew apps       # Install applications (nvim, ghostty, aerospace, etc.)
 donburi setup           # Install all configurations
@@ -56,26 +66,26 @@ donburi setup           # Install all configurations
 
 ## Components
 
-| Component | Description | Config Location |
-|-----------|-------------|-----------------|
-| **Aerospace** | Tiling window manager | `~/.config/aerospace` |
-| **Neovim** | Text editor with LSP, completions, AI | `~/.config/nvim` |
-| **Ghostty** | Modern GPU-accelerated terminal | `~/Library/Application Support/com.mitchellh.ghostty/config` |
-| **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar` |
-| **tmux** | Terminal multiplexer (minimal config) | `~/.tmux.conf` |
-| **zsh** | Shell configuration with Oh My Zsh | `~/.zshrc` |
+| Component      | Description                               | Config Location                                              |
+| -------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| **Aerospace**  | Tiling window manager                     | `~/.config/aerospace`                                        |
+| **Neovim**     | Text editor with LSP, completions, AI     | `~/.config/nvim`                                             |
+| **Ghostty**    | Modern GPU-accelerated terminal           | `~/Library/Application Support/com.mitchellh.ghostty/config` |
+| **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
+| **tmux**       | Terminal multiplexer (minimal config)     | `~/.tmux.conf`                                               |
+| **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
 
 ## Keybinding Reference
 
 Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as the base modifier, Neovim uses `Ctrl`. Adding `Shift` triggers resize operations in both.
 
-| Action | Aerospace | Neovim |
-|--------|-----------|--------|
-| Focus / Navigate | `Alt + hjkl` | `Ctrl + hjkl` |
-| Resize | `Alt + Shift + hjkl` | `Ctrl + Shift + hjkl` |
-| Move window | `Alt + Ctrl + hjkl` | — |
-| Toggle layout | `Alt + /` | `Ctrl + /` |
-| Switch workspace | `Alt + 1-9` | — |
+| Action           | Aerospace            | Neovim                |
+| ---------------- | -------------------- | --------------------- |
+| Focus / Navigate | `Alt + hjkl`         | `Ctrl + hjkl`         |
+| Resize           | `Alt + Shift + hjkl` | `Ctrl + Shift + hjkl` |
+| Move window      | `Alt + Ctrl + hjkl`  | —                     |
+| Toggle layout    | `Alt + /`            | `Ctrl + /`            |
+| Switch workspace | `Alt + 1-9`          | —                     |
 
 ## CLI Reference
 
@@ -118,11 +128,13 @@ source ~/.zshrc         # Reload shell configuration
 ```
 
 Test the setup:
+
 1. Press `Alt + hjkl` to test Aerospace window navigation
 2. Press `Alt + 1-9` to switch workspaces
 3. Open `nvim` and run `:checkhealth` to verify plugins
 
 Start Sketchybar if not running:
+
 ```bash
 brew services start sketchybar
 ```
@@ -131,33 +143,38 @@ brew services start sketchybar
 
 Quick shortcuts to edit any configuration (added to your shell):
 
-| Alias | Opens |
-|-------|-------|
-| `nconf` | Neovim config |
-| `aconf` | Aerospace config |
-| `gconf` | Ghostty config |
-| `tconf` | tmux config |
-| `zconf` | zsh config |
+| Alias   | Opens             |
+| ------- | ----------------- |
+| `nconf` | Neovim config     |
+| `aconf` | Aerospace config  |
+| `gconf` | Ghostty config    |
+| `tconf` | tmux config       |
+| `zconf` | zsh config        |
 | `sconf` | Sketchybar config |
 
 ## Troubleshooting
 
 **Aerospace not responding to keybindings**
+
 - Grant accessibility permissions: System Settings → Privacy & Security → Accessibility → Enable AeroSpace
 
 **Sketchybar not showing**
+
 ```bash
 brew services start sketchybar
 ```
 
 **Neovim plugins not loading**
+
 - Run `:Lazy` inside Neovim to check plugin status
 - Run `:checkhealth` for diagnostics
 
 **Finding backed-up configs**
+
 - Backups are stored in `~/.config/donburi-backup-<timestamp>/`
 
 **donburi command not found**
+
 - Restart your terminal or run: `export PATH="$HOME/.local/bin:$PATH"`
 
 ## License
