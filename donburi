@@ -598,6 +598,7 @@ Commands:
   help                  Show this help message
 
 Options:
+  --version, -v         Show version
   --dry-run             Preview changes without applying
   --list                Show packages without installing (brew only)
 
@@ -625,6 +626,7 @@ while [[ "$1" == --* ]]; do
     case "$1" in
         --dry-run) DRY_RUN=true; shift ;;
         --list) LIST_ONLY=true; shift ;;
+        --version|-v) cat "$DONBURI_DIR/VERSION"; exit 0 ;;
         --help|-h) cmd_help; exit 0 ;;
         *) log_error "Unknown option: $1"; cmd_help; exit 1 ;;
     esac
