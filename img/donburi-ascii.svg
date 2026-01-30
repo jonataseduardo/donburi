@@ -2,7 +2,7 @@
   <style>
     text { font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; }
   </style>
-  <g transform="translate(30, 0)">
+  <g transform="translate(93, 0)">
     <text y="20" fill="#DCD7BA" xml:space="preserve">████████▄   ▄██████▄  ███▄▄▄▄   ▀█████████▄  ███    █▄     ▄████████  ▄█</text>
     <text y="36" fill="#C8C093" xml:space="preserve">███   ▀███ ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███ ███</text>
     <text y="52" fill="#E6C384" xml:space="preserve">███    ███ ███    ███ ███   ███   ███    ███ ███    ███   ███    ███ ███▌</text>
