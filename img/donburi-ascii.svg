@@ -1,14 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="780" height="180" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 180" fill="none">
   <style>
-    text { font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; text-anchor: middle; }
+    text { font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; }
   </style>
-  <text x="390" y="20" fill="#DCD7BA" xml:space="preserve">████████▄   ▄██████▄  ███▄▄▄▄   ▀█████████▄  ███    █▄     ▄████████  ▄█</text>
-  <text x="390" y="36" fill="#C8C093" xml:space="preserve">███   ▀███ ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███ ███</text>
-  <text x="390" y="52" fill="#E6C384" xml:space="preserve">███    ███ ███    ███ ███   ███   ███    ███ ███    ███   ███    ███ ███▌</text>
-  <text x="390" y="68" fill="#FFA066" xml:space="preserve">███    ███ ███    ███ ███   ███  ▄███▄▄▄██▀  ███    ███  ▄███▄▄▄▄██▀ ███▌</text>
-  <text x="390" y="84" fill="#D27E99" xml:space="preserve">███    ███ ███    ███ ███   ███ ▀▀███▀▀▀██▄  ███    ███ ▀▀███▀▀▀▀▀   ███▌</text>
-  <text x="390" y="100" fill="#957FB8" xml:space="preserve">███    ███ ███    ███ ███   ███   ███    ██▄ ███    ███ ▀███████████ ███</text>
-  <text x="390" y="116" fill="#7E9CD8" xml:space="preserve">███   ▄███ ███    ███ ███   ███   ███    ███ ███    ███   ███    ███ ███</text>
-  <text x="390" y="132" fill="#7FB4CA" xml:space="preserve">████████▀   ▀██████▀   ▀█   █▀  ▄█████████▀  ████████▀    ███    ███ █▀</text>
-  <text x="390" y="148" fill="#6A9589" xml:space="preserve">                                                          ███    ███</text>
+  <g transform="translate(30, 0)">
+    <text y="20" fill="#DCD7BA" xml:space="preserve">████████▄   ▄██████▄  ███▄▄▄▄   ▀█████████▄  ███    █▄     ▄████████  ▄█</text>
+    <text y="36" fill="#C8C093" xml:space="preserve">███   ▀███ ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███ ███</text>
+    <text y="52" fill="#E6C384" xml:space="preserve">███    ███ ███    ███ ███   ███   ███    ███ ███    ███   ███    ███ ███▌</text>
+    <text y="68" fill="#FFA066" xml:space="preserve">███    ███ ███    ███ ███   ███  ▄███▄▄▄██▀  ███    ███  ▄███▄▄▄▄██▀ ███▌</text>
+    <text y="84" fill="#D27E99" xml:space="preserve">███    ███ ███    ███ ███   ███ ▀▀███▀▀▀██▄  ███    ███ ▀▀███▀▀▀▀▀   ███▌</text>
+    <text y="100" fill="#957FB8" xml:space="preserve">███    ███ ███    ███ ███   ███   ███    ██▄ ███    ███ ▀███████████ ███</text>
+    <text y="116" fill="#7E9CD8" xml:space="preserve">███   ▄███ ███    ███ ███   ███   ███    ███ ███    ███   ███    ███ ███</text>
+    <text y="132" fill="#7FB4CA" xml:space="preserve">████████▀   ▀██████▀   ▀█   █▀  ▄█████████▀  ████████▀    ███    ███ █▀</text>
+    <text y="148" fill="#6A9589" xml:space="preserve">                                                          ███    ███</text>
+  </g>
 </svg>
