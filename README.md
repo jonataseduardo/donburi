@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="img/donburi.png" alt="Donburi" width="140" align="middle">&nbsp;&nbsp;
-  <img src="img/donburi-ascii.svg" alt="DONBURI" width="550" align="middle">
+  <img src="img/donburi.png" alt="Donburi" width="140"><br>
+  <img src="img/donburi-ascii.svg" alt="DONBURI" width="600">
 </p>
 <p align="center">A unified macOS dotfiles configuration</p>
 
