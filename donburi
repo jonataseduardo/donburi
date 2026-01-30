@@ -212,16 +212,74 @@ BREW_DOCKER_FORMULA=(colima docker docker-compose docker-buildx)
 
 setup_nvim() {
     echo -e "${CYAN}--- nvim ---${NC}"
+
+    # Nvim dependencies via Homebrew
+    if command -v brew &>/dev/null; then
+        local nvim_deps=(ripgrep gcc make)
+        for pkg in "${nvim_deps[@]}"; do
+            if ! brew list --formula "$pkg" &>/dev/null; then
+                if [[ "$DRY_RUN" == true ]]; then
+                    log_info "Would install formula: $pkg"
+                else
+                    log_info "Installing formula: $pkg"
+                    brew install "$pkg"
+                fi
+            else
+                log_info "Already installed: $pkg"
+            fi
+        done
+    else
+        log_warn "Homebrew not found — skipping nvim dependencies"
+    fi
+
     create_symlink "$SRC_NVIM" "$DST_NVIM"
+    log_info "Plugins and LSPs will auto-install on first nvim launch (lazy.nvim + mason)"
 }
 
 setup_ghostty() {
     echo -e "${CYAN}--- ghostty ---${NC}"
+
+    # Install JetBrains Mono Nerd Font
+    if command -v brew &>/dev/null; then
+        if ! brew list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
+            if [[ "$DRY_RUN" == true ]]; then
+                log_info "Would install cask: font-jetbrains-mono-nerd-font"
+            else
+                log_info "Installing cask: font-jetbrains-mono-nerd-font"
+                brew install --cask font-jetbrains-mono-nerd-font
+            fi
+        else
+            log_info "Already installed: font-jetbrains-mono-nerd-font"
+        fi
+    else
+        log_warn "Homebrew not found — skipping font installation"
+    fi
+
     create_symlink "$SRC_GHOSTTY" "$DST_GHOSTTY"
 }
 
 setup_aerospace() {
     echo -e "${CYAN}--- aerospace ---${NC}"
+
+    # Aerospace dependencies via Homebrew
+    if command -v brew &>/dev/null; then
+        local aero_deps=(jq bash FelixKratz/formulae/borders)
+        for pkg in "${aero_deps[@]}"; do
+            if ! brew list --formula "$pkg" &>/dev/null; then
+                if [[ "$DRY_RUN" == true ]]; then
+                    log_info "Would install formula: $pkg"
+                else
+                    log_info "Installing formula: $pkg"
+                    brew install "$pkg"
+                fi
+            else
+                log_info "Already installed: $pkg"
+            fi
+        done
+    else
+        log_warn "Homebrew not found — skipping aerospace dependencies"
+    fi
+
     # Remove old ~/.aerospace.toml to avoid AeroSpace ambiguity error
     local old_aerospace="$HOME/.aerospace.toml"
     if [[ -e "$old_aerospace" || -L "$old_aerospace" ]]; then
@@ -311,6 +369,23 @@ setup_zsh() {
 
 setup_sketchybar() {
     echo -e "${CYAN}--- sketchybar ---${NC}"
+
+    # Install JetBrains Mono Nerd Font (shared with ghostty)
+    if command -v brew &>/dev/null; then
+        if ! brew list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
+            if [[ "$DRY_RUN" == true ]]; then
+                log_info "Would install cask: font-jetbrains-mono-nerd-font"
+            else
+                log_info "Installing cask: font-jetbrains-mono-nerd-font"
+                brew install --cask font-jetbrains-mono-nerd-font
+            fi
+        else
+            log_info "Already installed: font-jetbrains-mono-nerd-font"
+        fi
+    else
+        log_warn "Homebrew not found — skipping font installation"
+    fi
+
     make_executable "$DONBURI_DIR/sketchybar" "sketchybarrc"
     make_executable "$DONBURI_DIR/sketchybar/plugins" "*.sh"
     create_symlink "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
