@@ -90,3 +90,14 @@ return {
 ```
 
 The file will be auto-imported via the `{ import = 'custom.plugins' }` directive in lazy-plugins.lua.
+
+## Upstream Tracking
+
+This config is forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim), tracked via the `kickstart` git remote. To review upstream changes:
+
+```bash
+git fetch kickstart
+git diff HEAD...kickstart/main -- nvim/lua/kickstart/
+```
+
+Cherry-pick or manually apply any useful updates. Custom plugins in `lua/custom/plugins/` are not affected by upstream.

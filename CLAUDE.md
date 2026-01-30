@@ -49,6 +49,15 @@ Each tool lives in its own directory and is symlinked to its config location by 
 - **Sketchybar**: Shell-script plugins in `sketchybar/plugins/`. Integrates with Aerospace for workspace indicators.
 - **Ghostty/tmux**: Minimal configs — Aerospace handles window management.
 
+### Upstream Tracking
+
+The Neovim config is forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim), available as the `kickstart` git remote. To review upstream changes:
+
+```bash
+git fetch kickstart
+git diff HEAD...kickstart/main -- nvim/lua/kickstart/
+```
+
 ### When Updating README.md
 
 Keep README.md as the primary user-facing documentation. Update it when:
