@@ -196,6 +196,8 @@ MIT
 
 ## Acknowledgments
 
+This project was built with significant assistance from [Claude Code](https://claude.ai/code), Anthropic's AI coding assistant.
+
 - [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim) — Neovim configuration foundation
 - [Kanagawa](https://github.com/rebelot/kanagawa.nvim) — color scheme
 - [Aerospace](https://github.com/nikitabobko/AeroSpace) — tiling window manager
