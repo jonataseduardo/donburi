@@ -232,8 +232,21 @@ setup_nvim() {
         log_warn "Homebrew not found — skipping nvim dependencies"
     fi
 
+    # Install lazy.nvim plugin manager if missing
+    local lazypath="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim"
+    if [[ ! -d "$lazypath" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            log_info "Would install lazy.nvim plugin manager"
+        else
+            log_info "Installing lazy.nvim plugin manager..."
+            git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$lazypath"
+        fi
+    else
+        log_info "lazy.nvim already installed"
+    fi
+
     create_symlink "$SRC_NVIM" "$DST_NVIM"
-    log_info "Plugins and LSPs will auto-install on first nvim launch (lazy.nvim + mason)"
+    log_info "Plugins and LSPs will auto-install on first nvim launch (mason)"
 }
 
 setup_ghostty() {
