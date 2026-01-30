@@ -58,6 +58,17 @@ git fetch kickstart
 git diff HEAD...kickstart/main -- nvim/lua/kickstart/
 ```
 
+### Linting
+
+This project uses [prek](https://github.com/j178/prek) as a pre-commit hook framework. Hooks are defined in `.pre-commit-config.yaml`.
+
+```bash
+prek run --all-files    # Run all hooks on every file
+prek install            # Install git pre-commit hook
+```
+
+Shell scripts must pass `shellcheck --severity=warning`. Add `# shellcheck shell=bash` to sourced files that lack a shebang.
+
 ### When Updating README.md
 
 Keep README.md as the primary user-facing documentation. Update it when:
