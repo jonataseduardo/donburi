@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Kanagawa color palette (0xAARRGGBB format)
+export KANAGAWA_BG="0xff1F1F28"
+export KANAGAWA_BG_DARK="0xff16161D"
+export KANAGAWA_FG="0xffDCD7BA"
+export KANAGAWA_FG_DIM="0xff727169"
+export KANAGAWA_BLUE="0xff7FB4CA"
+export KANAGAWA_CYAN="0xff7AA89F"
+export KANAGAWA_GREEN="0xff76946A"
+export KANAGAWA_YELLOW="0xffE6C384"
+export KANAGAWA_ORANGE="0xffFF9E64"
+export KANAGAWA_RED="0xffFF5D62"
+export KANAGAWA_PURPLE="0xff957FB8"
+export KANAGAWA_HIGHLIGHT="0xff2D4F67"
