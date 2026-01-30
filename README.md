@@ -35,10 +35,7 @@ Installation is **non-destructive**—existing configurations are automatically 
 - **Homebrew** — package manager for macOS
 - **Git** — for cloning the repository
 
-**Recommended:**
-
-- Oh My Zsh — zsh framework
-- Powerlevel10k — zsh theme
+All other dependencies are installed automatically during setup (see below).
 
 ## Quick Start
 
@@ -74,6 +71,21 @@ donburi setup           # Install all configurations
 | **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
 | **tmux**       | Terminal multiplexer (minimal config)     | `~/.tmux.conf`                                               |
 | **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
+
+### What Setup Installs Automatically
+
+Each `donburi setup` component installs its own dependencies via Homebrew and git:
+
+| Component      | Auto-installed Dependencies                                                  |
+| -------------- | ---------------------------------------------------------------------------- |
+| **Neovim**     | ripgrep, gcc, make, [lazy.nvim](https://github.com/folke/lazy.nvim) plugin manager |
+| **Ghostty**    | JetBrains Mono Nerd Font                                                     |
+| **Aerospace**  | jq, bash, [JankyBorders](https://github.com/FelixKratz/JankyBorders)        |
+| **Sketchybar** | JetBrains Mono Nerd Font                                                     |
+| **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                        |
+| **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
+
+Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
 
 ## Keybinding Reference
 
@@ -111,7 +123,7 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 
 ```bash
 donburi brew               # Install apps only (default)
-donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq)
+donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq, borders)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
