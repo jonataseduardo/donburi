@@ -34,6 +34,7 @@ SRC_GHOSTTY="$DONBURI_DIR/ghostty/config"
 SRC_AEROSPACE="$DONBURI_DIR/aerospace"
 SRC_TMUX="$DONBURI_DIR/tmux/tmux.conf"
 SRC_ZSH="$DONBURI_DIR/zsh/zshrc"
+SRC_ZSH_DONBURI="$DONBURI_DIR/zsh/donburi.zsh"
 SRC_SKETCHYBAR="$DONBURI_DIR/sketchybar"
 
 # Target paths
@@ -42,6 +43,7 @@ DST_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 DST_AEROSPACE="$HOME/.config/aerospace"
 DST_TMUX="$HOME/.tmux.conf"
 DST_ZSH="$HOME/.zshrc"
+DST_ZSH_DONBURI="$HOME/.donburi.zsh"
 DST_SKETCHYBAR="$HOME/.config/sketchybar"
 
 # ---------------------------------------------------------------------------
@@ -236,7 +238,53 @@ setup_tmux() {
 
 setup_zsh() {
     echo -e "${CYAN}--- zsh ---${NC}"
+
+    # Install Oh My Zsh if missing
+    if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            log_info "Would install Oh My Zsh"
+        else
+            log_info "Installing Oh My Zsh..."
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+        fi
+    else
+        log_info "Oh My Zsh already installed"
+    fi
+
+    # Install Powerlevel10k theme if missing
+    local p10k_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    if [[ ! -d "$p10k_dir" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            log_info "Would install Powerlevel10k theme"
+        else
+            log_info "Installing Powerlevel10k theme..."
+            git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
+        fi
+    else
+        log_info "Powerlevel10k already installed"
+    fi
+
+    # Install CLI dependencies via Homebrew
+    if command -v brew &>/dev/null; then
+        local zsh_deps=(fzf lsd gnu-sed gawk)
+        for pkg in "${zsh_deps[@]}"; do
+            if ! brew list --formula "$pkg" &>/dev/null; then
+                if [[ "$DRY_RUN" == true ]]; then
+                    log_info "Would install formula: $pkg"
+                else
+                    log_info "Installing formula: $pkg"
+                    brew install "$pkg"
+                fi
+            else
+                log_info "Already installed: $pkg"
+            fi
+        done
+    else
+        log_warn "Homebrew not found — skipping CLI dependencies (fzf, lsd, gnu-sed, gawk)"
+    fi
+
     create_symlink "$SRC_ZSH" "$DST_ZSH"
+    create_symlink "$SRC_ZSH_DONBURI" "$DST_ZSH_DONBURI"
 }
 
 setup_sketchybar() {
@@ -371,6 +419,7 @@ cmd_status() {
     check_link "aerospace"  "$SRC_AEROSPACE"  "$DST_AEROSPACE"
     check_link "tmux"       "$SRC_TMUX"       "$DST_TMUX"
     check_link "zsh"        "$SRC_ZSH"        "$DST_ZSH"
+    check_link "zsh-donburi" "$SRC_ZSH_DONBURI" "$DST_ZSH_DONBURI"
     check_link "sketchybar" "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
 }
 
