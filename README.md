@@ -15,7 +15,7 @@ The philosophy centers on three principles: **consistent hjkl-based navigation**
 Installation is **non-destructive**—existing configurations are automatically backed up before any changes are made. You can install everything at once or pick individual components to adopt incrementally.
 
 <p align="center">
-  <img src="screenshot.png" alt="Donburi desktop screenshot" width="800">
+  <img src="img/screenshot.png" alt="Donburi desktop screenshot" width="800">
   <br>
   <sub>Screenshot taken on a 34" ultrawide monitor. This is my personal, opinionated configuration — your mileage may vary.</sub>
 </p>
@@ -76,13 +76,13 @@ donburi setup           # Install all configurations
 
 Each `donburi setup` component installs its own dependencies via Homebrew and git:
 
-| Component      | Auto-installed Dependencies                                                  |
-| -------------- | ---------------------------------------------------------------------------- |
-| **Neovim**     | ripgrep, gcc, make, [lazy.nvim](https://github.com/folke/lazy.nvim) plugin manager |
-| **Ghostty**    | JetBrains Mono Nerd Font                                                     |
-| **Aerospace**  | jq, bash, [JankyBorders](https://github.com/FelixKratz/JankyBorders)        |
-| **Sketchybar** | JetBrains Mono Nerd Font                                                     |
-| **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                        |
+| Component      | Auto-installed Dependencies                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Neovim**     | ripgrep, gcc, make, [lazy.nvim](https://github.com/folke/lazy.nvim) plugin manager                                 |
+| **Ghostty**    | JetBrains Mono Nerd Font                                                                                           |
+| **Aerospace**  | jq, bash, [JankyBorders](https://github.com/FelixKratz/JankyBorders)                                               |
+| **Sketchybar** | JetBrains Mono Nerd Font                                                                                           |
+| **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                                                               |
 | **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
 
 Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
