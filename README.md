@@ -93,6 +93,14 @@ Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as 
 | Toggle layout    | `Alt + /`            | `Ctrl + /`            |
 | Switch workspace | `Alt + 1-9`          | —                     |
 
+Use the `akeys` command to display a comprehensive, color-coded table of all Aerospace keybindings:
+
+```bash
+akeys               # Show all keybindings with pager
+akeys main          # Show only main mode keybindings
+akeys --no-pager    # Show without pager
+```
+
 ## CLI Reference
 
 ```bash
@@ -160,6 +168,10 @@ Quick shortcuts to edit any configuration (added to your shell):
 | `sconf` | Sketchybar config |
 
 ## Troubleshooting
+
+**Ghostty tabs and Aerospace compatibility**
+
+- **Note:** Ghostty's native tab feature doesn't integrate well with Aerospace's window management. It's recommended to use Aerospace splits instead of Ghostty tabs for a smoother workflow. Create new Ghostty windows with `Alt+T` and let Aerospace manage them as separate tiles.
 
 **Aerospace not responding to keybindings**
 
