@@ -276,43 +276,40 @@ display_mode() {
 
 # Show usage
 show_usage() {
-    echo "Usage: $(basename "$0") [mode]"
-    echo ""
-    echo "Display Aerospace keybindings in a formatted table."
-    echo ""
-    echo "Arguments:"
-    echo "  mode    The mode to display (default: all modes)"
-    echo "          Options: main, service, all"
-    echo ""
-    echo "Examples:"
-    echo "  $(basename "$0")           # Show all modes"
-    echo "  $(basename "$0") main      # Show only main mode"
-    echo "  $(basename "$0") service   # Show only service mode"
+    cat <<EOF
+Usage: $(basename "$0") [options] [mode]
+
+Display Aerospace keybindings in a formatted table with pager support.
+
+Arguments:
+  mode        The mode to display (default: all modes)
+              Options: main, service, all
+
+Options:
+  --no-pager  Output directly to terminal without pager
+  -h, --help  Show this help message
+
+Examples:
+  $(basename "$0")                # Show all modes in pager
+  $(basename "$0") main           # Show only main mode in pager
+  $(basename "$0") service        # Show only service mode in pager
+  $(basename "$0") --no-pager     # Show all modes without pager
+
+Pager commands:
+  /pattern    Search forward for pattern
+  ?pattern    Search backward for pattern
+  n           Next search match
+  N           Previous search match
+  q           Quit pager
+  h           Show pager help
+EOF
 }
 
-# Main
-main() {
-    # Check for aerospace
-    if ! command -v aerospace &>/dev/null; then
-        echo "Error: aerospace command not found"
-        echo "Install AeroSpace: brew install --cask nikitabobko/tap/aerospace"
-        exit 1
-    fi
-
-    # Check for jq
-    if ! command -v jq &>/dev/null; then
-        echo "Error: jq command not found"
-        echo "Install jq: brew install jq"
-        exit 1
-    fi
-
-    local mode="${1:-all}"
+# Generate the output
+generate_output() {
+    local mode="$1"
 
     case "$mode" in
-        -h|--help)
-            show_usage
-            exit 0
-            ;;
         main)
             display_mode "main"
             ;;
@@ -324,12 +321,107 @@ main() {
             echo ""
             display_mode "service"
             ;;
+    esac
+}
+
+# Detect and configure pager
+setup_pager() {
+    local pager=""
+    local pager_opts=""
+
+    # Prefer bat if available, otherwise use less
+    if command -v bat &>/dev/null; then
+        pager="bat"
+        # bat options: plain style (no line numbers), preserve colors, paging always
+        pager_opts="--style=plain --color=always --paging=always"
+    elif command -v less &>/dev/null; then
+        pager="less"
+        # less options: -R for ANSI colors, -S no wrap, -M verbose prompt, -i case-insensitive search
+        pager_opts="-RSMi"
+    else
+        # No pager available, output directly
+        return 1
+    fi
+
+    echo "$pager $pager_opts"
+}
+
+# Main
+main() {
+    # Check for aerospace
+    if ! command -v aerospace &>/dev/null; then
+        cat >&2 <<EOF
+Error: aerospace command not found
+Install AeroSpace: brew install --cask nikitabobko/tap/aerospace
+EOF
+        exit 1
+    fi
+
+    # Check for jq
+    if ! command -v jq &>/dev/null; then
+        cat >&2 <<EOF
+Error: jq command not found
+Install jq: brew install jq
+EOF
+        exit 1
+    fi
+
+    # Parse arguments
+    local use_pager=true
+    local mode="all"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            --no-pager)
+                use_pager=false
+                shift
+                ;;
+            main|service|all)
+                mode="$1"
+                shift
+                ;;
+            *)
+                cat >&2 <<EOF
+Unknown option: $1
+EOF
+                show_usage >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    # Validate mode
+    case "$mode" in
+        main|service|all)
+            # Valid mode
+            ;;
         *)
-            echo "Unknown mode: $mode"
-            show_usage
+            cat >&2 <<EOF
+Unknown mode: $mode
+EOF
+            show_usage >&2
             exit 1
             ;;
     esac
+
+    # Generate output with or without pager
+    if [[ "$use_pager" == true ]]; then
+        pager_cmd=$(setup_pager)
+        if [[ -n "$pager_cmd" ]]; then
+            # Use pager if available
+            generate_output "$mode" | eval "$pager_cmd"
+        else
+            # Fallback to direct output if no pager
+            generate_output "$mode"
+        fi
+    else
+        # Direct output without pager
+        generate_output "$mode"
+    fi
 }
 
 main "$@"
