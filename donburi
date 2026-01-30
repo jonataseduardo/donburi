@@ -201,7 +201,11 @@ BREW_APPS_FORMULA=(neovim tmux sketchybar jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 # CLI: Essential command-line tools
-BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash)
+BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl)
+
+# Utils: Development utilities and communication apps
+BREW_UTILS_FORMULA=(node python)
+BREW_UTILS_CASK=(slack discord spotify)
 
 # Docker: Container development tools
 BREW_DOCKER_FORMULA=(colima docker docker-compose docker-buildx)
@@ -436,6 +440,11 @@ brew_list_category() {
             echo -e "${BOLD}CLI (command-line tools):${NC}"
             echo "  Formulas: ${BREW_CLI_FORMULA[*]}"
             ;;
+        utils)
+            echo -e "${BOLD}Utils (dev utilities & communication):${NC}"
+            echo "  Formulas: ${BREW_UTILS_FORMULA[*]}"
+            echo "  Casks:    ${BREW_UTILS_CASK[*]}"
+            ;;
         docker)
             echo -e "${BOLD}Docker (container tools):${NC}"
             echo "  Formulas: ${BREW_DOCKER_FORMULA[*]}"
@@ -444,6 +453,8 @@ brew_list_category() {
             brew_list_category apps
             echo ""
             brew_list_category cli
+            echo ""
+            brew_list_category utils
             echo ""
             brew_list_category docker
             ;;
@@ -467,6 +478,16 @@ brew_install_cli() {
     done
 }
 
+brew_install_utils() {
+    echo -e "${CYAN}--- brew: utils ---${NC}"
+    for pkg in "${BREW_UTILS_FORMULA[@]}"; do
+        brew_install "$pkg" formula
+    done
+    for pkg in "${BREW_UTILS_CASK[@]}"; do
+        brew_install "$pkg" cask
+    done
+}
+
 brew_install_docker() {
     echo -e "${CYAN}--- brew: docker ---${NC}"
     for pkg in "${BREW_DOCKER_FORMULA[@]}"; do
@@ -487,15 +508,17 @@ cmd_brew() {
     case "$category" in
         apps)   brew_install_apps ;;
         cli)    brew_install_cli ;;
+        utils)  brew_install_utils ;;
         docker) brew_install_docker ;;
         all)
             brew_install_apps
             brew_install_cli
+            brew_install_utils
             brew_install_docker
             ;;
         *)
             log_error "Unknown brew category: $category"
-            echo "Available categories: apps, cli, docker, all"
+            echo "Available categories: apps, cli, utils, docker, all"
             return 1
             ;;
     esac
@@ -570,7 +593,7 @@ Commands:
                         Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar
   status                Show symlink status
   brew [category]       Install packages via Homebrew
-                        Categories: apps (default), cli, docker, all
+                        Categories: apps (default), cli, utils, docker, all
   update                Update donburi via git pull
   help                  Show this help message
 

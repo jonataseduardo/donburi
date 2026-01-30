@@ -124,7 +124,8 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 ```bash
 donburi brew               # Install apps only (default)
 donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq, borders)
-donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash)
+donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl)
+donburi brew utils         # Install dev utilities & communication (node, python, slack, discord, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
