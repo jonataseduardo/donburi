@@ -122,6 +122,9 @@ sketchybar --add item spotify right \
         label.color=$KANAGAWA_FG \
         update_freq=5 \
         script="$PLUGIN_DIR/spotify.sh" \
+        background.color=$KANAGAWA_HIGHLIGHT \
+        background.border_color=$KANAGAWA_GREEN \
+        background.border_width=1 \
         click_script="osascript -e 'tell application \"Spotify\" to playpause'"
 
 # Initialize bar
