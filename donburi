@@ -233,7 +233,29 @@ setup_aerospace() {
 
 setup_tmux() {
     echo -e "${CYAN}--- tmux ---${NC}"
+
+    # Install TPM (Tmux Plugin Manager) if missing
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+    if [[ ! -d "$tpm_dir" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            log_info "Would install TPM (Tmux Plugin Manager)"
+        else
+            log_info "Installing TPM (Tmux Plugin Manager)..."
+            git clone --depth=1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+        fi
+    else
+        log_info "TPM already installed"
+    fi
+
     create_symlink "$SRC_TMUX" "$DST_TMUX"
+
+    # Install TPM plugins
+    if [[ -x "$tpm_dir/bin/install_plugins" ]] && [[ "$DRY_RUN" != true ]]; then
+        log_info "Installing tmux plugins via TPM..."
+        "$tpm_dir/bin/install_plugins"
+    elif [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install tmux plugins via TPM"
+    fi
 }
 
 setup_zsh() {
