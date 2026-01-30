@@ -178,6 +178,8 @@ fi
 
 assert_output_contains "nvim" "setup nvim --dry-run mentions nvim" "$DONBURI" setup nvim --dry-run
 
+if [[ "${DONBURI_TEST_LEVEL:-full}" != "quick" ]]; then
+
 # --- Setup nvim (real) ---
 echo "--- setup nvim ---"
 run "$DONBURI" setup nvim
@@ -259,3 +261,5 @@ if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "apps" || echo "$OUTPUT
 else
     fail "brew all --dry-run exits 0" "exit=$EXIT_CODE"
 fi
+
+fi # end DONBURI_TEST_LEVEL != quick
