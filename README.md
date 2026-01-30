@@ -14,6 +14,12 @@ The philosophy centers on three principles: **consistent hjkl-based navigation**
 
 Installation is **non-destructive**—existing configurations are automatically backed up before any changes are made. You can install everything at once or pick individual components to adopt incrementally.
 
+<p align="center">
+  <img src="screenshot.png" alt="Donburi desktop screenshot" width="800">
+  <br>
+  <sub>Screenshot taken on a 34" ultrawide monitor. This is my personal, opinionated configuration — your mileage may vary.</sub>
+</p>
+
 ## Features
 
 - **Unified hjkl-based navigation** across window manager, editor, and terminal
