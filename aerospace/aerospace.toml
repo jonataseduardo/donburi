@@ -50,6 +50,15 @@ alt-ctrl-j = 'move down'
 alt-ctrl-k = 'move up'
 alt-ctrl-l = 'move right'
 
+# Join windows (create splits) using Alt+Cmd+hjkl
+alt-cmd-h = 'join-with left'
+alt-cmd-j = 'join-with down'
+alt-cmd-k = 'join-with up'
+alt-cmd-l = 'join-with right'
+
+# Flatten workspace (unjoin all windows) using Alt+Cmd+F
+alt-cmd-f = 'flatten-workspace-tree'
+
 # Layout control
 alt-slash = 'layout tiles horizontal vertical'
 alt-comma = 'layout accordion horizontal vertical'
@@ -105,17 +114,8 @@ r = ['flatten-workspace-tree', 'mode main']
 f = ['layout floating tiling', 'mode main']
 backspace = ['close-all-windows-but-current', 'mode main']
 
-# Join with window
-alt-shift-h = ['join-with left', 'mode main']
-alt-shift-j = ['join-with down', 'mode main']
-alt-shift-k = ['join-with up', 'mode main']
-alt-shift-l = ['join-with right', 'mode main']
-
 # Window management shortcuts
-h = ['focus left', 'mode main']
-j = ['focus down', 'mode main']
-k = ['focus up', 'mode main']
-l = ['focus right', 'mode main']
+# (No join bindings in service mode - use Alt+Cmd in main mode instead)
 
 # Balance windows
 b = ['balance-sizes', 'mode main']
