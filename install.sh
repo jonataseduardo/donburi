@@ -78,6 +78,7 @@ log_info "Created symlink: $BIN_DIR/donburi -> $DONBURI_HOME/donburi"
 # ---------------------------------------------------------------------------
 add_to_path() {
     local shell_rc="$1"
+    # shellcheck disable=SC2016
     local path_line='export PATH="$HOME/.local/bin:$PATH"'
 
     if [ -f "$shell_rc" ]; then
@@ -86,9 +87,11 @@ add_to_path() {
             log_info "PATH already configured in $shell_rc"
             return 1
         fi
-        echo "" >> "$shell_rc"
-        echo "# Added by donburi installer" >> "$shell_rc"
-        echo "$path_line" >> "$shell_rc"
+        {
+            echo ""
+            echo "# Added by donburi installer"
+            echo "$path_line"
+        } >> "$shell_rc"
         log_info "Added ~/.local/bin to PATH in $shell_rc"
         return 0
     fi
@@ -134,6 +137,7 @@ echo ""
 
 if [ "$PATH_UPDATED" = true ]; then
     echo -e "${YELLOW}Note: Restart your terminal or run:${NC}"
+    # shellcheck disable=SC2016
     echo '  export PATH="$HOME/.local/bin:$PATH"'
     echo ""
 fi

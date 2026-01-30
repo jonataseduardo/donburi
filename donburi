@@ -164,7 +164,7 @@ brew_install() {
     local type="${2:-formula}" # "formula" or "cask"
 
     if [[ "$DRY_RUN" == true ]]; then
-        if brew list --${type} "$name" &>/dev/null; then
+        if brew list --"${type}" "$name" &>/dev/null; then
             log_info "Would upgrade $type: $name"
         else
             log_info "Would install $type: $name"
@@ -172,9 +172,9 @@ brew_install() {
         return 0
     fi
 
-    if brew list --${type} "$name" &>/dev/null; then
+    if brew list --"${type}" "$name" &>/dev/null; then
         log_info "Upgrading $type: $name"
-        brew upgrade --${type} "$name" 2>/dev/null || log_info "Already up to date: $name"
+        brew upgrade --"${type}" "$name" 2>/dev/null || log_info "Already up to date: $name"
     else
         log_info "Installing $type: $name"
         brew install ${type:+--${type}} "$name"
@@ -188,7 +188,7 @@ make_executable() {
     if [[ "$DRY_RUN" == true ]]; then
         log_info "Would chmod +x: $dir/$pattern"
     else
-        chmod +x "$dir"/$pattern 2>/dev/null || true
+        chmod +x "$dir"/"$pattern" 2>/dev/null || true
     fi
 }
 
@@ -653,7 +653,7 @@ show_footer() {
         echo -e "${YELLOW}Dry run complete. No changes were made.${NC}"
     else
         echo -e "${GREEN}Done!${NC}"
-        [[ -d "$BACKUP_DIR" ]] && echo "Backups: $BACKUP_DIR" || true
+        if [[ -d "$BACKUP_DIR" ]]; then echo "Backups: $BACKUP_DIR"; fi
     fi
 }
 
