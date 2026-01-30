@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # ---------------------------------------------------------------------------
 # Donburi - Personal shell configuration
 # Sourced from ~/.zshrc via: source ~/.donburi.zsh

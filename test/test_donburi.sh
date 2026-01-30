@@ -219,7 +219,7 @@ assert_symlink "sketchybar symlink" "$TEST_HOME/.config/sketchybar" "$REPO_DIR/s
 # --- Status after full setup ---
 run "$DONBURI" status
 ALL_OK=true
-for component in nvim ghostty aerospace tmux zsh sketchybar; do
+for _component in nvim ghostty aerospace tmux zsh sketchybar; do
     if ! echo "$OUTPUT" | grep -q "OK"; then
         ALL_OK=false
         break
