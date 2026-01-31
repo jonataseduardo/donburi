@@ -13,6 +13,7 @@ set -e
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+# shellcheck disable=SC2034  # DONBURI_REPO reserved for future cloning functionality
 DONBURI_REPO="https://github.com/jonatas/donburi.git"
 DONBURI_TEMP="/tmp/donburi-admin-$$"
 
