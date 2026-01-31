@@ -44,3 +44,8 @@ alias h2='$(npm prefix -s)/node_modules/.bin/shopify hydrogen'
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# Opencode
+# ---------------------------------------------------------------------------
+export PATH="$HOME/.opencode/bin:$PATH"
