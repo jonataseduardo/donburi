@@ -266,11 +266,11 @@ BREW_APPS_FORMULA=(neovim tmux sketchybar jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 # CLI: Essential command-line tools
-BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl)
+BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 
 # Utils: Development utilities and communication apps
 BREW_UTILS_FORMULA=(node python)
-BREW_UTILS_CASK=(slack discord spotify)
+BREW_UTILS_CASK=(slack spotify)
 
 # Docker: Container development tools
 BREW_DOCKER_FORMULA=(colima docker docker-compose docker-buildx)
