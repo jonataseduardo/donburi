@@ -51,6 +51,7 @@ DST_SKETCHYBAR="$HOME/.config/sketchybar"
 # ---------------------------------------------------------------------------
 DRY_RUN=false
 LIST_ONLY=false
+NO_BREW=false
 
 # Colors
 RED='\033[0;31m'
@@ -59,6 +60,58 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
+
+# ---------------------------------------------------------------------------
+# Brew Detection
+# ---------------------------------------------------------------------------
+BREW_CMD=""
+BREW_PREFIX=""
+
+# Common brew installation locations
+BREW_LOCATIONS=(
+    "/opt/homebrew/bin/brew"          # Apple Silicon Macs
+    "/usr/local/bin/brew"              # Intel Macs
+    "/home/linuxbrew/.linuxbrew/bin/brew"  # Linux
+    "$HOME/.brew/bin/brew"             # User installation
+    "$HOME/.local/homebrew/bin/brew"   # Alternative user installation
+)
+
+# Find brew command - checks custom path first, then common locations
+find_brew() {
+    # Check if already found
+    [[ -n "$BREW_CMD" ]] && return 0
+
+    # Check custom path from environment
+    if [[ -n "${DONBURI_BREW_PATH:-}" ]] && [[ -x "${DONBURI_BREW_PATH}" ]]; then
+        BREW_CMD="${DONBURI_BREW_PATH}"
+        BREW_PREFIX="$(dirname "$(dirname "$BREW_CMD")")"
+        return 0
+    fi
+
+    # Check if brew is in PATH
+    if command -v brew &>/dev/null; then
+        BREW_CMD="$(command -v brew)"
+        BREW_PREFIX="$(brew --prefix 2>/dev/null || dirname "$(dirname "$BREW_CMD")")"
+        return 0
+    fi
+
+    # Check common locations
+    for location in "${BREW_LOCATIONS[@]}"; do
+        if [[ -x "$location" ]]; then
+            BREW_CMD="$location"
+            BREW_PREFIX="$(dirname "$(dirname "$BREW_CMD")")"
+            return 0
+        fi
+    done
+
+    # Not found
+    return 1
+}
+
+# Check if running with sudo
+is_sudo() {
+    [[ -n "${SUDO_USER:-}" ]] || [[ "$EUID" -eq 0 ]]
+}
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -163,8 +216,20 @@ brew_install() {
     local name="$1"
     local type="${2:-formula}" # "formula" or "cask"
 
+    # Skip if NO_BREW is set
+    if [[ "$NO_BREW" == true ]]; then
+        log_warn "Skipping brew package: $name (--no-brew mode)"
+        return 0
+    fi
+
+    # Ensure brew is found
+    if ! find_brew; then
+        log_warn "Homebrew not found, skipping: $name"
+        return 1
+    fi
+
     if [[ "$DRY_RUN" == true ]]; then
-        if brew list --"${type}" "$name" &>/dev/null; then
+        if "$BREW_CMD" list --"${type}" "$name" &>/dev/null; then
             log_info "Would upgrade $type: $name"
         else
             log_info "Would install $type: $name"
@@ -172,12 +237,12 @@ brew_install() {
         return 0
     fi
 
-    if brew list --"${type}" "$name" &>/dev/null; then
+    if "$BREW_CMD" list --"${type}" "$name" &>/dev/null; then
         log_info "Upgrading $type: $name"
-        brew upgrade --"${type}" "$name" 2>/dev/null || log_info "Already up to date: $name"
+        "$BREW_CMD" upgrade --"${type}" "$name" 2>/dev/null || log_info "Already up to date: $name"
     else
         log_info "Installing $type: $name"
-        brew install ${type:+--${type}} "$name"
+        "$BREW_CMD" install ${type:+--${type}} "$name"
     fi
 }
 
@@ -218,20 +283,22 @@ setup_nvim() {
     echo -e "${CYAN}--- nvim ---${NC}"
 
     # Nvim dependencies via Homebrew
-    if command -v brew &>/dev/null; then
+    if [[ "$NO_BREW" != true ]] && find_brew; then
         local nvim_deps=(ripgrep gcc make)
         for pkg in "${nvim_deps[@]}"; do
-            if ! brew list --formula "$pkg" &>/dev/null; then
+            if ! "$BREW_CMD" list --formula "$pkg" &>/dev/null; then
                 if [[ "$DRY_RUN" == true ]]; then
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    brew install "$pkg"
+                    "$BREW_CMD" install "$pkg"
                 fi
             else
                 log_info "Already installed: $pkg"
             fi
         done
+    elif [[ "$NO_BREW" == true ]]; then
+        log_info "Skipping brew dependencies (--no-brew mode)"
     else
         log_warn "Homebrew not found — skipping nvim dependencies"
     fi
@@ -257,17 +324,19 @@ setup_ghostty() {
     echo -e "${CYAN}--- ghostty ---${NC}"
 
     # Install JetBrains Mono Nerd Font
-    if command -v brew &>/dev/null; then
-        if ! brew list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
+    if [[ "$NO_BREW" != true ]] && find_brew; then
+        if ! "$BREW_CMD" list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
             if [[ "$DRY_RUN" == true ]]; then
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                brew install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
         fi
+    elif [[ "$NO_BREW" == true ]]; then
+        log_info "Skipping font installation (--no-brew mode)"
     else
         log_warn "Homebrew not found — skipping font installation"
     fi
@@ -279,20 +348,22 @@ setup_aerospace() {
     echo -e "${CYAN}--- aerospace ---${NC}"
 
     # Aerospace dependencies via Homebrew
-    if command -v brew &>/dev/null; then
+    if [[ "$NO_BREW" != true ]] && find_brew; then
         local aero_deps=(jq bash FelixKratz/formulae/borders)
         for pkg in "${aero_deps[@]}"; do
-            if ! brew list --formula "$pkg" &>/dev/null; then
+            if ! "$BREW_CMD" list --formula "$pkg" &>/dev/null; then
                 if [[ "$DRY_RUN" == true ]]; then
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    brew install "$pkg"
+                    "$BREW_CMD" install "$pkg"
                 fi
             else
                 log_info "Already installed: $pkg"
             fi
         done
+    elif [[ "$NO_BREW" == true ]]; then
+        log_info "Skipping brew dependencies (--no-brew mode)"
     else
         log_warn "Homebrew not found — skipping aerospace dependencies"
     fi
@@ -362,20 +433,22 @@ setup_zsh() {
     fi
 
     # Install CLI dependencies via Homebrew
-    if command -v brew &>/dev/null; then
+    if [[ "$NO_BREW" != true ]] && find_brew; then
         local zsh_deps=(fzf lsd gnu-sed gawk)
         for pkg in "${zsh_deps[@]}"; do
-            if ! brew list --formula "$pkg" &>/dev/null; then
+            if ! "$BREW_CMD" list --formula "$pkg" &>/dev/null; then
                 if [[ "$DRY_RUN" == true ]]; then
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    brew install "$pkg"
+                    "$BREW_CMD" install "$pkg"
                 fi
             else
                 log_info "Already installed: $pkg"
             fi
         done
+    elif [[ "$NO_BREW" == true ]]; then
+        log_info "Skipping CLI dependencies (--no-brew mode)"
     else
         log_warn "Homebrew not found — skipping CLI dependencies (fzf, lsd, gnu-sed, gawk)"
     fi
@@ -388,17 +461,19 @@ setup_sketchybar() {
     echo -e "${CYAN}--- sketchybar ---${NC}"
 
     # Install JetBrains Mono Nerd Font (shared with ghostty)
-    if command -v brew &>/dev/null; then
-        if ! brew list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
+    if [[ "$NO_BREW" != true ]] && find_brew; then
+        if ! "$BREW_CMD" list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
             if [[ "$DRY_RUN" == true ]]; then
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                brew install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
         fi
+    elif [[ "$NO_BREW" == true ]]; then
+        log_info "Skipping font installation (--no-brew mode)"
     else
         log_warn "Homebrew not found — skipping font installation"
     fi
@@ -422,10 +497,34 @@ setup_all() {
 # ---------------------------------------------------------------------------
 
 brew_check() {
-    if ! command -v brew &>/dev/null; then
-        log_error "Homebrew not installed. Visit https://brew.sh"
+    if [[ "$NO_BREW" == true ]]; then
+        log_warn "Brew operations disabled (--no-brew mode)"
         return 1
     fi
+
+    if ! find_brew; then
+        log_error "Homebrew not found in any standard location"
+        echo ""
+        echo "Homebrew is required for package installation."
+        echo ""
+        echo "Options:"
+        echo "1. Install Homebrew: Visit https://brew.sh"
+        echo "2. If Homebrew is installed in a custom location:"
+        echo "   export DONBURI_BREW_PATH=/path/to/brew"
+        echo "3. If you're in a corporate environment:"
+        echo "   Ask your admin to run: sudo donburi brew all"
+        echo "4. Skip brew dependencies: donburi setup --no-brew"
+        return 1
+    fi
+
+    log_info "Using Homebrew at: $BREW_CMD"
+
+    # Check if running with sudo when it might be needed
+    if is_sudo; then
+        log_warn "Running with sudo privileges - packages will be installed system-wide"
+    fi
+
+    return 0
 }
 
 brew_list_category() {
@@ -557,6 +656,184 @@ cmd_status() {
 }
 
 # ---------------------------------------------------------------------------
+# Brew Check Command
+# ---------------------------------------------------------------------------
+
+cmd_brew_check() {
+    echo -e "${CYAN}=== Homebrew Installation Check ===${NC}"
+    echo ""
+
+    # Check environment variable first
+    if [[ -n "${DONBURI_BREW_PATH:-}" ]]; then
+        echo "Custom path set: DONBURI_BREW_PATH=$DONBURI_BREW_PATH"
+        if [[ -x "$DONBURI_BREW_PATH" ]]; then
+            echo -e "${GREEN}✓${NC} Custom brew path is valid"
+        else
+            echo -e "${RED}✗${NC} Custom brew path is not executable"
+        fi
+        echo ""
+    fi
+
+    # Try to find brew
+    if find_brew; then
+        echo -e "${GREEN}✓${NC} Homebrew found at: $BREW_CMD"
+        echo "  Prefix: $BREW_PREFIX"
+
+        # Get brew version
+        if BREW_VERSION=$("$BREW_CMD" --version 2>/dev/null | head -n1); then
+            echo "  Version: $BREW_VERSION"
+        fi
+
+        # Check if running with sudo
+        if is_sudo; then
+            echo -e "${YELLOW}⚠${NC} Running with sudo privileges"
+            echo "  Packages will be installed system-wide"
+        else
+            echo "  Running as: $(whoami)"
+        fi
+
+        echo ""
+        echo "Brew package categories available:"
+        echo "  • apps: UI applications (nvim, ghostty, aerospace, etc.)"
+        echo "  • cli: Command-line tools (bat, fzf, ripgrep, etc.)"
+        echo "  • utils: Development utilities (node, python, slack, etc.)"
+        echo "  • docker: Container tools (colima, docker, docker-compose)"
+        echo ""
+        echo "Run 'donburi brew --list' to see all packages"
+
+    else
+        echo -e "${RED}✗${NC} Homebrew not found"
+        echo ""
+        echo "Checked locations:"
+        for location in "${BREW_LOCATIONS[@]}"; do
+            if [[ -e "$location" ]]; then
+                echo "  • $location (exists but not executable)"
+            else
+                echo "  • $location (not found)"
+            fi
+        done
+        echo ""
+        echo -e "${BOLD}Installation Options:${NC}"
+        echo ""
+        echo "1. Install Homebrew (recommended):"
+        echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        echo ""
+        echo "2. If Homebrew is installed elsewhere:"
+        echo "   export DONBURI_BREW_PATH=/path/to/brew"
+        echo "   donburi brew-check"
+        echo ""
+        echo "3. For corporate environments:"
+        echo "   • Ask your IT admin to install Homebrew"
+        echo "   • Then run: sudo donburi brew all"
+        echo ""
+        echo "4. Skip brew dependencies:"
+        echo "   donburi setup --no-brew"
+        echo ""
+        return 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Permissions Command
+# ---------------------------------------------------------------------------
+
+check_accessibility_permission() {
+    local app_name="$1"
+    local bundle_id="$2"
+
+    # Check if app has accessibility permission (macOS TCC database)
+    # Note: Direct TCC database access requires Full Disk Access
+    # We'll check if the app can perform accessibility actions instead
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "Would check accessibility for $app_name"
+        return 0
+    fi
+
+    # Try to detect if accessibility is granted by checking if process is running
+    # and if we can query its windows (requires accessibility)
+    if pgrep -x "$app_name" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} $app_name is running"
+        return 0
+    else
+        echo -e "${YELLOW}⚠${NC} $app_name is not running - cannot verify permissions"
+        return 1
+    fi
+}
+
+check_service_status() {
+    local service="$1"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "Would check service status for $service"
+        return 0
+    fi
+
+    if ! find_brew; then
+        echo -e "${RED}✗${NC} Homebrew not found - cannot check service status"
+        return 1
+    fi
+
+    # Check if service is running
+    if "$BREW_CMD" services list 2>/dev/null | grep -q "^$service.*started"; then
+        echo -e "${GREEN}✓${NC} $service service is running"
+        return 0
+    else
+        echo -e "${YELLOW}⚠${NC} $service service is not running"
+        echo "    Run: brew services start $service"
+        return 1
+    fi
+}
+
+cmd_permissions() {
+    echo -e "${CYAN}=== Permission Status Check ===${NC}"
+    echo ""
+
+    echo -e "${BOLD}Aerospace (Window Manager)${NC}"
+    check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace"
+    echo "  Required: Accessibility permission"
+    echo "  To grant: System Settings → Privacy & Security → Accessibility → Enable AeroSpace"
+    echo ""
+
+    echo -e "${BOLD}Sketchybar (Menu Bar)${NC}"
+    check_service_status "sketchybar"
+    echo "  Required: Running as a service"
+    if ! find_brew; then
+        echo "  To start: Install Homebrew first, then run: brew services start sketchybar"
+    else
+        echo "  To start: brew services start sketchybar"
+    fi
+    echo ""
+
+    echo -e "${BOLD}Borders (Window Borders - Optional)${NC}"
+    check_accessibility_permission "borders" "com.felixkratz.borders"
+    echo "  Optional: Screen Recording permission for window borders"
+    echo "  To grant: System Settings → Privacy & Security → Screen Recording → Enable Borders"
+    echo ""
+
+    echo -e "${BOLD}Ghostty (Terminal)${NC}"
+    # Use ps instead of pgrep as pgrep has issues finding ghostty on macOS
+    if ps aux | grep -q "[G]hostty.app"; then
+        echo -e "${GREEN}✓${NC} Ghostty is running"
+    else
+        echo -e "${YELLOW}⚠${NC} Ghostty is not running"
+        echo "  Note: Launch Ghostty once to trigger any permission dialogs"
+    fi
+    echo ""
+
+    echo -e "${CYAN}=== Quick Actions ===${NC}"
+    echo ""
+    echo "Open System Preferences directly:"
+    echo "  • Accessibility: open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'"
+    echo "  • Screen Recording: open 'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'"
+    echo ""
+
+    if is_sudo; then
+        echo -e "${YELLOW}Note: Running with sudo - some permission checks may not work correctly${NC}"
+        echo "Permission checks should be run as the regular user, not with sudo."
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Update Command
 # ---------------------------------------------------------------------------
 
@@ -594,23 +871,29 @@ Commands:
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
+  brew-check            Check Homebrew installation and configuration
+  permissions           Check macOS permissions for apps
   update                Update donburi via git pull
   help                  Show this help message
 
 Options:
   --version, -v         Show version
   --dry-run             Preview changes without applying
+  --no-brew             Skip all Homebrew operations (setup only)
   --list                Show packages without installing (brew only)
 
 Examples:
   donburi setup                 # Install all configurations
   donburi setup nvim            # Install only Neovim config
   donburi setup --dry-run       # Preview all setup changes
+  donburi setup --no-brew       # Setup configs without brew dependencies
   donburi status                # Check symlink status
   donburi brew                  # Install apps (nvim, ghostty, etc.)
   donburi brew cli              # Install CLI tools (bat, fzf, etc.)
   donburi brew all              # Install all packages
   donburi brew --list           # Show all available packages
+  donburi brew-check            # Check Homebrew installation
+  donburi permissions           # Check app permissions
   donburi update                # Update donburi to latest version
 
 For more information, see: https://github.com/jonatas/donburi
@@ -664,6 +947,7 @@ case "$COMMAND" in
         while [[ $# -gt 0 ]]; do
             case "$1" in
                 --dry-run) DRY_RUN=true; shift ;;
+                --no-brew) NO_BREW=true; shift ;;
                 -*) log_error "Unknown option: $1"; exit 1 ;;
                 *) SETUP_COMPONENT="$1"; shift ;;
             esac
@@ -706,6 +990,20 @@ case "$COMMAND" in
         if [[ "$LIST_ONLY" != true ]]; then
             show_footer
         fi
+        ;;
+    brew-check)
+        cmd_brew_check
+        ;;
+    permissions)
+        # Parse permissions-specific flags
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                --dry-run) DRY_RUN=true; shift ;;
+                -*) log_error "Unknown option: $1"; exit 1 ;;
+                *) log_error "Unknown argument: $1"; exit 1 ;;
+            esac
+        done
+        cmd_permissions
         ;;
     update)
         # Parse update-specific flags

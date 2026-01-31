@@ -32,10 +32,12 @@ Installation is **non-destructive**—existing configurations are automatically 
 ## Requirements
 
 - **macOS 15+** (Sequoia)
-- **Homebrew** — package manager for macOS
 - **Git** — for cloning the repository
+- **Homebrew** — package manager for macOS (optional with `--no-brew` flag)
 
 All other dependencies are installed automatically during setup (see below).
+
+**Note for corporate users**: See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for installation in restricted environments.
 
 ## Quick Start
 
@@ -57,8 +59,15 @@ git clone https://github.com/jonatas/donburi.git ~/.donburi
 After installation:
 
 ```bash
+donburi brew-check      # Check Homebrew status
 donburi brew apps       # Install applications (nvim, ghostty, aerospace, etc.)
 donburi setup           # Install all configurations
+```
+
+For environments without Homebrew:
+
+```bash
+donburi setup --no-brew # Setup configs without brew dependencies
 ```
 
 ## Components
@@ -86,6 +95,57 @@ Each `donburi setup` component installs its own dependencies via Homebrew and gi
 | **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
 
 Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
+
+## CLI Commands
+
+The `donburi` command provides several utilities for managing your configuration:
+
+### Core Commands
+
+```bash
+donburi setup [component]     # Install configurations
+donburi status                # Check symlink status
+donburi permissions           # Check macOS permissions for apps
+donburi update                # Update donburi via git pull
+```
+
+### Homebrew Management
+
+```bash
+donburi brew-check            # Check Homebrew installation status
+donburi brew [category]       # Install packages via Homebrew
+donburi brew --list           # Show available packages without installing
+```
+
+Package categories:
+- `apps` — UI applications (neovim, ghostty, aerospace, sketchybar)
+- `cli` — Command-line tools (bat, fzf, ripgrep, etc.)
+- `utils` — Development utilities (node, python, slack, discord)
+- `docker` — Container tools (colima, docker, docker-compose)
+- `all` — Install everything
+
+### Setup Options
+
+```bash
+donburi setup              # Install all components
+donburi setup nvim         # Install a single component
+donburi setup --dry-run    # Preview changes without applying
+donburi setup --no-brew    # Setup without Homebrew dependencies
+```
+
+### Enterprise Usage
+
+For corporate environments where users don't have admin privileges:
+
+```bash
+# Admin runs:
+sudo donburi brew all      # Install all brew packages system-wide
+
+# User runs:
+donburi setup --no-brew    # Setup configs without brew dependencies
+```
+
+See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup instructions.
 
 ## Keybinding Reference
 
