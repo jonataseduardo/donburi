@@ -876,6 +876,10 @@ Commands:
   update                Update donburi via git pull
   help                  Show this help message
 
+Admin Commands (require sudo):
+  admin-setup           Complete admin setup for enterprise
+  admin-check           Verify admin setup is complete
+
 Options:
   --version, -v         Show version
   --dry-run             Preview changes without applying
@@ -895,9 +899,184 @@ Examples:
   donburi brew-check            # Check Homebrew installation
   donburi permissions           # Check app permissions
   donburi update                # Update donburi to latest version
+  sudo donburi admin-setup      # Run complete admin setup (IT staff)
+  donburi admin-check           # Verify admin setup is complete
 
 For more information, see: https://github.com/jonatas/donburi
 EOF
+}
+
+# ---------------------------------------------------------------------------
+# Admin Commands for Enterprise Setup
+# ---------------------------------------------------------------------------
+
+cmd_admin_setup() {
+    echo -e "${CYAN}=== Donburi Admin Setup ===${NC}"
+    echo ""
+
+    # Check if running with sudo
+    if ! is_sudo; then
+        echo -e "${RED}ERROR: This command requires sudo privileges${NC}"
+        echo "Please run: sudo donburi admin-setup"
+        exit 1
+    fi
+
+    echo "This command will help administrators set up donburi for enterprise users."
+    echo "It will:"
+    echo "  1. Install all required Homebrew packages"
+    echo "  2. Start necessary services (sketchybar)"
+    echo "  3. Guide you through granting system permissions"
+    echo ""
+    echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
+    read -r
+
+    # Step 1: Check Homebrew installation
+    echo ""
+    echo -e "${BOLD}Step 1: Checking Homebrew...${NC}"
+    if ! find_brew; then
+        echo -e "${RED}Homebrew is not installed!${NC}"
+        echo "Please install Homebrew first:"
+        echo '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Homebrew found at: $BREW_CMD${NC}"
+
+    # Step 2: Install all packages
+    echo ""
+    echo -e "${BOLD}Step 2: Installing required packages...${NC}"
+    echo "This may take several minutes..."
+    cmd_brew "all"
+
+    # Step 3: Start sketchybar service
+    echo ""
+    echo -e "${BOLD}Step 3: Starting services...${NC}"
+    echo "Starting sketchybar service..."
+    if "$BREW_CMD" services start sketchybar 2>&1 | grep -q "Successfully started"; then
+        echo -e "${GREEN}✓ Sketchybar service started${NC}"
+    elif "$BREW_CMD" services list | grep -q "sketchybar.*started"; then
+        echo -e "${GREEN}✓ Sketchybar service already running${NC}"
+    else
+        echo -e "${YELLOW}⚠ Could not verify sketchybar service status${NC}"
+    fi
+
+    # Step 4: Grant permissions
+    echo ""
+    echo -e "${BOLD}Step 4: System Permissions${NC}"
+    echo ""
+    echo "The following applications need system permissions."
+    echo "I'll open the System Settings to the correct panes for you."
+    echo ""
+
+    echo -e "${CYAN}4a. Aerospace - Accessibility Permission${NC}"
+    echo "   Aerospace needs this to manage windows"
+    echo "   Action: Enable AeroSpace in the list"
+    echo ""
+    echo -e "${YELLOW}Opening Accessibility settings...${NC}"
+    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension" 2>/dev/null || \
+        open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null
+    echo "Press Enter after granting permission..."
+    read -r
+
+    echo ""
+    echo -e "${CYAN}4b. Borders - Screen Recording Permission (Optional)${NC}"
+    echo "   JankyBorders adds colored borders to windows (visual enhancement only)"
+    echo "   This is OPTIONAL - skip if you don't want window borders"
+    echo "   Note: Despite the name, this does NOT record your screen"
+    echo ""
+    echo "Grant this permission? (y/N): "
+    read -r grant_borders
+    if [[ "$grant_borders" =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Opening Screen Recording settings...${NC}"
+        open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture" 2>/dev/null
+        echo "Press Enter after granting permission (or skip)..."
+        read -r
+    else
+        echo "Skipping Borders permission (optional component)"
+    fi
+
+    # Step 5: Verify setup
+    echo ""
+    echo -e "${BOLD}Step 5: Verifying setup...${NC}"
+    echo ""
+    cmd_admin_check
+
+    echo ""
+    echo -e "${GREEN}=== Admin setup complete! ===${NC}"
+    echo ""
+    echo "Next steps for users:"
+    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash"
+    echo "  2. Setup configs: donburi setup --no-brew"
+    echo ""
+}
+
+cmd_admin_check() {
+    local all_good=true
+
+    echo -e "${CYAN}=== Admin Setup Status ===${NC}"
+    echo ""
+
+    # Check Homebrew
+    echo -e "${BOLD}Homebrew:${NC}"
+    if find_brew; then
+        echo -e "  ${GREEN}✓${NC} Installed at: $BREW_CMD"
+    else
+        echo -e "  ${RED}✗${NC} Not installed"
+        all_good=false
+    fi
+
+    # Check key packages
+    echo ""
+    echo -e "${BOLD}Required packages:${NC}"
+    local packages=("neovim" "ghostty" "aerospace" "sketchybar" "tmux" "jq" "borders")
+    for pkg in "${packages[@]}"; do
+        if "$BREW_CMD" list --formula 2>/dev/null | grep -q "^$pkg$" || \
+           "$BREW_CMD" list --cask 2>/dev/null | grep -q "^$pkg$"; then
+            echo -e "  ${GREEN}✓${NC} $pkg"
+        else
+            echo -e "  ${RED}✗${NC} $pkg not installed"
+            all_good=false
+        fi
+    done
+
+    # Check services
+    echo ""
+    echo -e "${BOLD}Services:${NC}"
+    if "$BREW_CMD" services list 2>/dev/null | grep -q "sketchybar.*started"; then
+        echo -e "  ${GREEN}✓${NC} Sketchybar service running"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running"
+        echo "      Run: brew services start sketchybar"
+        all_good=false
+    fi
+
+    # Check permissions (basic check)
+    echo ""
+    echo -e "${BOLD}Permissions:${NC}"
+    echo "  Note: Permission checks require the apps to be launched once"
+
+    # Check if Aerospace has accessibility
+    if check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" 2>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} Aerospace has Accessibility permission"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Aerospace needs Accessibility permission"
+        echo "      Open: System Settings → Privacy & Security → Accessibility"
+    fi
+
+    # Check if Borders has screen recording (optional)
+    if check_accessibility_permission "borders" "com.felixkratz.borders" 2>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} Borders has Screen Recording permission (optional)"
+    else
+        echo -e "  ${CYAN}ℹ${NC} Borders can use Screen Recording permission (optional)"
+    fi
+
+    echo ""
+    if [[ "$all_good" == true ]]; then
+        echo -e "${GREEN}✓ All admin tasks completed successfully!${NC}"
+        return 0
+    else
+        echo -e "${YELLOW}⚠ Some admin tasks still need completion${NC}"
+        return 1
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1017,6 +1196,14 @@ case "$COMMAND" in
         show_header
         cmd_update
         show_footer
+        ;;
+    admin-setup)
+        # No argument parsing needed, handled in the function
+        cmd_admin_setup
+        ;;
+    admin-check)
+        # No argument parsing needed
+        cmd_admin_check
         ;;
     help|--help|-h)
         cmd_help

@@ -4,8 +4,8 @@ This guide helps IT administrators and users in corporate environments install a
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Two-Phase Installation](#two-phase-installation)
+- [Express Admin Setup](#express-admin-setup)
+- [Detailed Two-Phase Installation](#detailed-two-phase-installation)
 - [Phase 1: Administrator Tasks](#phase-1-administrator-tasks)
 - [Phase 2: User Configuration](#phase-2-user-configuration)
 - [Troubleshooting](#troubleshooting)
@@ -19,7 +19,49 @@ Donburi supports enterprise environments where:
 - System permissions need to be granted for applications
 - Corporate security policies restrict software installation
 
-## Two-Phase Installation
+## Express Admin Setup
+
+**For administrators who want the fastest setup:**
+
+### Prerequisites
+- macOS 15+ (Sequoia)
+- Administrator privileges
+- Homebrew installed (or permission to install it)
+
+### Quick Setup (5 minutes)
+
+1. **Install Homebrew** (if not already installed):
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+2. **Run the admin setup command**:
+```bash
+# Clone donburi
+git clone https://github.com/jonatas/donburi.git /tmp/donburi
+
+# Run automated admin setup
+sudo /tmp/donburi/donburi admin-setup
+```
+
+This single command will:
+- ✅ Install all required packages (neovim, ghostty, aerospace, sketchybar, tmux, etc.)
+- ✅ Start the sketchybar service
+- ✅ Guide you through granting system permissions
+- ✅ Verify everything is correctly installed
+
+3. **Tell users to run**:
+```bash
+# Install donburi
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+
+# Setup configs (packages already installed by admin)
+donburi setup --no-brew
+```
+
+That's it! For detailed manual setup, continue reading below.
+
+## Detailed Two-Phase Installation
 
 ### Phase 1: Administrator Tasks
 
@@ -85,10 +127,16 @@ sudo brew services start sketchybar
 
 #### 1.4 Verify Installation
 
-Check that packages are installed:
+Run the admin check command to verify all tasks are complete:
 ```bash
-/tmp/donburi/donburi brew-check
+/tmp/donburi/donburi admin-check
 ```
+
+This will verify:
+- Homebrew installation
+- All required packages
+- Service status
+- System permissions (if apps have been launched)
 
 ### Phase 2: User Configuration
 
@@ -225,24 +273,29 @@ If setup fails due to missing dependencies:
 Use this template to request IT assistance:
 
 ```
-Subject: Request for Development Environment Setup
+Subject: Request for Development Environment Setup (Donburi)
 
 Dear IT Support,
 
 I need to set up my development environment using the donburi dotfiles manager.
-This requires the installation of Homebrew and several development packages.
+This requires administrator privileges for initial setup.
 
-Required actions:
-1. Install Homebrew package manager
-2. Run: sudo /path/to/donburi/donburi brew all
-3. Grant accessibility permissions for AeroSpace window manager
-4. Start sketchybar service
+Quick Setup Instructions:
+1. Clone repository: git clone https://github.com/jonatas/donburi.git /tmp/donburi
+2. Run automated setup: sudo /tmp/donburi/donburi admin-setup
+3. Follow the on-screen prompts for permissions
+
+The admin-setup command will:
+- Install Homebrew (if needed)
+- Install all required packages
+- Start necessary services
+- Guide through permission grants
+- Verify everything is installed
 
 Repository: https://github.com/jonatas/donburi
-Documentation: See ENTERPRISE_SETUP.md in the repository
+Full docs: ENTERPRISE_SETUP.md (Express Admin Setup section)
 
-All user configurations will be installed in my home directory without requiring
-further administrative access.
+After admin setup, I can configure my user environment without further admin access.
 
 Thank you,
 [Your Name]
