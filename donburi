@@ -36,7 +36,7 @@ SRC_TMUX="$DONBURI_DIR/tmux/tmux.conf"
 SRC_ZSH="$DONBURI_DIR/zsh/zshrc"
 SRC_ZSH_DONBURI="$DONBURI_DIR/zsh/donburi.zsh"
 SRC_SKETCHYBAR="$DONBURI_DIR/sketchybar"
-SRC_BTOP="$DONBURI_DIR/btop/themes"
+SRC_BTOP="$DONBURI_DIR/btop"
 
 # Target paths
 DST_NVIM="$HOME/.config/nvim"
@@ -46,7 +46,7 @@ DST_TMUX="$HOME/.tmux.conf"
 DST_ZSH="$HOME/.zshrc"
 DST_ZSH_DONBURI="$HOME/.donburi.zsh"
 DST_SKETCHYBAR="$HOME/.config/sketchybar"
-DST_BTOP="$HOME/.config/btop/themes"
+DST_BTOP="$HOME/.config/btop"
 
 # ---------------------------------------------------------------------------
 # Options
@@ -493,7 +493,6 @@ setup_btop() {
     echo -e "${CYAN}--- btop ---${NC}"
 
     create_symlink "$SRC_BTOP" "$DST_BTOP"
-    log_info "To use the Kanagawa theme, run: btop and press Esc → Options → Select color_theme → kanagawa-wave"
 }
 
 generate_aerospace_ref() {

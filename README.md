@@ -80,7 +80,7 @@ donburi setup --no-brew # Setup configs without brew dependencies
 | **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
 | **tmux**       | Terminal multiplexer (minimal config)     | `~/.tmux.conf`                                               |
 | **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
-| **btop**       | Resource monitor with Kanagawa theme      | `~/.config/btop/themes`                                      |
+| **btop**       | Resource monitor with Kanagawa theme      | `~/.config/btop`                                             |
 
 ### What Setup Installs Automatically
 
