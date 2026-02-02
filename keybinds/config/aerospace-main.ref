@@ -1,0 +1,46 @@
+Workspaces|alt-1|workspace 1
+Workspaces|alt-2|workspace 2
+Workspaces|alt-3|workspace 3
+Workspaces|alt-4|workspace 4
+Workspaces|alt-5|workspace 5
+Workspaces|alt-6|workspace 6
+Workspaces|alt-7|workspace 7
+Workspaces|alt-8|workspace 8
+Workspaces|alt-9|workspace 9
+Workspace|alt-cmd-f|flatten-workspace-tree
+Join Windows|alt-cmd-h|join-with left
+Join Windows|alt-cmd-j|join-with down
+Join Windows|alt-cmd-k|join-with up
+Join Windows|alt-cmd-l|join-with right
+Layout|alt-comma|layout accordion horizontal vertical
+Window Movement|alt-ctrl-h|move left
+Window Movement|alt-ctrl-j|move down
+Window Movement|alt-ctrl-k|move up
+Window Movement|alt-ctrl-l|move right
+Scripts|alt-d|exec-and-forget  open -a "dmenu-mac"
+Focus Navigation|alt-h|focus left
+Focus Navigation|alt-j|focus down
+Focus Navigation|alt-k|focus up
+Focus Navigation|alt-l|focus right
+Scripts|alt-shift-0|exec-and-forget  /Users/jonatas/c/donburi/aerospace/scripts/setup-layout.sh
+Move to Workspace|alt-shift-1|move-node-to-workspace 1
+Move to Workspace|alt-shift-2|move-node-to-workspace 2
+Move to Workspace|alt-shift-3|move-node-to-workspace 3
+Move to Workspace|alt-shift-4|move-node-to-workspace 4
+Move to Workspace|alt-shift-5|move-node-to-workspace 5
+Move to Workspace|alt-shift-6|move-node-to-workspace 6
+Move to Workspace|alt-shift-7|move-node-to-workspace 7
+Move to Workspace|alt-shift-8|move-node-to-workspace 8
+Move to Workspace|alt-shift-9|move-node-to-workspace 9
+Layout|alt-shift-f|fullscreen
+Window Resize|alt-shift-h|resize width -50
+Window Resize|alt-shift-j|resize height +50
+Window Resize|alt-shift-k|resize height -50
+Window Resize|alt-shift-l|resize width +50
+Monitor|alt-shift-left|move-workspace-to-monitor --wrap-around prev
+Config|alt-shift-r|reload-config
+Monitor|alt-shift-right|move-workspace-to-monitor --wrap-around next
+Mode|alt-shift-semicolon|mode service
+Layout|alt-shift-slash|layout tiles horizontal
+Layout|alt-shift-space|layout floating tiling
+Layout|alt-slash|layout tiles horizontal vertical

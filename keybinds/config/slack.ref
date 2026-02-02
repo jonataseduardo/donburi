@@ -1,0 +1,67 @@
+# Slack macOS Keybindings
+# Format: category|keybinding|description
+# Users can override these in ~/.config/keybinds/slack.conf
+
+# Navigation
+Navigation|Cmd+K|Quick Switcher - jump to any conversation
+Navigation|Cmd+T|Jump to conversation - search by name
+Navigation|Cmd+G|Go to previous conversation
+Navigation|Cmd+[|Older conversation
+Navigation|Cmd+]|Newer conversation
+Navigation|Page Up|Scroll up in channel
+Navigation|Page Down|Scroll down in channel
+Navigation|Cmd+↑|Jump to first unread message
+Navigation|Cmd+↓|Jump to first unread message
+Navigation|Alt+Up|Jump to previous conversation
+Navigation|Alt+Down|Jump to next conversation
+
+# Messaging & Composing
+Messaging|Cmd+Enter|Send message
+Messaging|Shift+Enter|New line in message
+Messaging|Cmd+/|Search current channel
+Messaging|Cmd+?|View shortcuts and commands
+Messaging|Cmd+U|Upload file
+Messaging|Ctrl+Enter|Create thread reply
+Messaging|Cmd+B|Bold text
+Messaging|Cmd+I|Italic text
+Messaging|Cmd+Shift+X|Strikethrough text
+Messaging|Cmd+`|Code block
+Messaging|Cmd+Shift+]|Indent code block
+
+# Reactions & Threads
+Reactions|Cmd+R|Show reaction picker (in thread)
+Reactions|Cmd+Y|Show emoji panel
+Threads|Cmd+T|Open message details
+Threads|Cmd+Shift+T|Go to parent message
+
+# Search
+Search|Cmd+F|Search current channel
+Search|Cmd+Shift+F|Search all conversations
+Search|Cmd+L|Clear search
+
+# Workspace & Preferences
+Workspace|Cmd+,|Open Preferences
+Workspace|Cmd+Shift+H|Show Home
+Workspace|Cmd+;|Show saved items
+Workspace|Cmd+'|Show draft messages
+Workspace|Cmd+J|Open file browser
+Workspace|Ctrl+Tab|Switch to next workspace
+Workspace|Ctrl+Shift+Tab|Switch to previous workspace
+
+# Calls & Media
+Calls|Cmd+Shift+U|Mute/unmute (in call)
+Calls|Cmd+Shift+V|Start/stop video (in call)
+Calls|Cmd+Shift+S|Share screen (in call)
+Calls|Esc|Leave call
+
+# Status & Presence
+Status|Cmd+.|Set status
+Status|Cmd+Shift+.|Open profile menu
+
+# Miscellaneous
+Miscellaneous|Cmd+1|Mark as read
+Miscellaneous|Cmd+2|Mark all as read
+Miscellaneous|Cmd+A|Select all text in message
+Miscellaneous|Delete|Delete message
+Miscellaneous|Tab|Auto-complete user mention
+Miscellaneous|Shift+Tab|Auto-complete reverse

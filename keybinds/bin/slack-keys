@@ -1,0 +1,201 @@
+#!/opt/homebrew/bin/bash
+# Slack Keybindings Helper
+# Display Slack macOS keybindings in a formatted table with Kanagawa colors
+
+set -euo pipefail
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Source the shared display library
+source "$SCRIPT_DIR/lib/display.sh"
+
+# Configuration file
+CONFIG_FILE="$SCRIPT_DIR/config/slack.ref"
+USER_CONFIG_FILE="$HOME/.config/keybinds/slack.ref"
+
+# Show usage
+show_usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Display Slack macOS keybindings in a formatted table with pager support.
+
+Options:
+  --no-pager  Output directly to terminal without pager
+  --edit      Open config file in \$EDITOR
+  -h, --help  Show this help message
+
+Examples:
+  $(basename "$0")              # Show all keybindings in pager
+  $(basename "$0") --no-pager   # Show without pager
+  $(basename "$0") --edit       # Edit keybindings config
+
+Pager commands:
+  /pattern    Search forward for pattern
+  ?pattern    Search backward for pattern
+  n           Next search match
+  N           Previous search match
+  q           Quit pager
+  h           Show pager help
+
+Config file: $USER_CONFIG_FILE
+Default file: $CONFIG_FILE
+EOF
+}
+
+# Parse config file and display keybindings
+display_keybindings() {
+    # Determine which config to use
+    local active_config="$CONFIG_FILE"
+    if [[ -f "$USER_CONFIG_FILE" ]]; then
+        active_config="$USER_CONFIG_FILE"
+    fi
+
+    draw_header "Slack Keybindings"
+
+    # Declare associative arrays for categories
+    declare -A category_keys
+    declare -A category_cmds
+
+    # Parse config file and categorize
+    while IFS='|' read -r category key description; do
+        # Skip comments and empty lines
+        [[ "$category" =~ ^#.*$ ]] && continue
+        [[ -z "$category" ]] && continue
+
+        # Trim whitespace using bash parameter expansion
+        category="${category#"${category%%[![:space:]]*}"}"
+        category="${category%"${category##*[![:space:]]}"}"
+        key="${key#"${key%%[![:space:]]*}"}"
+        key="${key%"${key##*[![:space:]]}"}"
+        description="${description#"${description%%[![:space:]]*}"}"
+        description="${description%"${description##*[![:space:]]}"}"
+
+        # Append to category arrays
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            category_keys[$category]+=$'\n'"$key"
+            category_cmds[$category]+=$'\n'"$description"
+        else
+            category_keys[$category]="$key"
+            category_cmds[$category]="$description"
+        fi
+    done < "$active_config"
+
+    # Get unique categories in order of appearance
+    local -a categories=()
+    declare -A seen_categories
+
+    while IFS='|' read -r category _ _; do
+        [[ "$category" =~ ^#.*$ ]] && continue
+        [[ -z "$category" ]] && continue
+        category="${category#"${category%%[![:space:]]*}"}"
+        category="${category%"${category##*[![:space:]]}"}"
+
+        if [[ -z "${seen_categories[$category]:-}" ]]; then
+            categories+=("$category")
+            seen_categories[$category]=1
+        fi
+    done < "$active_config"
+
+    # Display by category in order
+    local first_category=true
+    for category in "${categories[@]}"; do
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            if [[ "$first_category" != true ]]; then
+                draw_line "$BOX_ML" "$BOX_X" "$BOX_MR"
+            fi
+            first_category=false
+
+            # Use a color for category (cycle through available colors)
+            local color="$CYAN"
+            case "${#categories[@]}" in
+                *)
+                    case "$category" in
+                        Navigation) color="$BLUE" ;;
+                        Messaging) color="$GREEN" ;;
+                        Reactions) color="$CYAN" ;;
+                        Search) color="$YELLOW" ;;
+                        Workspace) color="$ORANGE" ;;
+                        Calls*) color="$MAGENTA" ;;
+                        Status) color="$RED" ;;
+                        *) color="$WHITE" ;;
+                    esac
+                    ;;
+            esac
+
+            draw_category "$category" "$color"
+
+            # Display each binding in this category
+            while IFS= read -r key && IFS= read -r cmd <&3; do
+                draw_row "$key" "$cmd"
+            done < <(echo "${category_keys[$category]}") 3< <(echo "${category_cmds[$category]}")
+        fi
+    done
+
+    draw_footer
+}
+
+# Main
+main() {
+    local use_pager=true
+    local edit_mode=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            --no-pager)
+                use_pager=false
+                shift
+                ;;
+            --edit)
+                edit_mode=true
+                shift
+                ;;
+            *)
+                cat >&2 <<EOF
+Unknown option: $1
+EOF
+                show_usage >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    # Handle edit mode
+    if [[ "$edit_mode" == true ]]; then
+        # Create user config directory if it doesn't exist
+        mkdir -p "$HOME/.config/keybinds"
+
+        # Copy default config to user location if it doesn't exist
+        if [[ ! -f "$USER_CONFIG_FILE" ]]; then
+            cp "$CONFIG_FILE" "$USER_CONFIG_FILE"
+            echo "Created $USER_CONFIG_FILE"
+        fi
+
+        # Open in editor
+        ${EDITOR:-nano} "$USER_CONFIG_FILE"
+        exit 0
+    fi
+
+    # Generate output with or without pager
+    if [[ "$use_pager" == true ]]; then
+        pager_cmd=$(setup_pager)
+        if [[ -n "$pager_cmd" ]]; then
+            # Use pager if available
+            display_keybindings | eval "$pager_cmd"
+        else
+            # Fallback to direct output if no pager
+            display_keybindings
+        fi
+    else
+        # Direct output without pager
+        display_keybindings
+    fi
+}
+
+main "$@"

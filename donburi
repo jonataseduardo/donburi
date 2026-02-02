@@ -483,6 +483,85 @@ setup_sketchybar() {
     create_symlink "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
 }
 
+generate_aerospace_ref() {
+    local output_file="$DONBURI_DIR/keybinds/config/aerospace-main.ref"
+
+    if ! command -v aerospace &>/dev/null || ! command -v jq &>/dev/null; then
+        log_warn "Skipping aerospace.ref generation (aerospace or jq not installed)"
+        return 0
+    fi
+
+    log_info "Generating aerospace-main.ref from live configuration..."
+
+    # Extract main mode bindings and convert to .ref format
+    aerospace config --get "mode.main.binding" --json 2>/dev/null | \
+        jq -r 'to_entries | .[] | "\(.key)=\(.value)"' | \
+        while IFS='=' read -r key cmd; do
+            # Determine category based on command
+            local category
+            case "$cmd" in
+                focus\ *)           category="Focus Navigation" ;;
+                resize\ *)          category="Window Resize" ;;
+                move\ left*|move\ right*|move\ up*|move\ down*)  category="Window Movement" ;;
+                workspace\ [0-9]*)  category="Workspaces" ;;
+                move-node-to-workspace*)  category="Move to Workspace" ;;
+                move-workspace-to-monitor*)  category="Monitor" ;;
+                layout*|fullscreen*) category="Layout" ;;
+                mode*)              category="Mode" ;;
+                reload-config*)     category="Config" ;;
+                exec*)              category="Scripts" ;;
+                join-with*)         category="Join Windows" ;;
+                flatten*)           category="Workspace" ;;
+                close-all*)         category="Windows" ;;
+                balance*)           category="Layout" ;;
+                *)                  category="Other" ;;
+            esac
+            echo "$category|$key|$cmd"
+        done > "$output_file"
+
+    log_info "Generated: $output_file"
+}
+
+generate_ghostty_ref() {
+    local input_file="$DONBURI_DIR/ghostty/config"
+    local output_file="$DONBURI_DIR/keybinds/config/ghostty.ref"
+
+    if [[ ! -f "$input_file" ]]; then
+        log_warn "Skipping ghostty.ref generation (ghostty/config not found)"
+        return 0
+    fi
+
+    log_info "Generating ghostty.ref from live configuration..."
+
+    # Extract keybind lines and convert to .ref format
+    grep "^keybind =" "$input_file" | \
+        sed 's/keybind = //; s/=/ | /; s/^/Keybindings | /' > "$output_file"
+
+    log_info "Generated: $output_file"
+}
+
+setup_keybinds() {
+    echo -e "${CYAN}--- keybinds ---${NC}"
+
+    # Make all keybind helper scripts executable
+    make_executable "$DONBURI_DIR/keybinds/bin" "slack-keys"
+    make_executable "$DONBURI_DIR/keybinds/bin" "chrome-keys"
+    make_executable "$DONBURI_DIR/keybinds/bin" "ghostty-keys"
+    make_executable "$DONBURI_DIR/keybinds/bin" "aerospace-keys"
+    make_executable "$DONBURI_DIR/keybinds/bin" "macos-keys"
+
+    # Generate reference files from live configs
+    generate_aerospace_ref
+    generate_ghostty_ref
+
+    log_info "Keybind helpers are ready to use"
+    log_info "  • akeys   - Aerospace keybindings"
+    log_info "  • skeys   - Slack keybindings"
+    log_info "  • ckeys   - Chrome keybindings"
+    log_info "  • gkeys   - Ghostty keybindings"
+    log_info "  • mkeys   - macOS keybindings"
+}
+
 setup_all() {
     setup_nvim
     setup_ghostty
@@ -490,6 +569,7 @@ setup_all() {
     setup_tmux
     setup_zsh
     setup_sketchybar
+    setup_keybinds
 }
 
 # ---------------------------------------------------------------------------
@@ -868,7 +948,7 @@ Usage: donburi <command> [options]
 
 Commands:
   setup [component]     Install configurations (default: all)
-                        Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar
+                        Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, keybinds
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
@@ -1141,9 +1221,10 @@ case "$COMMAND" in
             tmux)       setup_tmux ;;
             zsh)        setup_zsh ;;
             sketchybar) setup_sketchybar ;;
+            keybinds)   setup_keybinds ;;
             *)
                 log_error "Unknown component: $SETUP_COMPONENT"
-                echo "Available components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, all"
+                echo "Available components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, keybinds, all"
                 exit 1
                 ;;
         esac

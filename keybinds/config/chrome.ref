@@ -1,0 +1,77 @@
+# Google Chrome macOS Keybindings
+# Format: category|keybinding|description
+# Users can override these in ~/.config/keybinds/chrome.conf
+
+# Tabs
+Tabs|Cmd+T|Open new tab
+Tabs|Cmd+N|Open new window
+Tabs|Cmd+W|Close current tab
+Tabs|Cmd+Shift+W|Close current window
+Tabs|Cmd+Shift+N|Open new Incognito window
+Tabs|Cmd+Shift+T|Reopen last closed tab
+Tabs|Cmd+Option+Right|Jump to open tab
+Tabs|Cmd+Option+Left|Jump to open tab
+Tabs|Cmd+Option+Down|Open Chrome menu
+Tabs|Cmd+Option+Up|Show/hide bookmarks bar
+
+# Navigation
+Navigation|Cmd+[|Back
+Navigation|Cmd+]|Forward
+Navigation|Cmd+L|Jump to address bar
+Navigation|Cmd+Y|Open History
+Navigation|Cmd+,|Open Settings
+Navigation|Cmd+Shift+Delete|Open Clear Browsing Data
+Navigation|Cmd+R|Reload current page
+Navigation|Cmd+Shift+R|Reload, ignore cached
+Navigation|Cmd+H|Open Home page
+Navigation|Cmd+S|Save page
+Navigation|Cmd+P|Print current page
+Navigation|Cmd+F|Find on page
+Navigation|Cmd+G|Find next match
+Navigation|Cmd+Shift+G|Find previous match
+
+# DevTools
+DevTools|Cmd+Option+I|Open DevTools
+DevTools|Cmd+Option+J|Open Console tab
+DevTools|Cmd+Option+U|View page source
+DevTools|Cmd+Option+C|Inspect element
+DevTools|Cmd+Option+B|Open Breakpoints editor
+DevTools|Cmd+;|Move DevTools focus
+DevTools|Cmd+Shift+M|Switch user/Chrome profile
+
+# Bookmarks
+Bookmarks|Cmd+D|Bookmark current page
+Bookmarks|Cmd+Option+B|Open Bookmark Manager
+Bookmarks|Cmd+B|Show/hide bookmarks bar
+
+# Search
+Search|Cmd+Shift+B|Search from address bar
+Search|Cmd+Option+F|Search in tabs
+
+# Window & Display
+Display|Cmd+=|Zoom in
+Display|Cmd+Minus|Zoom out
+Display|Cmd+0|Reset zoom to default
+Display|Cmd+Up|Maximize window
+Display|Cmd+Down|Minimize window
+Display|Cmd+F|Enter fullscreen
+Display|Cmd+Shift+F|Enter fullscreen (presentation)
+
+# Extensions & Tools
+Extensions|Cmd+Shift+M|Switch to other user/Chrome profile
+Extensions|Cmd+M|Minimize window
+Extensions|Cmd+Option+Down|Open Chrome menu
+Extensions|Cmd+Option+Up|Show/hide bookmarks bar
+
+# Page Functions
+Page|Space|Scroll down
+Page|Shift+Space|Scroll up
+Page|Ctrl+Tab|Jump to next open tab
+Page|Ctrl+Shift+Tab|Jump to previous open tab
+
+# Address Bar
+Address|Cmd+L|Jump to address bar
+Address|Type search term + Enter|Search with default engine
+Address|Type URL + Enter|Navigate to URL
+Address|Type term + Option+Enter|Open search in background
+Address|Type term + Cmd+Enter|Open search in new background tab
