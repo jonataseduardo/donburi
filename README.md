@@ -96,6 +96,45 @@ Each `donburi setup` component installs its own dependencies via Homebrew and gi
 
 Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
 
+### Custom Neovim Plugins
+
+In addition to kickstart-modular.nvim's core plugins, donburi includes these custom plugins:
+
+| Plugin | Purpose |
+|--------|---------|
+| **ChatGPT** | AI-powered code completion and generation |
+| **dadbod** | Database UI and SQL query execution |
+| **diffview** | Enhanced Git diff visualization |
+| **fugitive** | Git integration and operations |
+| **ghostty** | Ghostty terminal integration |
+| **Kanagawa** | Unified color scheme (theme) |
+| **lualine** | Customizable statusline |
+| **markdown-preview** | Live Markdown preview |
+| **python-debugger** | Python debugging support |
+| **render-markdown** | Enhanced Markdown rendering |
+| **smart-splits** | Smart window navigation and resizing |
+| **toggleterm** | Integrated terminal multiplexer |
+
+All plugins auto-install on first Neovim launch. View/manage with `:Lazy`.
+
+### Sketchybar Indicators
+
+Donburi's Sketchybar configuration includes these status indicators:
+
+| Indicator | Purpose |
+|-----------|---------|
+| **Aerospace** | Current workspace number and available workspaces |
+| **Front App** | Name of currently focused application |
+| **Clock** | Current time and date |
+| **CPU** | CPU usage percentage |
+| **Memory** | RAM usage percentage |
+| **Battery** | Battery level and charging status |
+| **Spotify** | Current playing track (if active) |
+| **Slack** | Slack status indicator |
+| **VPN** | VPN connection status |
+
+Indicators auto-update and use the Kanagawa color scheme. Customize in `~/.config/sketchybar/`.
+
 ## CLI Commands
 
 The `donburi` command provides several utilities for managing your configuration:
@@ -107,7 +146,20 @@ donburi setup [component]     # Install configurations
 donburi status                # Check symlink status
 donburi permissions           # Check macOS permissions for apps
 donburi update                # Update donburi via git pull
+donburi --version             # Show donburi version
+donburi help                  # Show help message
 ```
+
+### Admin Commands (Enterprise)
+
+For corporate environments with system-wide Homebrew installations:
+
+```bash
+donburi admin-setup           # Setup as administrator
+donburi admin-check           # Check admin setup status
+```
+
+See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate installation instructions.
 
 ### Homebrew Management
 
@@ -119,8 +171,8 @@ donburi brew --list           # Show available packages without installing
 
 Package categories:
 - `apps` — UI applications (neovim, ghostty, aerospace, sketchybar)
-- `cli` — Command-line tools (bat, fzf, ripgrep, etc.)
-- `utils` — Development utilities (node, python, slack, discord)
+- `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
+- `utils` — Development utilities (node, python, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
 - `all` — Install everything
 
@@ -159,12 +211,32 @@ Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as 
 | Toggle layout    | `Alt + /`            | `Ctrl + /`            |
 | Switch workspace | `Alt + 1-9`          | —                     |
 
-Use the `akeys` command to display a comprehensive, color-coded table of all Aerospace keybindings:
+### Keybinding Helper Commands
+
+Display color-coded keybinding tables for various applications:
 
 ```bash
-akeys               # Show all keybindings with pager
-akeys main          # Show only main mode keybindings
-akeys --no-pager    # Show without pager
+akeys               # Aerospace window manager keybindings
+skeys               # Slack keybindings
+ckeys               # Chrome/Chromium keybindings
+gkeys               # Ghostty terminal keybindings
+mkeys               # macOS system keybindings
+```
+
+Each command supports:
+
+```bash
+--no-pager          # Display without pager
+--edit              # Edit the keybinding file
+-h, --help          # Show command help
+```
+
+Example:
+
+```bash
+akeys main          # Show only Aerospace main mode keybindings
+skeys --no-pager    # Show Slack keybindings without pager
+gkeys --edit        # Open Ghostty keybindings for editing
 ```
 
 ## CLI Reference
@@ -192,11 +264,12 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 ```bash
 donburi brew               # Install apps only (default)
 donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq, borders)
-donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl)
-donburi brew utils         # Install dev utilities & communication (node, python, slack, discord, spotify)
+donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
+donburi brew utils         # Install dev utilities & communication (node, python, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
+donburi brew --dry-run     # Preview packages without installing
 ```
 
 ## Post-Installation
@@ -220,9 +293,38 @@ Start Sketchybar if not running:
 brew services start sketchybar
 ```
 
-## Config Aliases
+## Environment Variables
 
-Quick shortcuts to edit any configuration (added to your shell):
+Customize installation and behavior using these environment variables:
+
+### Installation Variables
+
+Set these when running `install.sh` or during manual setup:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DONBURI_HOME` | Custom installation directory | `~/.donburi` |
+| `DONBURI_BRANCH` | Git branch to install from | `main` |
+| `DONBURI_BREW_PATH` | Custom Homebrew installation path (enterprise) | Auto-detected |
+
+Example:
+
+```bash
+# Install to custom location
+DONBURI_HOME=~/MyApps/donburi bash install.sh
+
+# Install from development branch
+DONBURI_BRANCH=dev bash install.sh
+
+# Set custom Homebrew path (enterprise environments)
+DONBURI_BREW_PATH=/opt/homebrew donburi setup --no-brew
+```
+
+## Config & Keybind Aliases
+
+Quick shortcuts to edit configurations and view keybindings (added to your shell):
+
+### Config Aliases
 
 | Alias   | Opens             |
 | ------- | ----------------- |
@@ -232,6 +334,27 @@ Quick shortcuts to edit any configuration (added to your shell):
 | `tconf` | tmux config       |
 | `zconf` | zsh config        |
 | `sconf` | Sketchybar config |
+
+### Keybind Aliases
+
+| Alias   | Shows                  |
+| ------- | ---------------------- |
+| `akeys` | Aerospace keybindings  |
+| `skeys` | Slack keybindings      |
+| `ckeys` | Chrome keybindings     |
+| `gkeys` | Ghostty keybindings    |
+| `mkeys` | macOS keybindings      |
+
+### Shell Aliases
+
+Donburi includes `lsd` for a modern `ls` replacement:
+
+| Alias | Command |
+| ----- | ------- |
+| `l`   | `lsd -l` (long format) |
+| `la`  | `lsd -lA` (with hidden files) |
+| `lla` | `lsd -llA` (long format, hidden files) |
+| `tree` | `lsd --tree` (tree view) |
 
 ## Troubleshooting
 
@@ -261,6 +384,36 @@ brew services start sketchybar
 **donburi command not found**
 
 - Restart your terminal or run: `export PATH="$HOME/.local/bin:$PATH"`
+
+## Development
+
+Donburi is actively maintained and welcomes contributions. Here are some useful resources:
+
+### Project Files
+
+| File | Purpose |
+|------|---------|
+| `VERSION` | Current version (0.1.0) |
+| `CHANGELOG.md` | Version history and changes |
+| `CLAUDE.md` | Development guidelines for AI assistants |
+| `.pre-commit-config.yaml` | Pre-commit hooks (shellcheck linting) |
+| `test/test_donburi.sh` | Test suite for CLI commands |
+
+### Development Workflow
+
+Before submitting pull requests, run the linting checks:
+
+```bash
+prek run --all-files    # Run pre-commit hooks (shellcheck, etc.)
+prek install            # Install git pre-commit hook
+```
+
+For detailed contribution guidelines, see [CLAUDE.md](CLAUDE.md).
+
+### Resources
+
+- **Upstream Neovim config**: [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim)
+- **Issues & PRs**: [GitHub repository](https://github.com/jonatas/donburi)
 
 ## License
 
