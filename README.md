@@ -80,6 +80,7 @@ donburi setup --no-brew # Setup configs without brew dependencies
 | **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
 | **tmux**       | Terminal multiplexer (minimal config)     | `~/.tmux.conf`                                               |
 | **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
+| **btop**       | Resource monitor with Kanagawa theme      | `~/.config/btop/themes`                                      |
 
 ### What Setup Installs Automatically
 
@@ -93,6 +94,7 @@ Each `donburi setup` component installs its own dependencies via Homebrew and gi
 | **Sketchybar** | JetBrains Mono Nerd Font                                                                                           |
 | **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                                                               |
 | **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
+| **btop**       | None (no external dependencies)                                                                                    |
 
 Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
 

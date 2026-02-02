@@ -36,6 +36,7 @@ SRC_TMUX="$DONBURI_DIR/tmux/tmux.conf"
 SRC_ZSH="$DONBURI_DIR/zsh/zshrc"
 SRC_ZSH_DONBURI="$DONBURI_DIR/zsh/donburi.zsh"
 SRC_SKETCHYBAR="$DONBURI_DIR/sketchybar"
+SRC_BTOP="$DONBURI_DIR/btop/themes"
 
 # Target paths
 DST_NVIM="$HOME/.config/nvim"
@@ -45,6 +46,7 @@ DST_TMUX="$HOME/.tmux.conf"
 DST_ZSH="$HOME/.zshrc"
 DST_ZSH_DONBURI="$HOME/.donburi.zsh"
 DST_SKETCHYBAR="$HOME/.config/sketchybar"
+DST_BTOP="$HOME/.config/btop/themes"
 
 # ---------------------------------------------------------------------------
 # Options
@@ -487,6 +489,13 @@ setup_sketchybar() {
     create_symlink "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
 }
 
+setup_btop() {
+    echo -e "${CYAN}--- btop ---${NC}"
+
+    create_symlink "$SRC_BTOP" "$DST_BTOP"
+    log_info "To use the Kanagawa theme, run: btop and press Esc → Options → Select color_theme → kanagawa-wave"
+}
+
 generate_aerospace_ref() {
     local output_file="$DONBURI_DIR/keybinds/config/aerospace-main.ref"
 
@@ -573,6 +582,7 @@ setup_all() {
     setup_tmux
     setup_zsh
     setup_sketchybar
+    setup_btop
     setup_keybinds
 }
 
@@ -737,6 +747,7 @@ cmd_status() {
     check_link "zsh"        "$SRC_ZSH"        "$DST_ZSH"
     check_link "zsh-donburi" "$SRC_ZSH_DONBURI" "$DST_ZSH_DONBURI"
     check_link "sketchybar" "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
+    check_link "btop"       "$SRC_BTOP"       "$DST_BTOP"
 }
 
 # ---------------------------------------------------------------------------
@@ -954,7 +965,7 @@ Usage: donburi <command> [options]
 
 Commands:
   setup [component]     Install configurations (default: all)
-                        Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, keybinds
+                        Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
@@ -1227,10 +1238,11 @@ case "$COMMAND" in
             tmux)       setup_tmux ;;
             zsh)        setup_zsh ;;
             sketchybar) setup_sketchybar ;;
+            btop)       setup_btop ;;
             keybinds)   setup_keybinds ;;
             *)
                 log_error "Unknown component: $SETUP_COMPONENT"
-                echo "Available components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, keybinds, all"
+                echo "Available components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds, all"
                 exit 1
                 ;;
         esac
