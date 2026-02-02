@@ -64,7 +64,9 @@ sketchybar --add item separator left \
 sketchybar --add item front_app center \
     --set front_app \
         icon.drawing=off \
+        label.font="JetBrainsMono Nerd Font:Bold:14.0" \
         label.color=$KANAGAWA_ORANGE \
+        background.drawing=off \
         script="$PLUGIN_DIR/front_app.sh" \
     --subscribe front_app front_app_switched
 
@@ -114,17 +116,43 @@ sketchybar --add item vpn right \
         update_freq=10 \
         script="$PLUGIN_DIR/vpn.sh"
 
+# Slack (between VPN and Spotify)
+sketchybar --add item slack right \
+    --set slack \
+        icon="󰒱" \
+        icon.color=$KANAGAWA_FG \
+        icon.padding_left=8 \
+        icon.padding_right=4 \
+        label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=10 \
+        update_freq=5 \
+        script="$PLUGIN_DIR/slack.sh" \
+        background.drawing=on \
+        background.color=$KANAGAWA_BG \
+        background.border_color=$KANAGAWA_ORANGE \
+        background.border_width=1 \
+        click_script="open -a 'Slack'"
+
 # Spotify (to the left of VPN)
 sketchybar --add item spotify right \
     --set spotify \
         icon="" \
         icon.color=$KANAGAWA_GREEN \
+        icon.padding_left=10 \
+        icon.padding_right=5 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=15 \
+        label.align=center \
         update_freq=5 \
         script="$PLUGIN_DIR/spotify.sh" \
-        background.color=$KANAGAWA_HIGHLIGHT \
         background.border_color=$KANAGAWA_GREEN \
         background.border_width=1 \
+        background.padding_left=0 \
+        background.padding_right=0 \
+        padding_left=0 \
+        padding_right=0 \
         click_script="osascript -e 'tell application \"Spotify\" to playpause'"
 
 # Initialize bar

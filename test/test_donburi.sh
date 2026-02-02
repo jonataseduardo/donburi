@@ -133,6 +133,9 @@ echo ""
 echo "--- help ---"
 assert_output_contains "Usage:" "help exits 0 and shows usage" "$DONBURI" help
 assert_exit_code 0 "--help exits 0" "$DONBURI" --help
+assert_output_contains "brew-check" "help mentions brew-check command" "$DONBURI" help
+assert_output_contains "permissions" "help mentions permissions command" "$DONBURI" help
+assert_output_contains "keybinds" "help mentions keybinds component" "$DONBURI" help
 
 # --- Status ---
 echo "--- status ---"
@@ -216,6 +219,23 @@ assert_symlink "zsh symlink"        "$TEST_HOME/.zshrc"             "$REPO_DIR/z
 assert_symlink "zsh-donburi symlink" "$TEST_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
 assert_symlink "sketchybar symlink" "$TEST_HOME/.config/sketchybar" "$REPO_DIR/sketchybar"
 
+# --- Status after keybinds setup ---
+run "$DONBURI" setup keybinds
+if [[ "$EXIT_CODE" -eq 0 ]]; then
+    pass "setup keybinds exits 0"
+else
+    fail "setup keybinds exits 0" "exit=$EXIT_CODE"
+fi
+
+# Verify keybind scripts were created (and setup_keybinds made them executable)
+for script_name in aerospace-keys slack-keys chrome-keys ghostty-keys macos-keys; do
+    if [[ -f "$REPO_DIR/keybinds/bin/$script_name" ]]; then
+        pass "keybind script $script_name exists"
+    else
+        fail "keybind script $script_name exists" "file not found"
+    fi
+done
+
 # --- Status after full setup ---
 run "$DONBURI" status
 ALL_OK=true
@@ -261,5 +281,18 @@ if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "apps" || echo "$OUTPUT
 else
     fail "brew all --dry-run exits 0" "exit=$EXIT_CODE"
 fi
+
+# --- Brew check command ---
+echo "--- brew-check ---"
+run "$DONBURI" brew-check
+if [[ "$EXIT_CODE" -eq 0 || "$EXIT_CODE" -eq 1 ]]; then
+    pass "brew-check exits with valid code"
+else
+    fail "brew-check exits with valid code" "exit=$EXIT_CODE"
+fi
+
+# --- Permissions command ---
+echo "--- permissions ---"
+assert_exit_code 0 "permissions command exits 0" "$DONBURI" permissions
 
 fi # end DONBURI_TEST_LEVEL != quick

@@ -1,0 +1,109 @@
+# macOS System Keybindings
+# Format: category|keybinding|description
+# Users can override these in ~/.config/keybinds/macos.conf
+
+# Spotlight & Search
+Spotlight|Cmd+Space|Open Spotlight search
+Spotlight|Cmd+Option+Space|Open Spotlight File Search
+Spotlight|Cmd+/|Accessibility search in Finder
+
+# Finder
+Finder|Cmd+Space|Open Spotlight
+Finder|Cmd+N|Open new Finder window
+Finder|Cmd+Shift+N|Create new folder
+Finder|Cmd+T|Open new tab
+Finder|Cmd+W|Close window
+Finder|Cmd+↑|Go to parent folder
+Finder|Cmd+↓|Open selected item
+Finder|Cmd+Option+↑|Open containing folder
+Finder|Cmd+Option+↓|Open selected item
+Finder|Cmd+Delete|Move to Trash
+Finder|Cmd+Option+Delete|Empty Trash
+Finder|Cmd+1|View as icons
+Finder|Cmd+2|View as list
+Finder|Cmd+3|View as columns
+Finder|Cmd+4|View as Gallery
+Finder|Cmd+I|Open Get Info
+Finder|Cmd+D|Duplicate
+Finder|Cmd+L|Make alias
+Finder|Cmd+Shift+.|Show hidden files
+Finder|Cmd+Shift+G|Go to folder
+Finder|Cmd+Shift+H|Go to home folder
+Finder|Cmd+Shift+D|Go to Desktop
+Finder|Cmd+Shift+A|Go to Applications
+Finder|Cmd+Shift+U|Go to Utilities
+Finder|Cmd+,|Open Finder Preferences
+
+# Screenshots
+Screenshots|Cmd+Shift+3|Capture whole screen
+Screenshots|Cmd+Shift+4|Capture selected area
+Screenshots|Cmd+Shift+4 + Space|Capture window
+Screenshots|Cmd+Shift+5|Open Screenshot app
+Screenshots|Cmd+Shift+6|Capture Touch Bar
+
+# Mission Control & Spaces
+MissionControl|Control+Up|Show Mission Control
+MissionControl|Control+Down|Show App Exposé
+MissionControl|Control+Left|Move to Space left
+MissionControl|Control+Right|Move to Space right
+MissionControl|Cmd+F3|Show Desktop
+MissionControl|F11|Show Desktop (if enabled)
+MissionControl|F12|Show Dashboard (if enabled)
+MissionControl|Control+↑|Mission Control
+MissionControl|Control+↓|Show all windows of app
+
+# Window Management
+Windows|Cmd+M|Minimize window
+Windows|Cmd+Option+M|Minimize all windows
+Windows|Cmd+H|Hide window
+Windows|Cmd+Option+H|Hide other windows
+Windows|Cmd+W|Close window
+Windows|Cmd+Q|Quit app
+Windows|Cmd+Option+Esc|Force Quit
+
+# Text & Editing
+Text|Cmd+A|Select all
+Text|Cmd+C|Copy
+Text|Cmd+V|Paste
+Text|Cmd+X|Cut
+Text|Cmd+Z|Undo
+Text+Shift+Cmd+Z|Redo
+Text|Cmd+B|Bold
+Text|Cmd+I|Italic
+Text|Cmd+U|Underline
+Text|Cmd+F|Find
+Text|Cmd+G|Find next
+Text|Cmd+Option+L|Align left
+Text|Cmd+Option+E|Align center
+Text|Cmd+Option+R|Align right
+Text|Cmd+Option+J|Justify
+
+# App Switcher & Dock
+AppSwitcher|Cmd+Tab|Switch to next app
+AppSwitcher|Cmd+Shift+Tab|Switch to previous app
+AppSwitcher|Cmd+`|Switch to next window in app
+AppSwitcher|Cmd+Shift+`|Switch to previous window in app
+AppSwitcher|Cmd+Option+D|Toggle Dock visibility
+AppSwitcher|Control+F3|Focus on Dock
+
+# System Controls
+System|Cmd+Power|Show power options
+System|Control+Power|Show restart/sleep/shutdown
+System|Cmd+Option+Power|Sleep
+System|Cmd+Option+Esc|Force Quit
+System|Cmd+Q|Quit app
+System|Cmd+,|Open app Preferences
+
+# Accessibility
+Accessibility|Cmd+Option+8|Zoom in/out
+Accessibility|Cmd+Option+=|Zoom in
+Accessibility|Cmd+Option+Minus|Zoom out
+Accessibility|Cmd+Option+8 then arrows|Pan zoomed image
+Accessibility|Option+Command+/|Open Accessibility
+
+# Help & System
+Help|Cmd+?|Open Help menu
+Help|Cmd+Shift+?|Search Help menu
+System|Cmd+Option+Power|Sleep
+System|Control+Command+Power|Restart
+System|Control+Option+Command+Power|Shutdown

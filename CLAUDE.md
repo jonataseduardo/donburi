@@ -8,7 +8,7 @@ For general documentation, installation, keybindings, and usage, see [README.md]
 
 ```bash
 donburi setup              # Install all configs
-donburi setup <component>  # Install single component (nvim|ghostty|aerospace|tmux|zsh|sketchybar)
+donburi setup <component>  # Install single component (nvim|ghostty|aerospace|tmux|zsh|sketchybar|btop)
 donburi setup --dry-run    # Preview changes
 donburi status             # Check symlink status
 donburi brew [category]    # Install packages (apps|cli|docker|all)
@@ -24,6 +24,7 @@ Each tool lives in its own directory and is symlinked to its config location by 
 | `nvim/` | `~/.config/nvim` |
 | `aerospace/` | `~/.config/aerospace` |
 | `sketchybar/` | `~/.config/sketchybar` |
+| `btop/` | `~/.config/btop` |
 | `ghostty/` | `~/Library/Application Support/com.mitchellh.ghostty/config` |
 | `tmux/` | `~/.tmux.conf` |
 | `zsh/` | `~/.zshrc` |
@@ -47,6 +48,7 @@ Each tool lives in its own directory and is symlinked to its config location by 
 
 - **Neovim** (largest component): See `nvim/CLAUDE.md` for detailed architecture. Plugins in `nvim/lua/kickstart/plugins/` (core) and `nvim/lua/custom/plugins/` (custom, auto-imported).
 - **Sketchybar**: Shell-script plugins in `sketchybar/plugins/`. Integrates with Aerospace for workspace indicators.
+- **btop**: Resource monitor config with Kanagawa wave theme and custom theme files.
 - **Ghostty/tmux**: Minimal configs — Aerospace handles window management.
 
 ### Upstream Tracking

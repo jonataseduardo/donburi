@@ -41,6 +41,11 @@ echo -e "${CYAN}║         Donburi Installer             ║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════╝${NC}"
 echo ""
 
+# Check for custom brew path
+if [ -n "${DONBURI_BREW_PATH:-}" ]; then
+    log_info "Using custom brew path: $DONBURI_BREW_PATH"
+fi
+
 # Check for git
 if ! command -v git &>/dev/null; then
     log_error "Git is required but not installed."
@@ -143,8 +148,17 @@ if [ "$PATH_UPDATED" = true ]; then
 fi
 
 echo "Next steps:"
+echo "  donburi brew-check    # Check Homebrew installation"
 echo "  donburi help          # Show available commands"
+echo ""
+echo "If Homebrew is installed:"
 echo "  donburi brew apps     # Install applications (nvim, ghostty, etc.)"
 echo "  donburi setup         # Install all configurations"
-echo "  donburi status        # Check configuration status"
+echo ""
+echo "If Homebrew is NOT installed:"
+echo "  donburi setup --no-brew  # Setup configs without brew dependencies"
+echo ""
+echo "For corporate environments:"
+echo "  Ask admin: sudo donburi brew all  # Install all brew packages"
+echo "  Then run:  donburi setup --no-brew  # Setup your configs"
 echo ""

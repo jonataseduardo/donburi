@@ -274,6 +274,14 @@ display_mode() {
     draw_footer
 }
 
+# Configuration file (for fallback/reference)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REF_CONFIG_DIR="$SCRIPT_DIR/keybinds/config"
+# shellcheck disable=SC2034
+REF_MAIN_FILE="$REF_CONFIG_DIR/aerospace-main.ref"
+# shellcheck disable=SC2034
+REF_SERVICE_FILE="$REF_CONFIG_DIR/aerospace-service.ref"
+
 # Show usage
 show_usage() {
     cat <<EOF
@@ -281,12 +289,15 @@ Usage: $(basename "$0") [options] [mode]
 
 Display Aerospace keybindings in a formatted table with pager support.
 
+The keybindings are read from your live Aerospace configuration.
+
 Arguments:
   mode        The mode to display (default: all modes)
               Options: main, service, all
 
 Options:
   --no-pager  Output directly to terminal without pager
+  --edit      Open Aerospace config file in \$EDITOR
   -h, --help  Show this help message
 
 Examples:
@@ -294,6 +305,7 @@ Examples:
   $(basename "$0") main           # Show only main mode in pager
   $(basename "$0") service        # Show only service mode in pager
   $(basename "$0") --no-pager     # Show all modes without pager
+  $(basename "$0") --edit         # Edit Aerospace configuration
 
 Pager commands:
   /pattern    Search forward for pattern
@@ -302,6 +314,8 @@ Pager commands:
   N           Previous search match
   q           Quit pager
   h           Show pager help
+
+Config source: Live Aerospace configuration (via aerospace config --get)
 EOF
 }
 
@@ -369,6 +383,7 @@ EOF
     # Parse arguments
     local use_pager=true
     local mode="all"
+    local edit_mode=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -378,6 +393,10 @@ EOF
                 ;;
             --no-pager)
                 use_pager=false
+                shift
+                ;;
+            --edit)
+                edit_mode=true
                 shift
                 ;;
             main|service|all)
@@ -393,6 +412,20 @@ EOF
                 ;;
         esac
     done
+
+    # Handle edit mode
+    if [[ "$edit_mode" == true ]]; then
+        # Find aerospace config location
+        local aerospace_config
+        if [[ -f "$HOME/.config/aerospace/aerospace.toml" ]]; then
+            aerospace_config="$HOME/.config/aerospace/aerospace.toml"
+        else
+            echo "Error: Aerospace config not found at ~/.config/aerospace/aerospace.toml"
+            exit 1
+        fi
+        ${EDITOR:-nano} "$aerospace_config"
+        exit 0
+    fi
 
     # Validate mode
     case "$mode" in
