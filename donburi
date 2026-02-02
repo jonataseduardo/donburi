@@ -200,12 +200,16 @@ create_symlink() {
     fi
 
     # Backup whatever is currently at the target path
-    backup_if_exists "$target"
+    backup_if_exists "$target" || true
 
-    # Create the symlink
+    # Create the symlink (remove any remaining target first)
     if [[ "$DRY_RUN" == true ]]; then
         log_info "Would symlink: $target -> $source"
     else
+        # Remove target if it still exists (in case backup failed or didn't run)
+        if [[ -e "$target" ]] || [[ -L "$target" ]]; then
+            rm -f "$target"
+        fi
         ln -s "$source" "$target"
         log_info "Symlinked: $target -> $source"
     fi
@@ -870,13 +874,13 @@ cmd_permissions() {
     echo ""
 
     echo -e "${BOLD}Aerospace (Window Manager)${NC}"
-    check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace"
+    check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" || true
     echo "  Required: Accessibility permission"
     echo "  To grant: System Settings → Privacy & Security → Accessibility → Enable AeroSpace"
     echo ""
 
     echo -e "${BOLD}Sketchybar (Menu Bar)${NC}"
-    check_service_status "sketchybar"
+    check_service_status "sketchybar" || true
     echo "  Required: Running as a service"
     if ! find_brew; then
         echo "  To start: Install Homebrew first, then run: brew services start sketchybar"
@@ -886,7 +890,7 @@ cmd_permissions() {
     echo ""
 
     echo -e "${BOLD}Borders (Window Borders - Optional)${NC}"
-    check_accessibility_permission "borders" "com.felixkratz.borders"
+    check_accessibility_permission "borders" "com.felixkratz.borders" || true
     echo "  Optional: Screen Recording permission for window borders"
     echo "  To grant: System Settings → Privacy & Security → Screen Recording → Enable Borders"
     echo ""
@@ -912,6 +916,8 @@ cmd_permissions() {
         echo -e "${YELLOW}Note: Running with sudo - some permission checks may not work correctly${NC}"
         echo "Permission checks should be run as the regular user, not with sudo."
     fi
+
+    return 0
 }
 
 # ---------------------------------------------------------------------------
