@@ -17,7 +17,6 @@ Window Movement|alt-ctrl-h|move left
 Window Movement|alt-ctrl-j|move down
 Window Movement|alt-ctrl-k|move up
 Window Movement|alt-ctrl-l|move right
-Scripts|alt-d|exec-and-forget  open -a "dmenu-mac"
 Focus Navigation|alt-h|focus left
 Focus Navigation|alt-j|focus down
 Focus Navigation|alt-k|focus up
