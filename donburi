@@ -268,8 +268,8 @@ BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 # CLI: Essential command-line tools
 BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 
-# Utils: Development utilities and communication apps
-BREW_UTILS_FORMULA=(node python)
+# Utils: Development utilities, media processing, data tools, and communication apps
+BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei)
 BREW_UTILS_CASK=(slack spotify)
 
 # Docker: Container development tools
@@ -620,7 +620,7 @@ brew_list_category() {
             echo "  Formulas: ${BREW_CLI_FORMULA[*]}"
             ;;
         utils)
-            echo -e "${BOLD}Utils (dev utilities & communication):${NC}"
+            echo -e "${BOLD}Utils (dev utilities, media, data tools, & communication):${NC}"
             echo "  Formulas: ${BREW_UTILS_FORMULA[*]}"
             echo "  Casks:    ${BREW_UTILS_CASK[*]}"
             ;;
@@ -776,7 +776,7 @@ cmd_brew_check() {
         echo "Brew package categories available:"
         echo "  • apps: UI applications (nvim, ghostty, aerospace, etc.)"
         echo "  • cli: Command-line tools (bat, fzf, ripgrep, etc.)"
-        echo "  • utils: Development utilities (node, python, slack, etc.)"
+        echo "  • utils: Dev utilities, media tools, data processing (ffmpeg, imagemagick, pandoc, etc.)"
         echo "  • docker: Container tools (colima, docker, docker-compose)"
         echo ""
         echo "Run 'donburi brew --list' to see all packages"

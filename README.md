@@ -172,7 +172,7 @@ donburi brew --list           # Show available packages without installing
 Package categories:
 - `apps` — UI applications (neovim, ghostty, aerospace, sketchybar)
 - `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
-- `utils` — Development utilities (node, python, slack, spotify)
+- `utils` — Dev utilities, media & data processing (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
 - `all` — Install everything
 
@@ -265,7 +265,7 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 donburi brew               # Install apps only (default)
 donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq, borders)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
-donburi brew utils         # Install dev utilities & communication (node, python, slack, spotify)
+donburi brew utils         # Install dev & media tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
