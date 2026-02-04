@@ -84,7 +84,7 @@ donburi setup --no-brew # Setup configs without brew dependencies
 
 ### What Setup Installs Automatically
 
-Each `donburi setup` component installs its own dependencies via Homebrew and git:
+Each `donburi setup` component installs its own dependencies via Homebrew, git, and curl scripts:
 
 | Component      | Auto-installed Dependencies                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -95,6 +95,7 @@ Each `donburi setup` component installs its own dependencies via Homebrew and gi
 | **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                                                               |
 | **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
 | **btop**       | None (no external dependencies)                                                                                    |
+| **Language Runtimes** | [Rust](https://www.rust-lang.org/) (via rustup), [uv](https://astral.sh/uv) (Python), [bun](https://bun.sh) (JavaScript) |
 
 Neovim LSP servers and plugins auto-install on first launch via Mason and lazy.nvim.
 
@@ -172,9 +173,9 @@ donburi brew --list           # Show available packages without installing
 ```
 
 Package categories:
-- `apps` — UI applications (neovim, ghostty, aerospace, sketchybar)
+- `apps` — UI applications (neovim, ghostty, aerospace, sketchybar, btop)
 - `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
-- `utils` — Dev utilities, media & data processing (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, slack, spotify)
+- `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@17, sqlite, go, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
 - `all` — Install everything
 
@@ -265,9 +266,9 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 
 ```bash
 donburi brew               # Install apps only (default)
-donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, jq, borders)
+donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, btop, jq, borders)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
-donburi brew utils         # Install dev & media tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, slack, spotify)
+donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@17, sqlite, go, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
@@ -294,6 +295,60 @@ Start Sketchybar if not running:
 ```bash
 brew services start sketchybar
 ```
+
+## Installing Code Formatters
+
+Donburi automatically installs language runtimes (Rust, uv, bun) that allow you to install code formatters on demand. This gives you flexibility to install only the formatters you need.
+
+### Available Formatters
+
+| Formatter | Language | Install Command | Prerequisite |
+|-----------|----------|-----------------|--------------|
+| **shfmt** | Shell | `go install mvdan.cc/sh/v3/cmd/shfmt@latest` | `go` (installed via brew) |
+| **ruff** | Python | `uv tool install ruff` or `pip install ruff` | `uv` or `python` (auto-installed) |
+| **prettier** | JS/TS/JSON/YAML/MD | `npm install -g prettier` or `bun install -g prettier` | `node` or `bun` (auto-installed) |
+| **taplo** | TOML | `cargo install taplo-cli` | `cargo` (auto-installed via Rust) |
+| **markdownlint-cli** | Markdown | `npm install -g markdownlint-cli` | `node` (already in utils) |
+
+### Installation Examples
+
+**Install all formatters:**
+```bash
+# Go formatter
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
+
+# Python formatter
+uv tool install ruff
+
+# JavaScript formatters
+npm install -g prettier markdownlint-cli
+
+# TOML formatter (requires Rust)
+cargo install taplo-cli
+```
+
+**Or install individually as needed:**
+```bash
+# Just Python formatter
+pip install ruff
+
+# Just shell formatter
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
+
+# Just Prettier (faster with bun)
+bun install -g prettier
+```
+
+### Why Auto-Installed Language Runtimes?
+
+- **Rust** (rustup) → Enables Rust tool ecosystem (taplo, etc.)
+- **uv** → Fast Python package manager for ruff, other Python tools
+- **bun** → Fast JavaScript runtime alternative to Node.js
+- **node** (via brew) → JavaScript/TypeScript ecosystem, npm packages
+- **python** (via brew) → Python development and pip packages
+- **go** (via brew) → Shell formatting and other Go tools
+
+You can skip installing formatters you don't use, keeping your system lean. All formatters are configured to auto-load in Neovim, but they're optional for core functionality.
 
 ## Environment Variables
 

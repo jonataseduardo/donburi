@@ -268,14 +268,14 @@ make_executable() {
 # ---------------------------------------------------------------------------
 
 # Apps: UI applications managed by donburi
-BREW_APPS_FORMULA=(neovim tmux sketchybar jq FelixKratz/formulae/borders)
+BREW_APPS_FORMULA=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 # CLI: Essential command-line tools
 BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 
 # Utils: Development utilities, media processing, data tools, and communication apps
-BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei)
+BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@17 sqlite go)
 BREW_UTILS_CASK=(slack spotify)
 
 # Docker: Container development tools
@@ -495,6 +495,62 @@ setup_btop() {
     create_symlink "$SRC_BTOP" "$DST_BTOP"
 }
 
+setup_rust() {
+    echo -e "${CYAN}--- rust ---${NC}"
+
+    if command -v cargo &>/dev/null; then
+        log_info "Rust (cargo) already installed"
+        return 0
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install Rust via rustup"
+        return 0
+    fi
+
+    log_info "Installing Rust via rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    # shellcheck disable=SC1091
+    source "$HOME/.cargo/env"
+    log_info "Rust installed successfully"
+}
+
+setup_uv() {
+    echo -e "${CYAN}--- uv ---${NC}"
+
+    if command -v uv &>/dev/null; then
+        log_info "uv (Python package manager) already installed"
+        return 0
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install uv"
+        return 0
+    fi
+
+    log_info "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    log_info "uv installed successfully"
+}
+
+setup_bun() {
+    echo -e "${CYAN}--- bun ---${NC}"
+
+    if command -v bun &>/dev/null; then
+        log_info "bun (JavaScript runtime) already installed"
+        return 0
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install bun"
+        return 0
+    fi
+
+    log_info "Installing bun..."
+    curl -fsSL https://bun.sh/install | bash
+    log_info "bun installed successfully"
+}
+
 generate_aerospace_ref() {
     local output_file="$DONBURI_DIR/keybinds/config/aerospace-main.ref"
 
@@ -575,6 +631,9 @@ setup_keybinds() {
 }
 
 setup_all() {
+    setup_rust
+    setup_uv
+    setup_bun
     setup_nvim
     setup_ghostty
     setup_aerospace
