@@ -4,6 +4,7 @@
 # Assumes Homebrew is already installed
 #
 # Usage (run as root via su):
+#   su -l <admin>
 #   curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
 
 set -e

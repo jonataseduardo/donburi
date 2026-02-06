@@ -4,9 +4,11 @@
 # This script can be downloaded and run independently without cloning the full repository
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-setup.sh | su -l <admin> -c "bash -s"
+#   su -l <admin>
+#   curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-setup.sh | bash
 #   Or download and run:
-#   su -l <admin> -c ./admin-setup.sh
+#   su -l <admin>
+#   ./admin-setup.sh
 
 set -e
 
