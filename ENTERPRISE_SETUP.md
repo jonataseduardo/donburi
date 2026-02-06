@@ -35,20 +35,21 @@ Donburi supports enterprise environments where:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. **Run the admin setup command**:
+2. **Run the admin install command (via `su`)**:
 ```bash
-# Clone donburi
-git clone https://github.com/jonatas/donburi.git /tmp/donburi
+# Enter admin shell
+su -l <admin>
 
-# Run automated admin setup
-sudo /tmp/donburi/donburi admin-setup
+# Run single-command admin install
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
 ```
+
+Note: `admin-install.sh` assumes Homebrew is already installed.
 
 This single command will:
 - ✅ Install all required packages (neovim, ghostty, aerospace, sketchybar, tmux, etc.)
-- ✅ Start the sketchybar service
-- ✅ Guide you through granting system permissions
-- ✅ Verify everything is correctly installed
+- ✅ Start the sketchybar service for the logged-in user (auto-detected via `/dev/console`)
+- ✅ Open the System Settings panes for required permissions
 
 3. **Tell users to run**:
 ```bash
@@ -89,18 +90,20 @@ Install all brew packages system-wide:
 git clone https://github.com/jonatas/donburi.git /tmp/donburi
 
 # Install all brew packages
-sudo /tmp/donburi/donburi brew all
+su -l <admin> -c "/tmp/donburi/donburi brew all"
 ```
 
 Or install specific categories:
 ```bash
-sudo /tmp/donburi/donburi brew apps    # Core applications
-sudo /tmp/donburi/donburi brew cli     # CLI tools
-sudo /tmp/donburi/donburi brew utils   # Development utilities
-sudo /tmp/donburi/donburi brew docker  # Container tools
+su -l <admin> -c "/tmp/donburi/donburi brew apps"    # Core applications
+su -l <admin> -c "/tmp/donburi/donburi brew cli"     # CLI tools
+su -l <admin> -c "/tmp/donburi/donburi brew utils"   # Development utilities
+su -l <admin> -c "/tmp/donburi/donburi brew docker"  # Container tools
 ```
 
 #### 1.3 Grant System Permissions
+
+If macOS asks for administrator authentication during this step, enter the admin password in the prompt.
 
 **Aerospace (Window Manager)**
 1. Open System Settings → Privacy & Security → Accessibility
@@ -109,8 +112,9 @@ sudo /tmp/donburi/donburi brew docker  # Container tools
 
 **Sketchybar (Menu Bar)**
 ```bash
-# Start sketchybar service system-wide
-sudo brew services start sketchybar
+# Start sketchybar service for the logged-in user (console session)
+CONSOLE_USER="$(stat -f %Su /dev/console)"
+su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
 ```
 
 **JankyBorders (Optional - Visual Window Borders)**
@@ -226,11 +230,12 @@ If users get permission errors:
 
 2. For service management:
    ```bash
-   # Admin runs:
-   sudo brew services start sketchybar
+    # Admin runs (targeting console user):
+    CONSOLE_USER="$(stat -f %Su /dev/console)"
+    su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
 
-   # Or user runs (if allowed):
-   brew services start --user sketchybar
+    # Or user runs (if allowed):
+    brew services start --user sketchybar
    ```
 
 ### Missing Dependencies
@@ -281,16 +286,14 @@ I need to set up my development environment using the donburi dotfiles manager.
 This requires administrator privileges for initial setup.
 
 Quick Setup Instructions:
-1. Clone repository: git clone https://github.com/jonatas/donburi.git /tmp/donburi
-2. Run automated setup: sudo /tmp/donburi/donburi admin-setup
+1. Enter admin shell: su -l <admin>
+2. Run automated setup: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
 3. Follow the on-screen prompts for permissions
 
-The admin-setup command will:
-- Install Homebrew (if needed)
-- Install all required packages
-- Start necessary services
-- Guide through permission grants
-- Verify everything is installed
+The admin install command will:
+- Install all required packages (assumes Homebrew is already installed)
+- Start the Sketchybar service for the logged-in user
+- Open System Settings panes for permissions
 
 Repository: https://github.com/jonatas/donburi
 Full docs: ENTERPRISE_SETUP.md (Express Admin Setup section)

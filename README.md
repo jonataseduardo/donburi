@@ -193,8 +193,11 @@ donburi setup --no-brew    # Setup without Homebrew dependencies
 For corporate environments where users don't have admin privileges:
 
 ```bash
-# Admin runs:
-sudo donburi brew all      # Install all brew packages system-wide
+# Admin runs (single command, assumes Homebrew already installed):
+su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash"
+
+# Manual alternative (if not using admin-install.sh):
+su -l <admin> -c "donburi brew all"      # Install all brew packages system-wide
 
 # User runs:
 donburi setup --no-brew    # Setup configs without brew dependencies

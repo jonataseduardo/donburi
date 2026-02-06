@@ -4,9 +4,9 @@
 # This script can be downloaded and run independently without cloning the full repository
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-setup.sh | sudo bash
+#   curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-setup.sh | su -l <admin> -c "bash -s"
 #   Or download and run:
-#   sudo ./admin-setup.sh
+#   su -l <admin> -c ./admin-setup.sh
 
 set -e
 
@@ -33,6 +33,15 @@ log_info()  { echo -e "${GREEN}[INFO]${NC}  $1"; }
 log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+get_console_user() {
+    local user
+    user="$(stat -f %Su /dev/console 2>/dev/null || true)"
+    if [[ -z "$user" || "$user" == "root" ]]; then
+        return 1
+    fi
+    echo "$user"
+}
+
 cleanup() {
     if [ -d "$DONBURI_TEMP" ]; then
         rm -rf "$DONBURI_TEMP"
@@ -51,17 +60,17 @@ echo -e "${CYAN}║    Donburi Admin Setup Script         ║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════╝${NC}"
 echo ""
 
-# Check if running with sudo
+# Check if running as root
 if [ "$EUID" -ne 0 ]; then
-    log_error "This script must be run with sudo"
-    echo "Usage: sudo $0"
+    log_error "This script must be run as root (admin)"
+    echo "Usage: su -l <admin> -c $0"
     exit 1
 fi
 
 echo "This script will set up donburi for enterprise users by:"
 echo "  • Installing Homebrew (if needed)"
 echo "  • Installing all required packages"
-echo "  • Starting necessary services"
+echo "  • Starting necessary services for the logged-in user"
 echo "  • Guiding through system permission grants"
 echo ""
 echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
@@ -107,7 +116,7 @@ echo -e "${BOLD}Step 2: Installing required packages...${NC}"
 echo "This may take several minutes..."
 
 # Core applications
-APPS=(neovim ghostty aerospace sketchybar tmux jq borders)
+APPS=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders ghostty nikitabobko/tap/aerospace)
 # CLI tools
 CLI_TOOLS=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl)
 # Development utilities
@@ -168,13 +177,19 @@ fi
 echo ""
 echo -e "${BOLD}Step 3: Starting services...${NC}"
 
-echo "Starting sketchybar service..."
-if "$BREW_CMD" services start sketchybar 2>&1 | grep -q "Successfully started"; then
-    log_info "Sketchybar service started"
-elif "$BREW_CMD" services list | grep -q "sketchybar.*started"; then
-    log_info "Sketchybar service already running"
+console_user="$(get_console_user || true)"
+if [[ -n "$console_user" ]]; then
+    echo "Starting sketchybar service for console user: $console_user"
+    if su -l "$console_user" -c "$BREW_CMD services start --user sketchybar" 2>&1 | grep -q "Successfully started"; then
+        log_info "Sketchybar service started"
+    elif su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
+        log_info "Sketchybar service already running"
+    else
+        log_warn "Could not verify sketchybar service status"
+    fi
 else
-    log_warn "Could not verify sketchybar service status"
+    log_warn "Console user not detected; cannot start sketchybar for a user session"
+    log_warn "Ask the logged-in user to run: brew services start --user sketchybar"
 fi
 
 # Step 4: System permissions
@@ -219,7 +234,7 @@ echo ""
 
 # Check packages
 echo "Installed packages:"
-for app in neovim ghostty aerospace sketchybar tmux jq borders; do
+for app in neovim tmux sketchybar btop jq borders ghostty aerospace; do
     if "$BREW_CMD" list --formula "$app" &>/dev/null 2>&1 || "$BREW_CMD" list --cask "$app" &>/dev/null 2>&1; then
         echo -e "  ${GREEN}✓${NC} $app"
     else
@@ -229,10 +244,15 @@ done
 
 echo ""
 echo "Services:"
-if "$BREW_CMD" services list | grep -q "sketchybar.*started"; then
-    echo -e "  ${GREEN}✓${NC} Sketchybar service running"
+console_user="$(get_console_user || true)"
+if [[ -n "$console_user" ]]; then
+    if su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
+        echo -e "  ${GREEN}✓${NC} Sketchybar service running (user: $console_user)"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running (user: $console_user)"
+    fi
 else
-    echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running"
+    echo -e "  ${YELLOW}⚠${NC} Console user not detected; cannot verify sketchybar service"
 fi
 
 # Step 6: Next steps

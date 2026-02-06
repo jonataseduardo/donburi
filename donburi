@@ -110,9 +110,18 @@ find_brew() {
     return 1
 }
 
-# Check if running with sudo
+# Check if running with admin/root privileges
 is_sudo() {
     [[ -n "${SUDO_USER:-}" ]] || [[ "$EUID" -eq 0 ]]
+}
+
+get_console_user() {
+    local user
+    user="$(stat -f %Su /dev/console 2>/dev/null || true)"
+    if [[ -z "$user" || "$user" == "root" ]]; then
+        return 1
+    fi
+    echo "$user"
 }
 
 # ---------------------------------------------------------------------------
@@ -664,16 +673,16 @@ brew_check() {
         echo "2. If Homebrew is installed in a custom location:"
         echo "   export DONBURI_BREW_PATH=/path/to/brew"
         echo "3. If you're in a corporate environment:"
-        echo "   Ask your admin to run: sudo donburi brew all"
+        echo "   Ask your admin to run: su -l <admin> -c \"donburi brew all\""
         echo "4. Skip brew dependencies: donburi setup --no-brew"
         return 1
     fi
 
     log_info "Using Homebrew at: $BREW_CMD"
 
-    # Check if running with sudo when it might be needed
+    # Check if running with admin/root privileges when it might be needed
     if is_sudo; then
-        log_warn "Running with sudo privileges - packages will be installed system-wide"
+        log_warn "Running with admin/root privileges - packages will be installed system-wide"
     fi
 
     return 0
@@ -837,10 +846,10 @@ cmd_brew_check() {
             echo "  Version: $BREW_VERSION"
         fi
 
-        # Check if running with sudo
+        # Check if running with admin/root privileges
         if is_sudo; then
-            echo -e "${YELLOW}⚠${NC} Running with sudo privileges"
-            echo "  Packages will be installed system-wide"
+        echo -e "${YELLOW}⚠${NC} Running with admin/root privileges"
+        echo "  Packages will be installed system-wide"
         else
             echo "  Running as: $(whoami)"
         fi
@@ -877,7 +886,7 @@ cmd_brew_check() {
         echo ""
         echo "3. For corporate environments:"
         echo "   • Ask your IT admin to install Homebrew"
-        echo "   • Then run: sudo donburi brew all"
+        echo "   • Then run: su -l <admin> -c \"donburi brew all\""
         echo ""
         echo "4. Skip brew dependencies:"
         echo "   donburi setup --no-brew"
@@ -933,7 +942,7 @@ check_service_status() {
         return 0
     else
         echo -e "${YELLOW}⚠${NC} $service service is not running"
-        echo "    Run: brew services start $service"
+        echo "    Run: brew services start --user $service"
         return 1
     fi
 }
@@ -952,9 +961,9 @@ cmd_permissions() {
     check_service_status "sketchybar" || true
     echo "  Required: Running as a service"
     if ! find_brew; then
-        echo "  To start: Install Homebrew first, then run: brew services start sketchybar"
+        echo "  To start: Install Homebrew first, then run: brew services start --user sketchybar"
     else
-        echo "  To start: brew services start sketchybar"
+        echo "  To start: brew services start --user sketchybar"
     fi
     echo ""
 
@@ -982,8 +991,8 @@ cmd_permissions() {
     echo ""
 
     if is_sudo; then
-        echo -e "${YELLOW}Note: Running with sudo - some permission checks may not work correctly${NC}"
-        echo "Permission checks should be run as the regular user, not with sudo."
+        echo -e "${YELLOW}Note: Running with admin/root privileges - some permission checks may not work correctly${NC}"
+        echo "Permission checks should be run as the regular user, not with admin/root privileges."
     fi
 
     return 0
@@ -1032,7 +1041,7 @@ Commands:
   update                Update donburi via git pull
   help                  Show this help message
 
-Admin Commands (require sudo):
+Admin Commands (require admin/root):
   admin-setup           Complete admin setup for enterprise
   admin-check           Verify admin setup is complete
 
@@ -1055,7 +1064,7 @@ Examples:
   donburi brew-check            # Check Homebrew installation
   donburi permissions           # Check app permissions
   donburi update                # Update donburi to latest version
-  sudo donburi admin-setup      # Run complete admin setup (IT staff)
+  su -l <admin> -c "donburi admin-setup"   # Run complete admin setup (IT staff)
   donburi admin-check           # Verify admin setup is complete
 
 For more information, see: https://github.com/jonatas/donburi
@@ -1070,17 +1079,17 @@ cmd_admin_setup() {
     echo -e "${CYAN}=== Donburi Admin Setup ===${NC}"
     echo ""
 
-    # Check if running with sudo
+    # Check if running as root
     if ! is_sudo; then
-        echo -e "${RED}ERROR: This command requires sudo privileges${NC}"
-        echo "Please run: sudo donburi admin-setup"
+        echo -e "${RED}ERROR: This command requires admin/root privileges${NC}"
+        echo "Please run: su -l <admin> -c \"donburi admin-setup\""
         exit 1
     fi
 
     echo "This command will help administrators set up donburi for enterprise users."
     echo "It will:"
     echo "  1. Install all required Homebrew packages"
-    echo "  2. Start necessary services (sketchybar)"
+    echo "  2. Start necessary services (sketchybar for the logged-in user)"
     echo "  3. Guide you through granting system permissions"
     echo ""
     echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
@@ -1106,13 +1115,19 @@ cmd_admin_setup() {
     # Step 3: Start sketchybar service
     echo ""
     echo -e "${BOLD}Step 3: Starting services...${NC}"
-    echo "Starting sketchybar service..."
-    if "$BREW_CMD" services start sketchybar 2>&1 | grep -q "Successfully started"; then
-        echo -e "${GREEN}✓ Sketchybar service started${NC}"
-    elif "$BREW_CMD" services list | grep -q "sketchybar.*started"; then
-        echo -e "${GREEN}✓ Sketchybar service already running${NC}"
+    console_user="$(get_console_user || true)"
+    if [[ -n "$console_user" ]]; then
+        echo "Starting sketchybar service for console user: $console_user"
+        if su -l "$console_user" -c "$BREW_CMD services start --user sketchybar" 2>&1 | grep -q "Successfully started"; then
+            echo -e "${GREEN}✓ Sketchybar service started${NC}"
+        elif su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
+            echo -e "${GREEN}✓ Sketchybar service already running${NC}"
+        else
+            echo -e "${YELLOW}⚠ Could not verify sketchybar service status${NC}"
+        fi
     else
-        echo -e "${YELLOW}⚠ Could not verify sketchybar service status${NC}"
+        echo -e "${YELLOW}⚠ Console user not detected; cannot start sketchybar for a user session${NC}"
+        echo "  Ask the logged-in user to run: brew services start --user sketchybar"
     fi
 
     # Step 4: Grant permissions
@@ -1197,11 +1212,18 @@ cmd_admin_check() {
     # Check services
     echo ""
     echo -e "${BOLD}Services:${NC}"
-    if "$BREW_CMD" services list 2>/dev/null | grep -q "sketchybar.*started"; then
-        echo -e "  ${GREEN}✓${NC} Sketchybar service running"
+    console_user="$(get_console_user || true)"
+    if [[ -n "$console_user" ]]; then
+        if su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
+            echo -e "  ${GREEN}✓${NC} Sketchybar service running (user: $console_user)"
+        else
+            echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running (user: $console_user)"
+            echo "      Run: brew services start --user sketchybar"
+            all_good=false
+        fi
     else
-        echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running"
-        echo "      Run: brew services start sketchybar"
+        echo -e "  ${YELLOW}⚠${NC} Console user not detected; cannot verify sketchybar service"
+        echo "      Run: brew services start --user sketchybar"
         all_good=false
     fi
 
