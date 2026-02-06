@@ -284,7 +284,7 @@ BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 
 # Utils: Development utilities, media processing, data tools, and communication apps
-BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@17 sqlite go)
+BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@17 sqlite go telnet)
 BREW_UTILS_CASK=(slack spotify)
 
 # Docker: Container development tools
