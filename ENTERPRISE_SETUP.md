@@ -35,20 +35,21 @@ Donburi supports enterprise environments where:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. **Run the admin setup command**:
+2. **Enter admin shell and run the install command**:
 ```bash
-# Clone donburi
-git clone https://github.com/jonatas/donburi.git /tmp/donburi
+# Enter admin shell
+su -l <admin>
 
-# Run automated admin setup
-sudo /tmp/donburi/donburi admin-setup
+# Run admin install
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
 ```
 
-This single command will:
+Note: `admin-install.sh` assumes Homebrew is already installed. Admin must be in `su` shell before running.
+
+This will:
 - ✅ Install all required packages (neovim, ghostty, aerospace, sketchybar, tmux, etc.)
-- ✅ Start the sketchybar service
-- ✅ Guide you through granting system permissions
-- ✅ Verify everything is correctly installed
+- ✅ Start the sketchybar service for the logged-in user (auto-detected via `/dev/console`)
+- ✅ Open the System Settings panes for required permissions
 
 3. **Tell users to run**:
 ```bash
@@ -88,19 +89,28 @@ Install all brew packages system-wide:
 # Clone donburi repository
 git clone https://github.com/jonatas/donburi.git /tmp/donburi
 
+# Enter admin shell
+su -l <admin>
+
 # Install all brew packages
-sudo /tmp/donburi/donburi brew all
+/tmp/donburi/donburi brew all
 ```
 
 Or install specific categories:
 ```bash
-sudo /tmp/donburi/donburi brew apps    # Core applications
-sudo /tmp/donburi/donburi brew cli     # CLI tools
-sudo /tmp/donburi/donburi brew utils   # Development utilities
-sudo /tmp/donburi/donburi brew docker  # Container tools
+# Enter admin shell first
+su -l <admin>
+
+# Then run any of:
+/tmp/donburi/donburi brew apps    # Core applications
+/tmp/donburi/donburi brew cli     # CLI tools
+/tmp/donburi/donburi brew utils   # Development utilities
+/tmp/donburi/donburi brew docker  # Container tools
 ```
 
 #### 1.3 Grant System Permissions
+
+If macOS asks for administrator authentication during this step, enter the admin password in the prompt.
 
 **Aerospace (Window Manager)**
 1. Open System Settings → Privacy & Security → Accessibility
@@ -109,8 +119,12 @@ sudo /tmp/donburi/donburi brew docker  # Container tools
 
 **Sketchybar (Menu Bar)**
 ```bash
-# Start sketchybar service system-wide
-sudo brew services start sketchybar
+# Enter admin shell first
+su -l <admin>
+
+# Start sketchybar service for the logged-in user (console session)
+CONSOLE_USER="$(stat -f %Su /dev/console)"
+su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
 ```
 
 **JankyBorders (Optional - Visual Window Borders)**
@@ -129,6 +143,10 @@ sudo brew services start sketchybar
 
 Run the admin check command to verify all tasks are complete:
 ```bash
+# Enter admin shell first
+su -l <admin>
+
+# Run admin check
 /tmp/donburi/donburi admin-check
 ```
 
@@ -226,8 +244,12 @@ If users get permission errors:
 
 2. For service management:
    ```bash
-   # Admin runs:
-   sudo brew services start sketchybar
+   # Admin runs (enter admin shell first):
+   su -l <admin>
+
+   # Then target console user:
+   CONSOLE_USER="$(stat -f %Su /dev/console)"
+   su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
 
    # Or user runs (if allowed):
    brew services start --user sketchybar
@@ -281,16 +303,14 @@ I need to set up my development environment using the donburi dotfiles manager.
 This requires administrator privileges for initial setup.
 
 Quick Setup Instructions:
-1. Clone repository: git clone https://github.com/jonatas/donburi.git /tmp/donburi
-2. Run automated setup: sudo /tmp/donburi/donburi admin-setup
+1. Enter admin shell: su -l <admin>
+2. Run automated setup: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
 3. Follow the on-screen prompts for permissions
 
-The admin-setup command will:
-- Install Homebrew (if needed)
-- Install all required packages
-- Start necessary services
-- Guide through permission grants
-- Verify everything is installed
+The admin install command will:
+- Install all required packages (assumes Homebrew is already installed)
+- Start the Sketchybar service for the logged-in user
+- Open System Settings panes for permissions
 
 Repository: https://github.com/jonatas/donburi
 Full docs: ENTERPRISE_SETUP.md (Express Admin Setup section)
