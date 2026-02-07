@@ -175,7 +175,7 @@ donburi brew --list           # Show available packages without installing
 Package categories:
 - `apps` — UI applications (neovim, ghostty, aerospace, sketchybar, btop)
 - `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
-- `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@17, sqlite, go, slack, spotify)
+- `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
 - `all` — Install everything
 
@@ -271,7 +271,7 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 donburi brew               # Install apps only (default)
 donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, btop, jq, borders)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
-donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@17, sqlite, go, slack, spotify)
+donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
@@ -453,9 +453,9 @@ Donburi is actively maintained and welcomes contributions. Here are some useful 
 
 | File | Purpose |
 |------|---------|
-| `VERSION` | Current version (0.1.0) |
+| `VERSION` | Current version |
 | `CHANGELOG.md` | Version history and changes |
-| `CLAUDE.md` | Development guidelines for AI assistants |
+| `AGENT.md` | Development guidelines for AI assistants |
 | `.pre-commit-config.yaml` | Pre-commit hooks (shellcheck linting) |
 | `test/test_donburi.sh` | Test suite for CLI commands |
 
@@ -468,7 +468,7 @@ prek run --all-files    # Run pre-commit hooks (shellcheck, etc.)
 prek install            # Install git pre-commit hook
 ```
 
-For detailed contribution guidelines, see [CLAUDE.md](CLAUDE.md).
+For detailed contribution guidelines, see [AGENT.md](AGENT.md).
 
 ### Resources
 

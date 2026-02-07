@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0] - 2026-02-07
+
+### Added
+- **Admin Install Script**: New `admin-install.sh` for single-command enterprise setup (curl-friendly)
+- **Language Runtimes**: Auto-install Rust (rustup), uv (Python), and bun (JavaScript) during `donburi setup`
+- **Code Formatters Guide**: README section documenting available formatters (shfmt, ruff, prettier, taplo) and install commands
+- **Brew Packages**: Added `postgresql@18`, `sqlite`, `go`, `telnet` to utils; `btop` to apps category
+- **Agent Instructions**: Renamed `CLAUDE.md` to `AGENT.md` for tool-agnostic naming
+
+### Changed
+- **Enterprise Admin Flow**: Replaced `sudo` pattern with `su -l <admin>` across all admin scripts, documentation, and help text
+- **Sketchybar Service Management**: Uses `get_console_user()` helper to start sketchybar as the logged-in user instead of system-wide
+- **Documentation**: Updated ENTERPRISE_SETUP.md, README.md, and install.sh to reflect new admin workflow
+
+### Fixed
+- Indentation in `brew-check` admin/root privilege message
+- Stale `CLAUDE.md` and version references in README.md
+- PostgreSQL version bumped from @17 to @18 (latest available)
+
 ## [0.2.0] - 2026-02-01
 
 ### Added
