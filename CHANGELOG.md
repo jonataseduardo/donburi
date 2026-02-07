@@ -9,6 +9,7 @@
   - Thread management: resolve/unresolve review threads
   - Issue management: list, search, create issues
   - All keybindings under `<leader>o` (Octo) with which-key sub-groups
+- **Diffview PR Diff**: `<leader>od` opens PR diffs file-by-file via diffview.nvim (auto-detects base branch); raw unified diff moved to `<leader>oD`
 
 ## [0.3.0] - 2026-02-07
 

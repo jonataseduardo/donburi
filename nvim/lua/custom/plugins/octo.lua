@@ -1,3 +1,26 @@
+-- Open diffview against the repo's default branch (main/master/develop)
+-- so PR diffs show file-by-file with full navigation
+local function pr_diff_with_diffview()
+  local base = vim.fn.system('git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null'):gsub('%s+', '')
+  if base == '' then
+    -- fallback: try common branch names
+    for _, branch in ipairs { 'main', 'master', 'develop' } do
+      local check = vim.fn.system('git rev-parse --verify origin/' .. branch .. ' 2>/dev/null'):gsub('%s+', '')
+      if check ~= '' then
+        base = 'origin/' .. branch
+        break
+      end
+    end
+  end
+  if base == '' then
+    vim.notify('Could not detect base branch for PR diff', vim.log.levels.ERROR)
+    return
+  end
+  -- strip refs/remotes/ prefix for DiffviewOpen
+  base = base:gsub('^refs/remotes/', '')
+  vim.cmd('DiffviewOpen ' .. base .. '...HEAD')
+end
+
 return {
   { -- GitHub PR review and issue management
     'pwntester/octo.nvim',
@@ -6,13 +29,15 @@ return {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'nvim-tree/nvim-web-devicons',
+      'sindrets/diffview.nvim',
     },
     keys = {
       -- PR workflow
       { '<leader>ol', '<cmd>Octo pr list<cr>', desc = 'List pull requests' },
       { '<leader>os', '<cmd>Octo pr search<cr>', desc = 'Search pull requests' },
       { '<leader>oc', '<cmd>Octo pr checkout<cr>', desc = 'Checkout PR branch' },
-      { '<leader>od', '<cmd>Octo pr diff<cr>', desc = 'View PR diff' },
+      { '<leader>od', pr_diff_with_diffview, desc = 'PR diff (file-by-file via diffview)' },
+      { '<leader>oD', '<cmd>Octo pr diff<cr>', desc = 'PR diff (raw unified)' },
       { '<leader>om', '<cmd>Octo pr merge<cr>', desc = 'Merge PR' },
       { '<leader>oR', '<cmd>Octo pr ready<cr>', desc = 'Mark PR as ready' },
 
