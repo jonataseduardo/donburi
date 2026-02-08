@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0] - 2026-02-08
+
+### Added
+- **Dashboard**: Added [snacks.nvim](https://github.com/folke/snacks.nvim) dashboard with Donburi ASCII art header in Kanagawa palette gradient colors
+  - Quick actions: find file, find text, recent files, config, Lazy, quit
+  - Startup time display
+- Updated screenshot to reflect new dashboard
+
 ## [0.3.1] - 2026-02-07
 
 ### Added
