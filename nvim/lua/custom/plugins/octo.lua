@@ -63,6 +63,7 @@ return {
       { '<leader>ow', '<cmd>Octo pr browser<cr>', desc = 'Open PR in browser' },
     },
     opts = {
+      comment_icon = '💬',
       use_local_fs = false,
       enable_builtin = true,
       default_remote = { 'origin' },
