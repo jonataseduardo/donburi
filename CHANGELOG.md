@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.1] - 2026-02-07
+
+### Added
+- **GitHub Code Review**: Added [octo.nvim](https://github.com/pwntester/octo.nvim) plugin for full GitHub PR review workflow from Neovim
+  - PR management: list, search, checkout, diff, merge, mark as ready
+  - Code review: start, submit, discard, resume reviews with inline comments
+  - Thread management: resolve/unresolve review threads
+  - Issue management: list, search, create issues
+  - All keybindings under `<leader>o` (Octo) with which-key sub-groups
+- **Diffview PR Diff**: `<leader>od` opens PR diffs file-by-file via diffview.nvim (auto-detects base branch); raw unified diff moved to `<leader>oD`
+
 ## [0.3.0] - 2026-02-07
 
 ### Added
