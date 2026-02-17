@@ -181,6 +181,39 @@ fi
 
 assert_output_contains "nvim" "setup nvim --dry-run mentions nvim" "$DONBURI" setup nvim --dry-run
 
+# --- Enterprise script syntax validation ---
+echo "--- enterprise script syntax ---"
+assert_exit_code 0 "donburi has valid bash syntax" bash -n "$DONBURI"
+assert_exit_code 0 "admin-install.sh has valid bash syntax" bash -n "$REPO_DIR/admin-install.sh"
+assert_exit_code 0 "admin-setup.sh has valid bash syntax" bash -n "$REPO_DIR/admin-setup.sh"
+assert_exit_code 0 "install.sh has valid bash syntax" bash -n "$REPO_DIR/install.sh"
+
+# --- admin-check (does not require root, just reports status) ---
+echo "--- admin-check ---"
+run "$DONBURI" admin-check
+if [[ "$EXIT_CODE" -eq 0 || "$EXIT_CODE" -eq 1 ]]; then
+    pass "admin-check exits with valid code"
+else
+    fail "admin-check exits with valid code" "exit=$EXIT_CODE"
+fi
+assert_output_contains "Admin Setup Status" "admin-check shows status header" "$DONBURI" admin-check
+assert_output_contains "Homebrew" "admin-check checks homebrew" "$DONBURI" admin-check
+assert_output_contains "Required packages" "admin-check checks packages" "$DONBURI" admin-check
+
+# --- setup --no-brew --dry-run (enterprise user flow) ---
+echo "--- setup --no-brew --dry-run ---"
+run "$DONBURI" setup --no-brew --dry-run
+if [[ "$EXIT_CODE" -eq 0 ]]; then
+    pass "setup --no-brew --dry-run exits 0"
+else
+    fail "setup --no-brew --dry-run exits 0" "exit=$EXIT_CODE"
+fi
+if echo "$OUTPUT" | grep -q "no-brew mode"; then
+    pass "setup --no-brew shows no-brew mode message"
+else
+    fail "setup --no-brew shows no-brew mode message"
+fi
+
 if [[ "${DONBURI_TEST_LEVEL:-full}" != "quick" ]]; then
 
 # --- Setup nvim (real) ---
@@ -218,6 +251,7 @@ assert_symlink "tmux symlink"       "$TEST_HOME/.tmux.conf"         "$REPO_DIR/t
 assert_symlink "zsh symlink"        "$TEST_HOME/.zshrc"             "$REPO_DIR/zsh/zshrc"
 assert_symlink "zsh-donburi symlink" "$TEST_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
 assert_symlink "sketchybar symlink" "$TEST_HOME/.config/sketchybar" "$REPO_DIR/sketchybar"
+assert_symlink "btop symlink"       "$TEST_HOME/.config/btop"       "$REPO_DIR/btop"
 
 # --- Status after keybinds setup ---
 run "$DONBURI" setup keybinds
@@ -239,16 +273,18 @@ done
 # --- Status after full setup ---
 run "$DONBURI" status
 ALL_OK=true
-for _component in nvim ghostty aerospace tmux zsh sketchybar; do
-    if ! echo "$OUTPUT" | grep -q "OK"; then
+for _component in nvim ghostty aerospace tmux zsh sketchybar btop; do
+    if echo "$OUTPUT" | grep -q "$_component.*OK"; then
+        pass "status shows OK for $_component"
+    else
+        fail "status shows OK for $_component"
         ALL_OK=false
-        break
     fi
 done
 if $ALL_OK; then
-    pass "status shows all OK after full setup"
+    pass "status shows all components OK after full setup"
 else
-    fail "status shows all OK after full setup"
+    fail "status shows all components OK after full setup"
 fi
 
 # --- Idempotency ---
@@ -294,5 +330,52 @@ fi
 # --- Permissions command ---
 echo "--- permissions ---"
 assert_exit_code 0 "permissions command exits 0" "$DONBURI" permissions
+
+# --- Enterprise: setup --no-brew (real, clean environment) ---
+echo "--- enterprise: setup --no-brew ---"
+
+# Create a fresh isolated HOME for --no-brew test
+NOBREW_HOME="$(mktemp -d)"
+SAVE_HOME="$HOME"
+export HOME="$NOBREW_HOME"
+echo "# placeholder" > "$NOBREW_HOME/.zshrc"
+
+run "$DONBURI" setup --no-brew
+if [[ "$EXIT_CODE" -eq 0 ]]; then
+    pass "setup --no-brew exits 0"
+else
+    fail "setup --no-brew exits 0" "exit=$EXIT_CODE output: $OUTPUT"
+fi
+
+# Verify all symlinks were created without brew
+assert_symlink "no-brew: nvim symlink"       "$NOBREW_HOME/.config/nvim"       "$REPO_DIR/nvim"
+assert_symlink "no-brew: aerospace symlink"  "$NOBREW_HOME/.config/aerospace"  "$REPO_DIR/aerospace"
+assert_symlink "no-brew: tmux symlink"       "$NOBREW_HOME/.tmux.conf"         "$REPO_DIR/tmux/tmux.conf"
+assert_symlink "no-brew: zsh symlink"        "$NOBREW_HOME/.zshrc"             "$REPO_DIR/zsh/zshrc"
+assert_symlink "no-brew: zsh-donburi symlink" "$NOBREW_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
+assert_symlink "no-brew: sketchybar symlink" "$NOBREW_HOME/.config/sketchybar" "$REPO_DIR/sketchybar"
+assert_symlink "no-brew: btop symlink"       "$NOBREW_HOME/.config/btop"       "$REPO_DIR/btop"
+
+# Verify idempotency with --no-brew
+run "$DONBURI" setup --no-brew
+if [[ "$EXIT_CODE" -eq 0 ]] && echo "$OUTPUT" | grep -q "Already linked"; then
+    pass "setup --no-brew is idempotent"
+else
+    fail "setup --no-brew is idempotent" "exit=$EXIT_CODE"
+fi
+
+# Verify status reports correctly after --no-brew setup
+run "$DONBURI" status
+for _component in nvim aerospace tmux zsh sketchybar btop; do
+    if echo "$OUTPUT" | grep -q "$_component.*OK"; then
+        pass "no-brew: status OK for $_component"
+    else
+        fail "no-brew: status OK for $_component"
+    fi
+done
+
+# Restore original test HOME
+export HOME="$SAVE_HOME"
+rm -rf "$NOBREW_HOME"
 
 fi # end DONBURI_TEST_LEVEL != quick

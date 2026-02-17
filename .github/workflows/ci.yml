@@ -9,11 +9,12 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - name: Install prek
-        run: pip install prek
+        run: pip install prek==0.3.3
 
       - name: Run pre-commit hooks
         run: prek run --all-files

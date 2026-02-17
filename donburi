@@ -257,7 +257,7 @@ brew_install() {
         "$BREW_CMD" upgrade --"${type}" "$name" 2>/dev/null || log_info "Already up to date: $name"
     else
         log_info "Installing $type: $name"
-        "$BREW_CMD" install ${type:+--${type}} "$name"
+        "$BREW_CMD" install ${type:+--${type}} "$name" || log_warn "Failed to install $name (continuing)"
     fi
 }
 
@@ -306,7 +306,7 @@ setup_nvim() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -345,7 +345,7 @@ setup_ghostty() {
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font || log_warn "Failed to install font-jetbrains-mono-nerd-font (continuing)"
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
@@ -371,7 +371,7 @@ setup_aerospace() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -428,7 +428,7 @@ setup_zsh() {
             log_info "Would install Oh My Zsh"
         else
             log_info "Installing Oh My Zsh..."
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+            KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
         fi
     else
         log_info "Oh My Zsh already installed"
@@ -456,7 +456,7 @@ setup_zsh() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -482,7 +482,7 @@ setup_sketchybar() {
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font || log_warn "Failed to install font-jetbrains-mono-nerd-font (continuing)"
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
