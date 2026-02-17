@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.1] - 2026-02-17
+
+### Fixed
+- **Network Resilience**: Added `|| log_warn` fallbacks to all 8 network-dependent operations (git clone for lazy.nvim, TPM, Powerlevel10k; curl for Oh My Zsh, rustup, uv, bun) so setup always completes symlinks even when external services are unreachable
+- **Enterprise Package Lists**: Synced `admin-install.sh` and `admin-setup.sh` package lists with `donburi` source of truth — added missing `telnet`/`gh`, removed `discord`, fixed `python@3`
+- **CI Stability**: Resolved 5 deterministic CI (Full) failures caused by `set -e` aborting setup functions before symlink creation; added `|| log_warn` fallbacks so symlinks always get created regardless of brew status
+- **Oh My Zsh**: Set `KEEP_ZSHRC=yes` to prevent `.zshrc` overwrites during installation
+- **CI Hardening**: Added `timeout-minutes` on all CI jobs, pinned prek version, triggered CI (Full) on push to `dev` to catch macOS integration failures before PRs to main
+
+### Added
+- **Enterprise Tests**: Added comprehensive enterprise test coverage — `--no-brew` setup flow with full symlink and idempotency verification, `admin-check` command validation, script syntax checks for all enterprise scripts, and per-component status assertions
+- **Package Drift Detection**: Added CI test that automatically catches future package list drift between `donburi` and enterprise scripts
+
 ## [0.4.0] - 2026-02-08
 
 ### Added
