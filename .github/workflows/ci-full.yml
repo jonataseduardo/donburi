@@ -1,12 +1,15 @@
 name: CI (Full)
 
 on:
+  push:
+    branches: [dev]
   pull_request:
     branches: [main]
 
 jobs:
   full-test:
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 

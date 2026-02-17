@@ -257,7 +257,7 @@ brew_install() {
         "$BREW_CMD" upgrade --"${type}" "$name" 2>/dev/null || log_info "Already up to date: $name"
     else
         log_info "Installing $type: $name"
-        "$BREW_CMD" install ${type:+--${type}} "$name"
+        "$BREW_CMD" install ${type:+--${type}} "$name" || log_warn "Failed to install $name (continuing)"
     fi
 }
 
@@ -306,7 +306,7 @@ setup_nvim() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -325,7 +325,7 @@ setup_nvim() {
             log_info "Would install lazy.nvim plugin manager"
         else
             log_info "Installing lazy.nvim plugin manager..."
-            git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$lazypath"
+            git clone --filter=blob:none --branch=stable https://github.com/folke/lazy.nvim.git "$lazypath" || log_warn "Failed to install lazy.nvim (continuing)"
         fi
     else
         log_info "lazy.nvim already installed"
@@ -345,7 +345,7 @@ setup_ghostty() {
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font || log_warn "Failed to install font-jetbrains-mono-nerd-font (continuing)"
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
@@ -371,7 +371,7 @@ setup_aerospace() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -402,7 +402,7 @@ setup_tmux() {
             log_info "Would install TPM (Tmux Plugin Manager)"
         else
             log_info "Installing TPM (Tmux Plugin Manager)..."
-            git clone --depth=1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+            git clone --depth=1 https://github.com/tmux-plugins/tpm "$tpm_dir" || log_warn "Failed to install TPM (continuing)"
         fi
     else
         log_info "TPM already installed"
@@ -413,7 +413,7 @@ setup_tmux() {
     # Install TPM plugins
     if [[ -x "$tpm_dir/bin/install_plugins" ]] && [[ "$DRY_RUN" != true ]]; then
         log_info "Installing tmux plugins via TPM..."
-        "$tpm_dir/bin/install_plugins"
+        "$tpm_dir/bin/install_plugins" || log_warn "Failed to install tmux plugins (continuing)"
     elif [[ "$DRY_RUN" == true ]]; then
         log_info "Would install tmux plugins via TPM"
     fi
@@ -428,7 +428,7 @@ setup_zsh() {
             log_info "Would install Oh My Zsh"
         else
             log_info "Installing Oh My Zsh..."
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+            KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || log_warn "Failed to install Oh My Zsh (continuing)"
         fi
     else
         log_info "Oh My Zsh already installed"
@@ -441,7 +441,7 @@ setup_zsh() {
             log_info "Would install Powerlevel10k theme"
         else
             log_info "Installing Powerlevel10k theme..."
-            git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
+            git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir" || log_warn "Failed to install Powerlevel10k (continuing)"
         fi
     else
         log_info "Powerlevel10k already installed"
@@ -456,7 +456,7 @@ setup_zsh() {
                     log_info "Would install formula: $pkg"
                 else
                     log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg"
+                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
                 fi
             else
                 log_info "Already installed: $pkg"
@@ -482,7 +482,7 @@ setup_sketchybar() {
                 log_info "Would install cask: font-jetbrains-mono-nerd-font"
             else
                 log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font
+                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font || log_warn "Failed to install font-jetbrains-mono-nerd-font (continuing)"
             fi
         else
             log_info "Already installed: font-jetbrains-mono-nerd-font"
@@ -518,10 +518,13 @@ setup_rust() {
     fi
 
     log_info "Installing Rust via rustup..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    # shellcheck disable=SC1091
-    source "$HOME/.cargo/env"
-    log_info "Rust installed successfully"
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        # shellcheck disable=SC1091
+        source "$HOME/.cargo/env"
+        log_info "Rust installed successfully"
+    else
+        log_warn "Failed to install Rust (continuing)"
+    fi
 }
 
 setup_uv() {
@@ -538,8 +541,11 @@ setup_uv() {
     fi
 
     log_info "Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    log_info "uv installed successfully"
+    if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+        log_info "uv installed successfully"
+    else
+        log_warn "Failed to install uv (continuing)"
+    fi
 }
 
 setup_bun() {
@@ -556,8 +562,11 @@ setup_bun() {
     fi
 
     log_info "Installing bun..."
-    curl -fsSL https://bun.sh/install | bash
-    log_info "bun installed successfully"
+    if curl -fsSL https://bun.sh/install | bash; then
+        log_info "bun installed successfully"
+    else
+        log_warn "Failed to install bun (continuing)"
+    fi
 }
 
 generate_aerospace_ref() {

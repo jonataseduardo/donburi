@@ -120,9 +120,9 @@ echo "This may take several minutes..."
 # Core applications
 APPS=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders ghostty nikitabobko/tap/aerospace)
 # CLI tools
-CLI_TOOLS=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl)
+CLI_TOOLS=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 # Development utilities
-UTILS=(node python@3 slack discord spotify)
+UTILS=(node python slack spotify)
 # Container tools
 DOCKER=(colima docker docker-compose docker-buildx)
 
