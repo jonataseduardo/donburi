@@ -181,6 +181,27 @@ fi
 
 assert_output_contains "nvim" "setup nvim --dry-run mentions nvim" "$DONBURI" setup nvim --dry-run
 
+# --- Package list consistency (admin-install.sh vs donburi) ---
+echo "--- package list consistency ---"
+
+# Helper: extract a BREW_* array from a file, sort it, and print one package per line
+extract_brew_list() {
+    local varname="$1"
+    local file="$2"
+    grep "^${varname}=" "$file" | sed 's/.*=(//' | sed 's/)//' | tr ' ' '\n' | sort
+}
+
+# Compare each package category between donburi (source of truth) and admin-install.sh
+for category in BREW_APPS_FORMULA BREW_APPS_CASK BREW_CLI_FORMULA BREW_UTILS_FORMULA BREW_UTILS_CASK BREW_DOCKER_FORMULA; do
+    donburi_val="$(extract_brew_list "$category" "$DONBURI")"
+    admin_val="$(extract_brew_list "$category" "$REPO_DIR/admin-install.sh")"
+    if [[ "$donburi_val" == "$admin_val" ]]; then
+        pass "admin-install.sh $category matches donburi"
+    else
+        fail "admin-install.sh $category matches donburi" "diff: donburi has [$(echo "$donburi_val" | tr '\n' ' ')] vs admin-install has [$(echo "$admin_val" | tr '\n' ' ')]"
+    fi
+done
+
 # --- Enterprise script syntax validation ---
 echo "--- enterprise script syntax ---"
 assert_exit_code 0 "donburi has valid bash syntax" bash -n "$DONBURI"
