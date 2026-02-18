@@ -2,7 +2,7 @@
 name: create-pr
 description: Create a well-structured pull request with conventional commits, pre-flight checks, and a diff-aware description. Use when asked to create a PR, submit changes, or open a pull request.
 disable-model-invocation: true
-allowed-tools: Bash(git *) Bash(gh *) Bash(prek *) Bash(stylua *)
+allowed-tools: Bash(git *) Bash(gh *) Bash(prek *)
 ---
 
 # Create Pull Request
@@ -16,11 +16,11 @@ Create a high-quality, reviewable pull request following project conventions.
 Before creating the PR, run all checks and fix any issues:
 
 ```bash
-# Run pre-commit hooks (shellcheck + stylua)
+# Run all hooks (shellcheck + stylua)
 prek run --all-files
 ```
 
-If StyLua reports formatting issues, fix them with `stylua <path>` and commit the changes.
+If StyLua fails, it will auto-format the files. Stage the fixes and run `prek run --all-files` again to confirm it passes. Commit any formatting changes before proceeding.
 
 Fix any failures before proceeding. Do not skip checks.
 
