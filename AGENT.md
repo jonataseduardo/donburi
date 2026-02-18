@@ -20,7 +20,7 @@ Guidance for Claude Code. For user-facing docs see [README.md](README.md).
 
 | Directory | Symlink Target |
 |-----------|----------------|
-| `nvim/` | `~/.config/nvim` (see `nvim/CLAUDE.md` for architecture) |
+| `nvim/` | `~/.config/nvim` (see `.claude/rules/nvim.md` for architecture) |
 | `aerospace/` | `~/.config/aerospace` |
 | `sketchybar/` | `~/.config/sketchybar` |
 | `btop/` | `~/.config/btop` |
