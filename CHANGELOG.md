@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.0] - 2026-02-17
+
+### Added
+- **Agent Skills**: Added `.claude/skills/changelog/` skill for automated changelog generation and semver version bumping from conventional commits
+
+### Changed
+- **CI**: Split brew tests into a separate `ci-brew.yml` workflow on macOS; run full CI on `ubuntu-latest` instead of `macos-latest`
+- **Tests**: Reorganized test suite to separate brew-dependent tests, skip gracefully when Homebrew is not available
+
 ## [0.4.2] - 2026-02-17
 
 ### Added
