@@ -64,7 +64,7 @@ return {
     {
       '<leader>B',
       function()
-        require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+        require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))
       end,
       desc = 'Debug: Set Breakpoint',
     },
@@ -78,8 +78,8 @@ return {
     },
   },
   config = function()
-    local dap = require 'dap'
-    local dapui = require 'dapui'
+    local dap = require('dap')
+    local dapui = require('dapui')
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
@@ -141,7 +141,7 @@ return {
       delve = {
         -- On Windows delve must be run attached or it crashes.
         -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-        detached = vim.fn.has 'win32' == 0,
+        detached = vim.fn.has('win32') == 0,
       },
     }
   end,

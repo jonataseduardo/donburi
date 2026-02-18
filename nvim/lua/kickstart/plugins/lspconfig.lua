@@ -181,15 +181,15 @@ return {
           end
           local handle = io.popen(python_path .. ' -m pip --version 2>&1')
           if handle then
-            local result = handle:read '*a'
+            local result = handle:read('*a')
             handle:close()
-            return not result:match 'No module named pip'
+            return not result:match('No module named pip')
           end
           return false
         end
 
         -- First check for VIRTUAL_ENV (Python venv)
-        local venv = os.getenv 'VIRTUAL_ENV'
+        local venv = os.getenv('VIRTUAL_ENV')
         if venv then
           local venv_python = venv .. '/bin/python'
           -- Check if the venv python exists and is executable
@@ -203,7 +203,7 @@ return {
         end
 
         -- Then check for CONDA_PREFIX (active Conda environment)
-        local conda = os.getenv 'CONDA_PREFIX'
+        local conda = os.getenv('CONDA_PREFIX')
         if conda then
           local conda_python = conda .. '/bin/python'
           if vim.fn.executable(conda_python) == 1 and (check_venv == false or has_pip(conda_python)) then
@@ -212,7 +212,7 @@ return {
         end
 
         -- Fallback to system Python
-        return vim.fn.exepath 'python3' or vim.fn.exepath 'python'
+        return vim.fn.exepath('python3') or vim.fn.exepath('python')
       end
 
       local servers = {

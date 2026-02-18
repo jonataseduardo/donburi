@@ -1,30 +1,22 @@
-# CLAUDE.md
+---
+paths:
+  - "nvim/**"
+---
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Neovim Configuration
 
-## Overview
-
-This is a modular Neovim configuration based on [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim). It uses lazy.nvim for plugin management with a separation between core "kickstart" plugins and custom user plugins.
+Modular Neovim config based on [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim). Uses lazy.nvim for plugin management.
 
 ## Commands
 
 ```bash
-# Format Lua files
-stylua lua/
-
-# Check Neovim config for errors
-nvim --headless -c "checkhealth" -c "qa"
-
-# View plugin status
-nvim -c ":Lazy"
-
-# Update plugins
-nvim -c ":Lazy update"
+stylua lua/                                  # Format Lua files
+nvim --headless -c "checkhealth" -c "qa"     # Check config for errors
+nvim -c ":Lazy"                              # View plugin status
+nvim -c ":Lazy update"                       # Update plugins
 ```
 
-## Architecture
-
-### Directory Structure
+## Directory Structure
 
 ```
 init.lua                    # Entry point: leader keys, requires core modules
@@ -37,7 +29,7 @@ lua/
 └── custom/plugins/         # User plugins (auto-imported via { import = 'custom.plugins' })
 ```
 
-### Plugin Organization
+## Plugin Organization
 
 - **Core plugins** in `lua/kickstart/plugins/`: lspconfig, blink-cmp, telescope, treesitter, conform, gitsigns, which-key, todo-comments, mini
 - **Optional plugins** (commented out): debug, indent_line, lint, autopairs, neo-tree
@@ -45,7 +37,7 @@ lua/
 
 Each plugin file returns a lazy.nvim spec table with configuration.
 
-### Key Components
+## Key Components
 
 - **LSP**: nvim-lspconfig + mason.nvim (servers: pyright, bashls, lua_ls with dynamic Python venv detection)
 - **Completion**: blink.cmp (Rust-based fuzzy matching) + LuaSnip
@@ -53,7 +45,7 @@ Each plugin file returns a lazy.nvim spec table with configuration.
 - **Git**: vim-fugitive + gitsigns.nvim
 - **Navigation**: telescope.nvim + smart-splits.nvim
 
-### Keybinding Structure
+## Keybinding Structure
 
 Leader key is `<Space>`. Main groups (via which-key):
 
@@ -89,15 +81,15 @@ return {
 }
 ```
 
-The file will be auto-imported via the `{ import = 'custom.plugins' }` directive in lazy-plugins.lua.
+The file is auto-imported via `{ import = 'custom.plugins' }` in lazy-plugins.lua.
 
 ## Upstream Tracking
 
-This config is forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim), tracked via the `kickstart` git remote. To review upstream changes:
+Forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim), tracked via the `kickstart` git remote:
 
 ```bash
 git fetch kickstart
 git diff HEAD...kickstart/main -- nvim/lua/kickstart/
 ```
 
-Cherry-pick or manually apply any useful updates. Custom plugins in `lua/custom/plugins/` are not affected by upstream.
+Cherry-pick or manually apply useful updates. Custom plugins in `lua/custom/plugins/` are unaffected by upstream.

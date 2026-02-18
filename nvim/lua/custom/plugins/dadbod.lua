@@ -104,7 +104,7 @@ return {
 
       local function open_ui(url)
         vim.g.db = url
-        vim.cmd 'DBUI'
+        vim.cmd('DBUI')
       end
 
       vim.api.nvim_create_user_command('DBConnectPostgres', function(opts)
@@ -181,7 +181,7 @@ return {
                 state.user = user
 
                 -- Password: use inputsecret so it won't echo
-                local password = vim.fn.inputsecret 'Password (leave empty for none): '
+                local password = vim.fn.inputsecret('Password (leave empty for none): ')
                 state.password = password
                 if password ~= nil and password ~= '' then
                   vim.notify('DBConnectPostgres: password will be saved in connections.json', vim.log.levels.WARN)

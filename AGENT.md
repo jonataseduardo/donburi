@@ -1,79 +1,83 @@
-# CLAUDE.md
+# AGENT.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code. For user-facing docs see [README.md](README.md).
 
-For general documentation, installation, keybindings, and usage, see [README.md](README.md).
+## Key Files
 
-## Quick Reference
+| File | Purpose |
+|------|---------|
+| `donburi` | Main CLI script (all commands) |
+| `install.sh` | Curl-friendly one-liner installer |
+| `admin-install.sh` | Enterprise admin install (run as root) |
+| `admin-setup.sh` | Enterprise admin setup (interactive) |
+| `ENTERPRISE_SETUP.md` | Enterprise deployment guide |
+| `README.md` | Primary user-facing documentation |
+| `CHANGELOG.md` | Release history |
+| `VERSION` | Current version string |
+| `.pre-commit-config.yaml` | Linting hooks (shellcheck + stylua) |
 
-```bash
-donburi setup              # Install all configs
-donburi setup <component>  # Install single component (nvim|ghostty|aerospace|tmux|zsh|sketchybar|btop)
-donburi setup --dry-run    # Preview changes
-donburi status             # Check symlink status
-donburi brew [category]    # Install packages (apps|cli|docker|all)
-donburi update             # Update donburi (git pull)
-```
-
-## Project Structure
-
-Each tool lives in its own directory and is symlinked to its config location by `donburi`:
+## Config Directories
 
 | Directory | Symlink Target |
 |-----------|----------------|
-| `nvim/` | `~/.config/nvim` |
+| `nvim/` | `~/.config/nvim` (see `.claude/rules/nvim.md` for architecture) |
 | `aerospace/` | `~/.config/aerospace` |
 | `sketchybar/` | `~/.config/sketchybar` |
 | `btop/` | `~/.config/btop` |
 | `ghostty/` | `~/Library/Application Support/com.mitchellh.ghostty/config` |
 | `tmux/` | `~/.tmux.conf` |
 | `zsh/` | `~/.zshrc` |
+| `keybinds/` | Keybinding reference docs |
 
-## CLI Files
+## Common Tasks
 
-| File | Purpose |
-|------|---------|
-| `donburi` | Main CLI script (multi-command tool) |
-| `install.sh` | Curl-friendly installer for one-liner installation |
-
-## Development Guidelines
-
-### Design Principles
-
-1. **Consistent hjkl navigation** — Aerospace uses `Alt`, Neovim uses `Ctrl`. Adding `Shift` = resize in both.
-2. **Kanagawa theme** — Maintain color consistency across all components.
-3. **Non-destructive setup** — `donburi` backs up existing configs to `~/.config/donburi-backup-<timestamp>/`.
-
-### Component-Specific Notes
-
-- **Neovim** (largest component): See `nvim/CLAUDE.md` for detailed architecture. Plugins in `nvim/lua/kickstart/plugins/` (core) and `nvim/lua/custom/plugins/` (custom, auto-imported).
-- **Sketchybar**: Shell-script plugins in `sketchybar/plugins/`. Integrates with Aerospace for workspace indicators.
-- **btop**: Resource monitor config with Kanagawa wave theme and custom theme files.
-- **Ghostty/tmux**: Minimal configs — Aerospace handles window management.
-
-### Upstream Tracking
-
-The Neovim config is forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim), available as the `kickstart` git remote. To review upstream changes:
+### Pre-commit / Linting
 
 ```bash
-git fetch kickstart
-git diff HEAD...kickstart/main -- nvim/lua/kickstart/
+prek run --all-files          # Run all hooks (shellcheck + stylua)
+prek install                  # Install git hook
 ```
 
-### Linting
+Shell scripts: `shellcheck --severity=warning`. Add `# shellcheck shell=bash` to sourced files without a shebang.
 
-This project uses [prek](https://github.com/j178/prek) as a pre-commit hook framework. Hooks are defined in `.pre-commit-config.yaml`.
+### Update README.md
+
+Update `README.md` whenever adding/changing components, keybindings, installation steps, or requirements. It is the single source of truth for users.
+
+### Sync Donburi (personal use)
 
 ```bash
-prek run --all-files    # Run all hooks on every file
-prek install            # Install git pre-commit hook
+donburi update                # Git pull latest changes
+donburi setup                 # Re-apply all symlinks
+donburi setup <component>     # Re-apply one component
+donburi status                # Verify symlink health
 ```
 
-Shell scripts must pass `shellcheck --severity=warning`. Add `# shellcheck shell=bash` to sourced files that lack a shebang.
+### Enterprise Installation
 
-### When Updating README.md
+Two-phase process documented in `ENTERPRISE_SETUP.md`:
 
-Keep README.md as the primary user-facing documentation. Update it when:
-- Adding new components or features
-- Changing keybindings or installation steps
-- Modifying requirements or troubleshooting info
+**Phase 1 - Admin** (requires root via `su -l <admin>`):
+```bash
+# Automated single-command install:
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
+
+# Or via CLI:
+donburi admin-setup           # Interactive admin setup
+donburi admin-check           # Verify admin tasks complete
+donburi brew all              # Install all brew packages
+```
+
+**Phase 2 - User** (no admin needed):
+```bash
+curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+donburi setup --no-brew       # Setup configs (packages already installed by admin)
+donburi permissions           # Check app permissions
+```
+
+## Design Principles
+
+- **hjkl navigation**: Aerospace uses `Alt`, Neovim uses `Ctrl`. Add `Shift` = resize.
+- **Kanagawa theme**: Consistent colors across all components.
+- **Non-destructive**: `donburi` backs up existing configs to `~/.config/donburi-backup-<timestamp>/`.
+- **Upstream tracking**: Neovim forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim) (`kickstart` git remote).

@@ -48,10 +48,10 @@ local function setup_ghostty()
   -- Additional Ghostty-specific configurations
   -- Enable better terminal integration
   vim.opt.termguicolors = true
-  
+
   -- Configure terminal behavior
   vim.opt.shell = vim.env.SHELL or '/bin/zsh'
-  
+
   -- Better terminal scrolling
   vim.opt.scrollback = 10000
 end

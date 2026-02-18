@@ -14,8 +14,14 @@ return {
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      current_line_blame = true,
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol',
+        delay = 300,
+      },
       on_attach = function(bufnr)
-        local gitsigns = require 'gitsigns'
+        local gitsigns = require('gitsigns')
 
         local function map(mode, l, r, opts)
           opts = opts or {}
@@ -28,7 +34,7 @@ return {
           if vim.wo.diff then
             vim.cmd.normal { ']c', bang = true }
           else
-            gitsigns.nav_hunk 'next'
+            gitsigns.nav_hunk('next')
           end
         end, { desc = 'Jump to next git [c]hange' })
 
@@ -36,17 +42,17 @@ return {
           if vim.wo.diff then
             vim.cmd.normal { '[c', bang = true }
           else
-            gitsigns.nav_hunk 'prev'
+            gitsigns.nav_hunk('prev')
           end
         end, { desc = 'Jump to previous git [c]hange' })
 
         -- Actions
         -- visual mode
         map('v', '<leader>ghs', function()
-          gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+          gitsigns.stage_hunk { vim.fn.line('.'), vim.fn.line('v') }
         end, { desc = 'stage git hunk' })
         map('v', '<leader>ghr', function()
-          gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+          gitsigns.reset_hunk { vim.fn.line('.'), vim.fn.line('v') }
         end, { desc = 'reset git hunk' })
         -- normal mode
         map('n', '<leader>ghs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
@@ -58,7 +64,7 @@ return {
         map('n', '<leader>ghb', gitsigns.blame_line, { desc = 'git [b]lame line' })
         map('n', '<leader>ghd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
         map('n', '<leader>ghD', function()
-          gitsigns.diffthis '@'
+          gitsigns.diffthis('@')
         end, { desc = 'git [D]iff against last commit' })
         -- Toggles
         map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
