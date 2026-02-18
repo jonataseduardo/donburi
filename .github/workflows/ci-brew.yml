@@ -1,0 +1,19 @@
+name: CI (Brew)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'donburi'
+      - 'admin-install.sh'
+      - 'test/test_donburi.sh'
+
+jobs:
+  brew-test:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run brew tests
+        run: DONBURI_TEST_LEVEL=brew bash test/test_donburi.sh

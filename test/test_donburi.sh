@@ -235,7 +235,7 @@ else
     fail "setup --no-brew shows no-brew mode message"
 fi
 
-if [[ "${DONBURI_TEST_LEVEL:-full}" != "quick" ]]; then
+if [[ "${DONBURI_TEST_LEVEL:-full}" != "quick" && "${DONBURI_TEST_LEVEL:-full}" != "brew" ]]; then
 
 # --- Setup nvim (real) ---
 echo "--- setup nvim ---"
@@ -321,33 +321,6 @@ fi
 echo "--- update --dry-run ---"
 assert_exit_code 0 "update --dry-run exits 0" "$DONBURI" update --dry-run
 
-# --- Brew dry-run ---
-echo "--- brew --dry-run ---"
-run "$DONBURI" brew cli --dry-run
-if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "Would install" || echo "$OUTPUT" | grep -q "Would upgrade"); then
-    pass "brew cli --dry-run exits 0 with preview"
-else
-    fail "brew cli --dry-run exits 0 with preview" "exit=$EXIT_CODE"
-fi
-
-assert_exit_code 0 "brew utils --dry-run exits 0" "$DONBURI" brew utils --dry-run
-
-run "$DONBURI" brew all --dry-run
-if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "apps" || echo "$OUTPUT" | grep -q "cli"); then
-    pass "brew all --dry-run exits 0"
-else
-    fail "brew all --dry-run exits 0" "exit=$EXIT_CODE"
-fi
-
-# --- Brew check command ---
-echo "--- brew-check ---"
-run "$DONBURI" brew-check
-if [[ "$EXIT_CODE" -eq 0 || "$EXIT_CODE" -eq 1 ]]; then
-    pass "brew-check exits with valid code"
-else
-    fail "brew-check exits with valid code" "exit=$EXIT_CODE"
-fi
-
 # --- Permissions command ---
 echo "--- permissions ---"
 assert_exit_code 0 "permissions command exits 0" "$DONBURI" permissions
@@ -399,4 +372,45 @@ done
 export HOME="$SAVE_HOME"
 rm -rf "$NOBREW_HOME"
 
-fi # end DONBURI_TEST_LEVEL != quick
+fi # end DONBURI_TEST_LEVEL not quick/brew
+
+# ---------------------------------------------------------------------------
+# Brew tests — run for "full" and "brew" levels (require Homebrew installed)
+# ---------------------------------------------------------------------------
+if [[ "${DONBURI_TEST_LEVEL:-full}" != "quick" ]]; then
+
+# --- Brew dry-run ---
+echo "--- brew --dry-run ---"
+if command -v brew &>/dev/null; then
+    run "$DONBURI" brew cli --dry-run
+    if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "Would install" || echo "$OUTPUT" | grep -q "Would upgrade"); then
+        pass "brew cli --dry-run exits 0 with preview"
+    else
+        fail "brew cli --dry-run exits 0 with preview" "exit=$EXIT_CODE"
+    fi
+
+    assert_exit_code 0 "brew utils --dry-run exits 0" "$DONBURI" brew utils --dry-run
+
+    run "$DONBURI" brew all --dry-run
+    if [[ "$EXIT_CODE" -eq 0 ]] && (echo "$OUTPUT" | grep -q "apps" || echo "$OUTPUT" | grep -q "cli"); then
+        pass "brew all --dry-run exits 0"
+    else
+        fail "brew all --dry-run exits 0" "exit=$EXIT_CODE"
+    fi
+
+    # --- Brew check command ---
+    echo "--- brew-check ---"
+    run "$DONBURI" brew-check
+    if [[ "$EXIT_CODE" -eq 0 || "$EXIT_CODE" -eq 1 ]]; then
+        pass "brew-check exits with valid code"
+    else
+        fail "brew-check exits with valid code" "exit=$EXIT_CODE"
+    fi
+else
+    skip "brew cli --dry-run exits 0 with preview" "brew not available"
+    skip "brew utils --dry-run exits 0" "brew not available"
+    skip "brew all --dry-run exits 0" "brew not available"
+    skip "brew-check exits with valid code" "brew not available"
+fi
+
+fi # end DONBURI_TEST_LEVEL not quick
