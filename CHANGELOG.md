@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.2] - 2026-02-17
+
+### Added
+- **Agent Skills**: Added `.claude/skills/create-pr/` skill for automated PR creation with conventional commits, pre-flight checks, and diff-aware descriptions
+- **Agent Rules**: Moved `nvim/CLAUDE.md` to `.claude/rules/nvim.md` with `paths: nvim/**` scoping so guidance loads only for Neovim changes
+- **AGENT.md**: New top-level agent file with key file index and task-oriented sections (replaces verbose `CLAUDE.md`)
+
+### Changed
+- **StyLua Hook**: Changed from check-only (`--check`) to auto-format mode so `prek run --all-files` fixes Lua formatting in place
+- **Gitsigns**: Added inline git blame with 300ms delay; consolidated diff keymaps around diffview.nvim
+
+### Fixed
+- **Pre-commit Skill**: Updated create-pr skill to use `prek` instead of `pre-commit` (which is not in PATH)
+- **Lua Formatting**: Applied StyLua formatting across 22 Lua files — parenthesized `require` calls, consistent table formatting, trailing newlines
+
 ## [0.4.1] - 2026-02-17
 
 ### Fixed
