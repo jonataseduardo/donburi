@@ -19,6 +19,9 @@ return {
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'kanagawa-wave', 'kanagawa-dragon', or 'kanagawa-lotus'.
       vim.cmd.colorscheme 'kanagawa'
+
+      -- Make gitsigns inline blame text more readable
+      vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { fg = '#957FB8', italic = true })
     end,
   },
 }

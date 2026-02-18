@@ -5,6 +5,8 @@ return {
     keys = {
       { '<leader>gv', '<cmd>DiffviewOpen<cr>', desc = 'Git diff view' },
       { '<leader>gV', '<cmd>DiffviewOpen HEAD~1<cr>', desc = 'Git diff vs previous' },
+      { '<leader>gd', '<cmd>DiffviewOpen<cr>', desc = 'Git diff view' },
+      { '<leader>gD', '<cmd>DiffviewOpen HEAD~1<cr>', desc = 'Git diff vs previous' },
       { '<leader>gf', '<cmd>DiffviewFileHistory %<cr>', desc = 'Git file history' },
       { '<leader>gF', '<cmd>DiffviewFileHistory<cr>', desc = 'Git branch history' },
       { '<leader>gq', '<cmd>DiffviewClose<cr>', desc = 'Close diff view' },
