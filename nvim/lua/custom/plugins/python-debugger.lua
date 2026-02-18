@@ -70,7 +70,7 @@ return {
       {
         '<leader>B',
         function()
-          require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+          require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))
         end,
         desc = 'Debug: Set Conditional [B]reakpoint',
       },
@@ -112,13 +112,13 @@ return {
       },
     },
     config = function()
-      local dap = require 'dap'
-      local dapui = require 'dapui'
+      local dap = require('dap')
+      local dapui = require('dapui')
 
       -- Helper function to get Python path (similar to lspconfig)
       local function get_python_path()
         -- First check for VIRTUAL_ENV (Python venv)
-        local venv = os.getenv 'VIRTUAL_ENV'
+        local venv = os.getenv('VIRTUAL_ENV')
         if venv then
           local venv_python = venv .. '/bin/python'
           if vim.fn.executable(venv_python) == 1 then
@@ -127,7 +127,7 @@ return {
         end
 
         -- Then check for CONDA_PREFIX (active Conda environment)
-        local conda = os.getenv 'CONDA_PREFIX'
+        local conda = os.getenv('CONDA_PREFIX')
         if conda then
           local conda_python = conda .. '/bin/python'
           if vim.fn.executable(conda_python) == 1 then
@@ -136,7 +136,7 @@ return {
         end
 
         -- Fallback to system Python
-        return vim.fn.exepath 'python3' or vim.fn.exepath 'python' or 'python'
+        return vim.fn.exepath('python3') or vim.fn.exepath('python') or 'python'
       end
 
       -- Mason-nvim-dap setup - auto-installs debugpy
@@ -231,7 +231,7 @@ return {
         name = 'Launch file with arguments',
         program = '${file}',
         args = function()
-          local args_string = vim.fn.input 'Arguments: '
+          local args_string = vim.fn.input('Arguments: ')
           return vim.split(args_string, ' ')
         end,
         pythonPath = python_path,

@@ -52,7 +52,7 @@ return {
       end
 
       -- Apply keymaps to all terminal types
-      vim.cmd 'autocmd! TermOpen * lua set_terminal_keymaps()'
+      vim.cmd('autocmd! TermOpen * lua set_terminal_keymaps()')
     end,
   },
 }

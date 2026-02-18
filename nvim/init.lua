@@ -5,19 +5,19 @@ vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
-require 'options'
+require('options')
 
 -- [[ Basic Keymaps ]]
-require 'keymaps'
+require('keymaps')
 
 -- [[ Install `lazy.nvim` plugin manager ]]
-require 'lazy-bootstrap'
+require('lazy-bootstrap')
 
 -- [[ Configure and install plugins ]]
-require 'lazy-plugins'
+require('lazy-plugins')
 
 -- [[ Ghostty terminal configuration ]]
-require 'custom.plugins.ghostty'
+require('custom.plugins.ghostty')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

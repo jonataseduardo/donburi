@@ -42,7 +42,7 @@ local function navigate_window(direction)
 
   if is_terminal then
     -- In terminal mode, exit terminal mode first, then navigate
-    vim.cmd 'stopinsert'
+    vim.cmd('stopinsert')
   end
 
   -- Store current window as last active before navigating
@@ -79,13 +79,11 @@ vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Navigate right (Ctrl+L)', norem
 -- Alternative key codes for better terminal compatibility
 -- Note: <C-h/j/k/l> keymaps removed to avoid conflicts with smart-splits plugin
 
-
 -- Alternative navigation using vim.cmd for better compatibility
 vim.keymap.set('n', '<C-Left>', '<C-w>h', { desc = 'Navigate left (alternative)', noremap = true, silent = true })
 vim.keymap.set('n', '<C-Down>', '<C-w>j', { desc = 'Navigate down (alternative)', noremap = true, silent = true })
 vim.keymap.set('n', '<C-Up>', '<C-w>k', { desc = 'Navigate up (alternative)', noremap = true, silent = true })
 vim.keymap.set('n', '<C-Right>', '<C-w>l', { desc = 'Navigate right (alternative)', noremap = true, silent = true })
-
 
 -- Additional fallback keybindings for terminal emulator compatibility
 -- Some terminals might not send Ctrl+hjkl properly
@@ -107,7 +105,7 @@ vim.keymap.set('n', '<C-\\>', navigate_last_active, {
   silent = true,
 })
 vim.keymap.set('t', '<C-\\>', function()
-  vim.cmd 'stopinsert'
+  vim.cmd('stopinsert')
   navigate_last_active()
 end, {
   desc = 'Navigate to last active window from terminal',
@@ -125,25 +123,31 @@ vim.api.nvim_create_autocmd('WinEnter', {
 -- Debug function to verify keybindings are working
 -- Call with :lua verify_navigation_keys()
 function _G.verify_navigation_keys()
-  print("Verifying navigation keybindings...")
+  print('Verifying navigation keybindings...')
   local mappings = {
-    '<C-h>', '<C-j>', '<C-k>', '<C-l>',  -- Primary Ctrl+hjkl mappings
-    '<C-Left>', '<C-Down>', '<C-Up>', '<C-Right>' -- Arrow key alternatives
+    '<C-h>',
+    '<C-j>',
+    '<C-k>',
+    '<C-l>', -- Primary Ctrl+hjkl mappings
+    '<C-Left>',
+    '<C-Down>',
+    '<C-Up>',
+    '<C-Right>', -- Arrow key alternatives
   }
-  
+
   for _, key in ipairs(mappings) do
     local ok, result = pcall(vim.api.nvim_get_keymap, 'n')
     if ok then
       local found = false
       for _, map in ipairs(result) do
         if map.lhs == key then
-          print(string.format("✓ %s -> %s", key, map.rhs))
+          print(string.format('✓ %s -> %s', key, map.rhs))
           found = true
           break
         end
       end
       if not found then
-        print(string.format("✗ %s not found", key))
+        print(string.format('✗ %s not found', key))
       end
     end
   end
@@ -157,30 +161,30 @@ vim.keymap.set('n', '<C-S-l>', '<C-w>>', { desc = 'Resize window right', noremap
 
 -- Terminal mode window resizing (Ctrl+Shift + hjkl)
 vim.keymap.set('t', '<C-S-h>', function()
-  vim.cmd 'stopinsert'
-  vim.cmd 'wincmd <'
+  vim.cmd('stopinsert')
+  vim.cmd('wincmd <')
 end, { desc = 'Resize window left from terminal', noremap = true, silent = true })
 
 vim.keymap.set('t', '<C-S-j>', function()
-  vim.cmd 'stopinsert'
-  vim.cmd 'wincmd -'
+  vim.cmd('stopinsert')
+  vim.cmd('wincmd -')
 end, { desc = 'Resize window down from terminal', noremap = true, silent = true })
 
 vim.keymap.set('t', '<C-S-k>', function()
-  vim.cmd 'stopinsert'
-  vim.cmd 'wincmd +'
+  vim.cmd('stopinsert')
+  vim.cmd('wincmd +')
 end, { desc = 'Resize window up from terminal', noremap = true, silent = true })
 
 vim.keymap.set('t', '<C-S-l>', function()
-  vim.cmd 'stopinsert'
-  vim.cmd 'wincmd >'
+  vim.cmd('stopinsert')
+  vim.cmd('wincmd >')
 end, { desc = 'Resize window right from terminal', noremap = true, silent = true })
 
 -- Layout toggle (Ctrl+/) - rotate window layout
 vim.keymap.set('n', '<C-/>', '<C-w>r', { desc = 'Toggle split layout', noremap = true, silent = true })
 vim.keymap.set('t', '<C-/>', function()
-  vim.cmd 'stopinsert'
-  vim.cmd 'wincmd r'
+  vim.cmd('stopinsert')
+  vim.cmd('wincmd r')
 end, { desc = 'Toggle split layout from terminal', noremap = true, silent = true })
 
 -- Ghostty terminal specific keymaps
