@@ -41,6 +41,7 @@ alias gkeys="$DONBURI_DIR/keybinds/bin/ghostty-keys"
 alias mkeys="$DONBURI_DIR/keybinds/bin/macos-keys"
 alias ipython="python -m IPython --no-autoindent"
 alias c=clear
+alias v=nvim
 
 # GNU coreutils on macOS
 [[ -x "$(command -v gsed)" ]] && alias sed=gsed
