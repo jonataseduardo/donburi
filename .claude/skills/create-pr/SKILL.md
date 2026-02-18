@@ -24,7 +24,27 @@ If StyLua fails, it will auto-format the files. Stage the fixes and run `prek ru
 
 Fix any failures before proceeding. Do not skip checks.
 
-### 2. Stage and commit with conventional commits
+### 2. Update changelog and version
+
+**Always run this step when the PR targets `main`.**
+
+Invoke the changelog and versioning skill to bump `VERSION` and update `CHANGELOG.md`:
+
+```
+/changelog
+```
+
+This will:
+1. Auto-detect the bump type from conventional commits on the branch (`feat` -> minor, `fix` -> patch, breaking -> major)
+2. Generate changelog entries grouped by type (Added, Changed, Fixed)
+3. Present the entries for review before writing
+4. Update `VERSION` and `CHANGELOG.md`, then commit as `chore(release): bump version to X.Y.Z and update changelog`
+
+If the user provided a bump type override, pass it through (e.g. `/changelog minor`).
+
+If the PR does **not** target `main` (e.g. merging into `dev`), skip this step.
+
+### 3. Stage and commit with conventional commits
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/). Every commit message must follow this format:
 
@@ -59,7 +79,7 @@ chore(release): bump version to 0.4.1 and update changelog
 - Focus on *why* the change was made, not *what* changed (the diff shows what)
 - If a commit addresses a GitHub issue, add `Fixes #<number>` or `Closes #<number>` in the commit body
 
-### 3. Analyze the diff
+### 4. Analyze the diff
 
 Before writing the PR description, gather context:
 
@@ -79,7 +99,7 @@ gh issue list --state open
 
 Use the actual diff output to write an accurate summary. Do not guess or generalize.
 
-### 4. Write the PR description
+### 5. Write the PR description
 
 Use this structure:
 
@@ -107,7 +127,7 @@ Fixes #<issue-number> (if applicable)
 - <Areas of uncertainty or trade-offs made>
 ```
 
-### 5. Create the PR
+### 6. Create the PR
 
 ```bash
 gh pr create --title "<conventional commit style title>" --body "$(cat <<'EOF'
