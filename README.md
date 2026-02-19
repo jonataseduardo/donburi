@@ -78,7 +78,7 @@ donburi setup --no-brew # Setup configs without brew dependencies
 | **Neovim**     | Text editor with LSP, completions, AI     | `~/.config/nvim`                                             |
 | **Ghostty**    | Modern GPU-accelerated terminal           | `~/Library/Application Support/com.mitchellh.ghostty/config` |
 | **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
-| **tmux**       | Terminal multiplexer (minimal config)     | `~/.tmux.conf`                                               |
+| **tmux**       | Terminal multiplexer with Kanagawa theme  | `~/.tmux.conf`                                               |
 | **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
 | **btop**       | Resource monitor with Kanagawa theme      | `~/.config/btop`                                             |
 
@@ -110,12 +110,12 @@ In addition to kickstart-modular.nvim's core plugins, donburi includes these cus
 | **diffview** | Enhanced Git diff visualization |
 | **fugitive** | Git integration and operations |
 | **ghostty** | Ghostty terminal integration |
-| **Kanagawa** | Unified color scheme (theme) |
-| **lualine** | Customizable statusline |
+| **Kanagawa** | Unified color scheme with purple split dividers |
+| **lualine** | Kanagawa vibrant statusline with flame separators |
 | **markdown-preview** | Live Markdown preview |
 | **python-debugger** | Python debugging support |
 | **render-markdown** | Enhanced Markdown rendering |
-| **smart-splits** | Smart window navigation and resizing |
+| **smart-splits** | Seamless split navigation across Neovim and tmux panes |
 | **toggleterm** | Integrated terminal multiplexer |
 
 All plugins auto-install on first Neovim launch. View/manage with `:Lazy`.
@@ -207,15 +207,16 @@ See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup inst
 
 ## Keybinding Reference
 
-Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as the base modifier, Neovim uses `Ctrl`. Adding `Shift` triggers resize operations in both.
+Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as the base modifier. Neovim and tmux share seamless `Ctrl+hjkl` navigation via [smart-splits.nvim](https://github.com/mrjones2014/smart-splits.nvim) — pressing `Ctrl+h` moves between Neovim splits and tmux panes transparently.
 
-| Action           | Aerospace            | Neovim                |
-| ---------------- | -------------------- | --------------------- |
-| Focus / Navigate | `Alt + hjkl`         | `Ctrl + hjkl`         |
-| Resize           | `Alt + Shift + hjkl` | `Ctrl + Shift + hjkl` |
-| Move window      | `Alt + Ctrl + hjkl`  | —                     |
-| Toggle layout    | `Alt + /`            | `Ctrl + /`            |
-| Switch workspace | `Alt + 1-9`          | —                     |
+| Action              | Aerospace            | Neovim             | tmux              |
+| ------------------- | -------------------- | ------------------ | ----------------- |
+| Focus / Navigate    | `Alt + hjkl`         | `Ctrl + hjkl`      | `Ctrl + hjkl`     |
+| Resize              | `Alt + Shift + hjkl` | `Ctrl+W H/J/K/L`  | `prefix + hjkl`   |
+| Move / Reposition   | `Alt + Ctrl + hjkl`  | `Ctrl+W Arrow`     | `prefix + {/}`    |
+| Split               | —                    | `Ctrl+W S/V`       | `prefix + "/%`    |
+| Switch workspace    | `Alt + 1-9`          | —                  | `prefix + number` |
+| Toggle layout       | `Alt + /`            | —                  | `prefix + Space`  |
 
 ### Keybinding Helper Commands
 
@@ -223,6 +224,7 @@ Display color-coded keybinding tables for various applications:
 
 ```bash
 akeys               # Aerospace window manager keybindings
+nkeys               # Tmux & Neovim navigation keybindings
 skeys               # Slack keybindings
 ckeys               # Chrome/Chromium keybindings
 gkeys               # Ghostty terminal keybindings
@@ -292,6 +294,7 @@ Test the setup:
 1. Press `Alt + hjkl` to test Aerospace window navigation
 2. Press `Alt + 1-9` to switch workspaces
 3. Open `nvim` and run `:checkhealth` to verify plugins
+4. In tmux, press `Ctrl + hjkl` to navigate between Neovim splits and tmux panes
 
 Start Sketchybar if not running:
 
@@ -394,6 +397,7 @@ Quick shortcuts to edit configurations and view keybindings (added to your shell
 | `tconf` | tmux config       |
 | `zconf` | zsh config        |
 | `sconf` | Sketchybar config |
+| `dconf` | Donburi root (all configs) |
 
 ### Keybind Aliases
 
@@ -404,6 +408,7 @@ Quick shortcuts to edit configurations and view keybindings (added to your shell
 | `ckeys` | Chrome keybindings     |
 | `gkeys` | Ghostty keybindings    |
 | `mkeys` | macOS keybindings      |
+| `nkeys` | Tmux & Neovim navigation |
 
 ### Shell Aliases
 

@@ -1,0 +1,169 @@
+#!/opt/homebrew/bin/bash
+# Navigation Keybindings Helper
+# Display tmux and neovim navigation/resize keybindings in a formatted table with Kanagawa colors
+
+set -euo pipefail
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Source the shared display library
+source "$SCRIPT_DIR/lib/display.sh"
+
+# Reference config file
+REF_CONFIG_FILE="$SCRIPT_DIR/config/navigation.ref"
+
+# Show usage
+show_usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Display tmux and neovim navigation keybindings in a formatted table with pager support.
+
+Covers seamless Ctrl+hjkl navigation (smart-splits), neovim split resize/reposition,
+and tmux pane management.
+
+Options:
+  --no-pager  Output directly to terminal without pager
+  -h, --help  Show this help message
+
+Examples:
+  $(basename "$0")              # Show all keybindings in pager
+  $(basename "$0") --no-pager   # Show without pager
+
+Pager commands:
+  /pattern    Search forward for pattern
+  ?pattern    Search backward for pattern
+  n           Next search match
+  N           Previous search match
+  q           Quit pager
+  h           Show pager help
+
+Config source: $REF_CONFIG_FILE
+EOF
+}
+
+# Display keybindings from the reference file
+display_keybindings() {
+    if [[ ! -f "$REF_CONFIG_FILE" ]]; then
+        echo "Error: Navigation config not found at $REF_CONFIG_FILE"
+        return 1
+    fi
+
+    draw_header "Tmux & Neovim Navigation"
+
+    # Declare associative arrays for categories
+    declare -A category_keys
+    declare -A category_cmds
+
+    # Track category order
+    local -a categories=()
+    declare -A seen_categories
+
+    # Parse reference file: Category|Key|Description
+    while IFS='|' read -r category key cmd; do
+        # Skip empty lines
+        [[ -z "$category" ]] && continue
+
+        # Trim whitespace
+        category="${category#"${category%%[![:space:]]*}"}"
+        category="${category%"${category##*[![:space:]]}"}"
+        key="${key#"${key%%[![:space:]]*}"}"
+        key="${key%"${key##*[![:space:]]}"}"
+        cmd="${cmd#"${cmd%%[![:space:]]*}"}"
+        cmd="${cmd%"${cmd##*[![:space:]]}"}"
+
+        # Track category order
+        if [[ -z "${seen_categories[$category]:-}" ]]; then
+            categories+=("$category")
+            seen_categories[$category]=1
+        fi
+
+        # Append to category arrays
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            category_keys[$category]+=$'\n'"$key"
+            category_cmds[$category]+=$'\n'"$cmd"
+        else
+            category_keys[$category]="$key"
+            category_cmds[$category]="$cmd"
+        fi
+    done < "$REF_CONFIG_FILE"
+
+    # Get category color
+    get_nav_category_color() {
+        local category="$1"
+        case "$category" in
+            "Navigation")         echo "$ORANGE" ;;
+            "Neovim Resize")      echo "$GREEN" ;;
+            "Neovim Reposition")  echo "$CYAN" ;;
+            "Neovim Splits")      echo "$BLUE" ;;
+            "Tmux Resize")        echo "$GREEN" ;;
+            "Tmux Splits")        echo "$BLUE" ;;
+            "Tmux Panes")         echo "$MAGENTA" ;;
+            "Tmux Windows")       echo "$YELLOW" ;;
+            *)                    echo "$WHITE" ;;
+        esac
+    }
+
+    # Display by category in order
+    local first_category=true
+    for category in "${categories[@]}"; do
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            if [[ "$first_category" != true ]]; then
+                draw_line "$BOX_ML" "$BOX_X" "$BOX_MR"
+            fi
+            first_category=false
+
+            local color
+            color=$(get_nav_category_color "$category")
+            draw_category "$category" "$color"
+
+            # Display each binding in this category
+            while IFS= read -r key && IFS= read -r cmd <&3; do
+                draw_row "$key" "$cmd"
+            done < <(echo "${category_keys[$category]}") 3< <(echo "${category_cmds[$category]}")
+        fi
+    done
+
+    draw_footer
+}
+
+# Main
+main() {
+    local use_pager=true
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            --no-pager)
+                use_pager=false
+                shift
+                ;;
+            *)
+                cat >&2 <<EOF
+Unknown option: $1
+EOF
+                show_usage >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    # Generate output with or without pager
+    if [[ "$use_pager" == true ]]; then
+        pager_cmd=$(setup_pager)
+        if [[ -n "$pager_cmd" ]]; then
+            display_keybindings | eval "$pager_cmd"
+        else
+            display_keybindings
+        fi
+    else
+        display_keybindings
+    fi
+}
+
+main "$@"

@@ -1,6 +1,6 @@
--- Ghostty terminal configuration
--- This replaces tmux.nvim with Ghostty-compatible terminal configuration
--- Ghostty handles window management, clipboard sync, and terminal features natively
+-- Terminal colors and clipboard configuration
+-- Works with Ghostty + tmux. Terminal colors match Kanagawa colorscheme.
+-- Navigation between tmux panes and neovim splits handled by smart-splits.
 
 local function setup_ghostty()
   -- Configure terminal behavior for Ghostty
@@ -42,11 +42,10 @@ local function setup_ghostty()
     }
   end
 
-  -- Ghostty-specific terminal configuration
-  -- Terminal navigation keymaps are handled by toggleterm.lua to avoid conflicts
+  -- Terminal integration
+  -- Navigation keymaps handled by smart-splits with tmux multiplexer backend
 
-  -- Additional Ghostty-specific configurations
-  -- Enable better terminal integration
+  -- Enable true color for Kanagawa theme
   vim.opt.termguicolors = true
 
   -- Configure terminal behavior

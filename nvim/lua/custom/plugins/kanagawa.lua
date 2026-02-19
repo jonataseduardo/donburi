@@ -20,6 +20,9 @@ return {
       -- any other, such as 'kanagawa-wave', 'kanagawa-dragon', or 'kanagawa-lotus'.
       vim.cmd.colorscheme('kanagawa')
 
+      -- Purple split divider lines (oniViolet)
+      vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#957FB8' })
+
       -- Make gitsigns inline blame text more readable
       vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { fg = '#957FB8', italic = true })
     end,

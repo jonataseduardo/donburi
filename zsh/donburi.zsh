@@ -28,6 +28,7 @@ alias nconf='cd $DONBURI_DIR/nvim/ && $EDITOR init.lua'
 alias aconf='cd $DONBURI_DIR/aerospace/ && $EDITOR aerospace.toml'
 alias gconf='cd $DONBURI_DIR/ghostty/ && $EDITOR config'
 alias sconf='cd $DONBURI_DIR/sketchybar/ && $EDITOR sketchybarrc'
+alias dconf='cd $DONBURI_DIR && $EDITOR .'
 
 # shellcheck disable=SC2139
 alias akeys="$DONBURI_DIR/keybinds/bin/aerospace-keys"
@@ -39,8 +40,11 @@ alias ckeys="$DONBURI_DIR/keybinds/bin/chrome-keys"
 alias gkeys="$DONBURI_DIR/keybinds/bin/ghostty-keys"
 # shellcheck disable=SC2139
 alias mkeys="$DONBURI_DIR/keybinds/bin/macos-keys"
+# shellcheck disable=SC2139
+alias nkeys="$DONBURI_DIR/keybinds/bin/navigation-keys"
 alias ipython="python -m IPython --no-autoindent"
 alias c=clear
+alias v=nvim
 
 # GNU coreutils on macOS
 [[ -x "$(command -v gsed)" ]] && alias sed=gsed
