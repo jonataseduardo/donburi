@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Sketchybar configuration with Kanagawa color scheme
+# Sketchybar configuration with Kanagawa Vibrant color scheme
 # Integrates with Aerospace window manager
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
@@ -18,7 +18,7 @@ sketchybar --bar \
     padding_right=10 \
     color=$KANAGAWA_BG_DARK
 
-# Default item settings
+# Default item settings — uniform pill style matching tmux/neovim Kanagawa Vibrant
 sketchybar --default \
     icon.font="JetBrainsMono Nerd Font:Bold:14.0" \
     icon.color=$KANAGAWA_FG \
@@ -27,6 +27,8 @@ sketchybar --default \
     background.color=$KANAGAWA_BG \
     background.corner_radius=5 \
     background.height=22 \
+    background.border_width=1 \
+    background.border_color=$KANAGAWA_FG_DIM \
     padding_left=5 \
     padding_right=5
 
@@ -36,87 +38,119 @@ for i in $(seq 1 9); do
         --set space.$i \
             icon=$i \
             icon.padding_left=8 \
-            icon.padding_right=8 \
+            icon.padding_right=2 \
+            label.font="JetBrainsMono Nerd Font:Regular:14.0" \
+            label.padding_left=2 \
+            label.padding_right=8 \
+            label.drawing=on \
             background.color=$KANAGAWA_BG \
             background.drawing=on \
-            label.drawing=off \
+            background.border_width=1 \
+            background.border_color=$KANAGAWA_FG_DIM \
+            update_freq=5 \
+            script="$PLUGIN_DIR/aerospace.sh" \
             click_script="aerospace workspace $i"
 done
 
 # Listen for aerospace workspace changes
 sketchybar --add event aerospace_workspace_change
 
-# Update workspace highlighting on change
+# Update workspace highlighting on workspace change and periodic refresh
 for i in $(seq 1 9); do
-    sketchybar --subscribe space.$i aerospace_workspace_change \
-        --set space.$i script="$PLUGIN_DIR/aerospace.sh"
+    sketchybar --subscribe space.$i aerospace_workspace_change
 done
 
-# Separator
+# Separator — no background, just a dim pipe character
 sketchybar --add item separator left \
     --set separator \
         icon="|" \
         icon.color=$KANAGAWA_FG_DIM \
         label.drawing=off \
-        background.drawing=off
+        background.drawing=off \
+        background.border_width=0
 
-# Current application (center)
+# Current application (center) — floating orange text, no pill
 sketchybar --add item front_app center \
     --set front_app \
         icon.drawing=off \
         label.font="JetBrainsMono Nerd Font:Bold:14.0" \
         label.color=$KANAGAWA_ORANGE \
         background.drawing=off \
+        background.border_width=0 \
         script="$PLUGIN_DIR/front_app.sh" \
     --subscribe front_app front_app_switched
 
 # Right side items (from right to left)
 
-# Clock
+# Clock — dim gray border, clock icon
 sketchybar --add item clock right \
     --set clock \
-        icon.drawing=off \
+        icon.color=$KANAGAWA_FG_DIM \
+        icon.padding_left=8 \
+        icon.padding_right=4 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_FG_DIM \
         update_freq=30 \
         script="$PLUGIN_DIR/clock.sh"
 
-# Battery
+# Battery — yellow border (dynamic icon/color set by plugin)
 sketchybar --add item battery right \
     --set battery \
-        icon.color=$KANAGAWA_GREEN \
+        icon.padding_left=8 \
+        icon.padding_right=2 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_YELLOW \
         update_freq=120 \
         script="$PLUGIN_DIR/battery.sh" \
     --subscribe battery system_woke power_source_change
 
-# Memory
+# Memory — purple icon + purple border, nf-md-memory icon
 sketchybar --add item memory right \
     --set memory \
-        icon="MEM" \
+        icon="󰍛" \
         icon.color=$KANAGAWA_PURPLE \
+        icon.padding_left=8 \
+        icon.padding_right=2 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_PURPLE \
         update_freq=30 \
         script="$PLUGIN_DIR/memory.sh"
 
-# CPU
+# CPU — blue icon + blue border, nf-md-chip icon
 sketchybar --add item cpu right \
     --set cpu \
-        icon="CPU" \
+        icon="󰻠" \
         icon.color=$KANAGAWA_BLUE \
+        icon.padding_left=8 \
+        icon.padding_right=2 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_BLUE \
         update_freq=15 \
         script="$PLUGIN_DIR/cpu.sh"
 
-# VPN (to the left of CPU)
+# VPN — green icon + green border (hidden when disconnected)
 sketchybar --add item vpn right \
     --set vpn \
         icon="󰒄" \
         icon.color=$KANAGAWA_GREEN \
+        icon.padding_left=8 \
+        icon.padding_right=4 \
         label.color=$KANAGAWA_FG \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_GREEN \
         update_freq=10 \
         script="$PLUGIN_DIR/vpn.sh"
 
-# Slack (between VPN and Spotify)
+# Slack — orange border (matches Slack's brand energy + active accent)
 sketchybar --add item slack right \
     --set slack \
         icon="󰒱" \
@@ -126,33 +160,28 @@ sketchybar --add item slack right \
         label.color=$KANAGAWA_FG \
         label.padding_left=0 \
         label.padding_right=10 \
-        update_freq=5 \
-        script="$PLUGIN_DIR/slack.sh" \
-        background.drawing=on \
         background.color=$KANAGAWA_BG \
         background.border_color=$KANAGAWA_ORANGE \
         background.border_width=1 \
+        update_freq=5 \
+        script="$PLUGIN_DIR/slack.sh" \
         click_script="open -a 'Slack'"
 
-# Spotify (to the left of VPN)
+# Spotify — green icon + green border
 sketchybar --add item spotify right \
     --set spotify \
-        icon="" \
+        icon="󰓇" \
         icon.color=$KANAGAWA_GREEN \
-        icon.padding_left=10 \
+        icon.padding_left=8 \
         icon.padding_right=5 \
         label.color=$KANAGAWA_FG \
         label.padding_left=0 \
-        label.padding_right=15 \
-        label.align=center \
-        update_freq=5 \
-        script="$PLUGIN_DIR/spotify.sh" \
+        label.padding_right=8 \
+        background.color=$KANAGAWA_BG \
         background.border_color=$KANAGAWA_GREEN \
         background.border_width=1 \
-        background.padding_left=0 \
-        background.padding_right=0 \
-        padding_left=0 \
-        padding_right=0 \
+        update_freq=5 \
+        script="$PLUGIN_DIR/spotify.sh" \
         click_script="osascript -e 'tell application \"Spotify\" to playpause'"
 
 # Initialize bar
