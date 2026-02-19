@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0] - 2026-02-18
+
+### Added
+- **nvim, tmux**: Unified Kanagawa vibrant theme across lualine and tmux status bar with matching surimiOrange accents, flame separators, and purple split dividers
+- **nvim, tmux**: Seamless `Ctrl+hjkl` navigation between Neovim splits and tmux panes via smart-splits with tmux multiplexer backend
+- **nvim**: Resolve ruff formatter dynamically per uv project context (uv run → global → uvx fallback)
+- **keybinds**: Add `navigation-keys` helper (`nkeys`) for tmux and Neovim navigation reference
+- **zsh**: Add `v=nvim` and `dconf` (donburi root) aliases
+
+### Changed
+- **nvim**: Overhaul keymaps.lua — remove 150+ lines of redundant navigation code, replace with clean resize/reposition bindings
+- **nvim**: Simplify ghostty.lua comments to reflect tmux + smart-splits architecture
+- **tmux**: Expand tmux.conf from minimal config to full Kanagawa-themed setup with smart-splits integration, pane resizing, and new plugins
+- **README**: Update keybinding reference table to include tmux column and document new aliases
+
 ## [0.5.0] - 2026-02-17
 
 ### Added
