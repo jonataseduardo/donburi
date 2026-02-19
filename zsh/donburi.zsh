@@ -45,6 +45,7 @@ alias nkeys="$DONBURI_DIR/keybinds/bin/navigation-keys"
 alias ipython="python -m IPython --no-autoindent"
 alias c=clear
 alias v=nvim
+alias oc=opencode
 
 # GNU coreutils on macOS
 [[ -x "$(command -v gsed)" ]] && alias sed=gsed
