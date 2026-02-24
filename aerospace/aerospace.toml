@@ -66,8 +66,8 @@ alt-comma = 'layout accordion horizontal vertical'
 # Force horizontal layout (useful for workspace 1)
 alt-shift-slash = 'layout tiles horizontal'
 
-# Fullscreen
-alt-shift-f = 'fullscreen'
+# Fullscreen (also reload SketchyBar to ensure it stays visible)
+alt-shift-f = ['fullscreen', 'exec-and-forget sketchybar --reload']
 
 # Float/unfloat window
 alt-shift-space = 'layout floating tiling'
@@ -113,6 +113,7 @@ esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main']
 f = ['layout floating tiling', 'mode main']
 backspace = ['close-all-windows-but-current', 'mode main']
+s = ['exec-and-forget /bin/bash -c "defaults write NSGlobalDomain _HIHideMenuBar -bool false && sketchybar --reload"', 'mode main']
 
 # Window management shortcuts
 # (No join bindings in service mode - use Alt+Cmd in main mode instead)

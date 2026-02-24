@@ -16,7 +16,8 @@ sketchybar --bar \
     sticky=on \
     padding_left=10 \
     padding_right=10 \
-    color=$KANAGAWA_BG_DARK
+    color=$KANAGAWA_BG_DARK \
+    display=all
 
 # Default item settings — uniform pill style matching tmux/neovim Kanagawa Vibrant
 sketchybar --default \
