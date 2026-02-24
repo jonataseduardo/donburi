@@ -22,13 +22,13 @@ if [ "$PLAYER_STATE" = "playing" ]; then
     sketchybar --set "$NAME" \
         drawing=on \
         icon="󰓇" \
-        icon.color="0xaa76946A" \
+        icon.color="$KANAGAWA_GREEN" \
         label="$DISPLAY"
 elif [ "$PLAYER_STATE" = "paused" ]; then
     sketchybar --set "$NAME" \
         drawing=on \
         icon="󰓇" \
-        icon.color="0x99727169" \
+        icon.color="$KANAGAWA_FG_DIM" \
         label="Paused"
 else
     sketchybar --set "$NAME" drawing=off

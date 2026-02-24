@@ -1,37 +1,55 @@
 #!/bin/bash
 source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/plugins/app_icons.sh"
 
 # Aerospace workspace indicator plugin
-# Highlights the active workspace and shows green border for workspaces with apps
+# Shows workspace number + Nerd Font icons for each open app
+# Hides empty workspaces unless they are currently focused
 
-# Get current aerospace workspace
 CURRENT_WORKSPACE=$(aerospace list-workspaces --focused 2>/dev/null || echo "1")
-
-# Extract space number from item name (e.g., "space.1" -> "1")
 SPACE_NUM="${NAME##*.}"
 
-# Check if workspace has any windows
-WINDOW_COUNT=$(aerospace list-windows --workspace "$SPACE_NUM" 2>/dev/null | wc -l)
-HAS_APPS=$((WINDOW_COUNT > 0))
+# Get list of app names in this workspace (column 2, trimmed)
+APPS=$(aerospace list-windows --workspace "$SPACE_NUM" 2>/dev/null \
+    | awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}')
+
+# Build the label string: one icon per app
+ICONS=""
+while IFS= read -r app; do
+    [ -z "$app" ] && continue
+    icon=$(get_app_icon "$app")
+    ICONS="${ICONS}${icon} "
+done <<< "$APPS"
+
+# Strip trailing space
+ICONS="${ICONS% }"
+
+HAS_APPS=false
+[ -n "$ICONS" ] && HAS_APPS=true
 
 if [ "$SPACE_NUM" = "$CURRENT_WORKSPACE" ]; then
-    # Active workspace - vibrant highlight
+    # Active workspace - always visible, vibrant orange highlight
     sketchybar --set "$NAME" \
+        drawing=on \
         icon.color="$KANAGAWA_BG_DARK" \
+        label="$ICONS" \
+        label.color="$KANAGAWA_BG_DARK" \
+        label.drawing=on \
         background.color="$KANAGAWA_ORANGE" \
-        background.border_color="$KANAGAWA_GREEN" \
+        background.border_color="$KANAGAWA_ORANGE" \
         background.border_width=1
-elif [ $HAS_APPS -eq 1 ]; then
-    # Inactive workspace with apps - green border
+elif $HAS_APPS; then
+    # Inactive workspace with apps - subtle dim border
     sketchybar --set "$NAME" \
+        drawing=on \
         icon.color="$KANAGAWA_FG_DIM" \
+        label="$ICONS" \
+        label.color="$KANAGAWA_FG_DIM" \
+        label.drawing=on \
         background.color="$KANAGAWA_BG" \
-        background.border_color="$KANAGAWA_GREEN" \
+        background.border_color="$KANAGAWA_FG_DIM" \
         background.border_width=1
 else
-    # Inactive workspace without apps - no border
-    sketchybar --set "$NAME" \
-        icon.color="$KANAGAWA_FG_DIM" \
-        background.color="$KANAGAWA_BG" \
-        background.border_width=0
+    # Empty inactive workspace - hide it
+    sketchybar --set "$NAME" drawing=off
 fi

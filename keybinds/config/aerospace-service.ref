@@ -1,0 +1,6 @@
+Config|esc|reload-config, mode main
+Workspace|r|flatten-workspace-tree, mode main
+Layout|f|layout floating tiling, mode main
+Windows|backspace|close-all-windows-but-current, mode main
+Layout|b|balance-sizes, mode main
+Config|s|exec-and-forget /bin/bash -c "defaults write NSGlobalDomain _HIHideMenuBar -bool false && sketchybar --reload", mode main

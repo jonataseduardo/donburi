@@ -5,9 +5,8 @@ source "$CONFIG_DIR/colors.sh"
 # Shows when a VPN connection is active
 
 VPN_ACTIVE=$(scutil --nc list 2>/dev/null | grep -c "Connected")
-UTUN_ACTIVE=$(ifconfig 2>/dev/null | grep -c "utun[1-9]")
 
-if [ "$VPN_ACTIVE" -gt 0 ] || [ "$UTUN_ACTIVE" -gt 0 ]; then
+if [ "$VPN_ACTIVE" -gt 0 ]; then
     sketchybar --set "$NAME" \
         icon="󰒄" \
         icon.color="$KANAGAWA_GREEN" \
