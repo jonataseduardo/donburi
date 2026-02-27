@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.1] - 2026-02-24
+
+### Fixed
+- **sketchybar**: Only show VPN icon when VPN is connected
+- **aerospace,sketchybar**: Prevent SketchyBar from disappearing in fullscreen
+
+### Changed
+- **sketchybar**: Apply Kanagawa Vibrant theme for cohesive look with tmux/neovim
+- **akeys**: Update aerospace keybinding references
+
 ## [0.6.0] - 2026-02-18
 
 ### Added

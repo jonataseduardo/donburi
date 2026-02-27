@@ -1008,6 +1008,106 @@ cmd_permissions() {
 }
 
 # ---------------------------------------------------------------------------
+# Start / Stop / Reload Commands
+# ---------------------------------------------------------------------------
+
+cmd_start() {
+    echo -e "${CYAN}--- start ---${NC}"
+
+    # AeroSpace
+    if pgrep -x AeroSpace >/dev/null 2>&1; then
+        log_info "AeroSpace is already running"
+    else
+        log_info "Starting AeroSpace..."
+        open -a AeroSpace
+        log_info "AeroSpace started"
+    fi
+
+    # SketchyBar
+    if pgrep -x sketchybar >/dev/null 2>&1; then
+        log_info "SketchyBar is already running"
+    else
+        log_info "Starting SketchyBar..."
+        if find_brew && "$BREW_CMD" services start sketchybar 2>/dev/null | grep -q "Successfully started"; then
+            log_info "SketchyBar started via brew services"
+        else
+            sketchybar &>/dev/null &
+            log_info "SketchyBar started directly"
+        fi
+    fi
+}
+
+cmd_stop() {
+    echo -e "${CYAN}--- stop ---${NC}"
+
+    # AeroSpace
+    if pgrep -x AeroSpace >/dev/null 2>&1; then
+        log_info "Stopping AeroSpace..."
+        osascript -e 'quit app "AeroSpace"' 2>/dev/null || pkill AeroSpace 2>/dev/null || true
+        log_info "AeroSpace stopped"
+    else
+        log_info "AeroSpace is not running"
+    fi
+
+    # SketchyBar
+    if pgrep -x sketchybar >/dev/null 2>&1; then
+        log_info "Stopping SketchyBar..."
+        pkill sketchybar 2>/dev/null || true
+        log_info "SketchyBar stopped"
+    else
+        log_info "SketchyBar is not running"
+    fi
+}
+
+cmd_reload() {
+    local target="${1:-all}"
+    echo -e "${CYAN}--- reload: $target ---${NC}"
+
+    case "$target" in
+        aerospace)
+            if pgrep -x AeroSpace >/dev/null 2>&1; then
+                log_info "Reloading AeroSpace config..."
+                aerospace reload-config
+                log_info "AeroSpace config reloaded"
+            else
+                log_warn "AeroSpace is not running — skipping"
+            fi
+            ;;
+        sketchybar)
+            if pgrep -x sketchybar >/dev/null 2>&1; then
+                log_info "Reloading SketchyBar..."
+                sketchybar --reload
+                log_info "SketchyBar reloaded"
+            else
+                log_warn "SketchyBar is not running — skipping"
+            fi
+            ;;
+        all)
+            if pgrep -x AeroSpace >/dev/null 2>&1; then
+                log_info "Reloading AeroSpace config..."
+                aerospace reload-config
+                log_info "AeroSpace config reloaded"
+            else
+                log_warn "AeroSpace is not running — skipping"
+            fi
+
+            if pgrep -x sketchybar >/dev/null 2>&1; then
+                log_info "Reloading SketchyBar..."
+                sketchybar --reload
+                log_info "SketchyBar reloaded"
+            else
+                log_warn "SketchyBar is not running — skipping"
+            fi
+            ;;
+        *)
+            log_error "Unknown reload target: $target"
+            echo "Usage: donburi reload [aerospace|sketchybar]"
+            return 1
+            ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------
 # Update Command
 # ---------------------------------------------------------------------------
 
@@ -1042,12 +1142,16 @@ Usage: donburi <command> [options]
 Commands:
   setup [component]     Install configurations (default: all)
                         Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds
+  start                 Start AeroSpace and SketchyBar (skips if already running)
+  stop                  Stop AeroSpace and SketchyBar
+  reload [target]       Reload AeroSpace config and/or SketchyBar (default: both)
+                        Targets: aerospace, sketchybar
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
   brew-check            Check Homebrew installation and configuration
   permissions           Check macOS permissions for apps
-  update                Update donburi via git pull
+  update                Update donburi (git pull)
   help                  Show this help message
 
 Admin Commands (require admin/root):
@@ -1061,6 +1165,11 @@ Options:
   --list                Show packages without installing (brew only)
 
 Examples:
+  donburi start                 # Start AeroSpace and SketchyBar
+  donburi stop                  # Stop AeroSpace and SketchyBar
+  donburi reload                # Reload configs for both
+  donburi reload aerospace      # Reload only AeroSpace config
+  donburi reload sketchybar     # Reload only SketchyBar
   donburi setup                 # Install all configurations
   donburi setup nvim            # Install only Neovim config
   donburi setup --dry-run       # Preview all setup changes
@@ -1385,6 +1494,15 @@ case "$COMMAND" in
         show_header
         cmd_update
         show_footer
+        ;;
+    start)
+        cmd_start
+        ;;
+    stop)
+        cmd_stop
+        ;;
+    reload)
+        cmd_reload "${1:-all}"
         ;;
     admin-setup)
         # No argument parsing needed, handled in the function
