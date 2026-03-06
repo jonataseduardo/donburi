@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Donburi Installer
-# Install via: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+# Install via: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 #
 # Environment variables:
 #   DONBURI_HOME    Installation directory (default: ~/.donburi)
@@ -14,7 +14,7 @@ set -e
 # ---------------------------------------------------------------------------
 DONBURI_HOME="${DONBURI_HOME:-$HOME/.donburi}"
 DONBURI_BRANCH="${DONBURI_BRANCH:-main}"
-DONBURI_REPO="https://github.com/jonatas/donburi.git"
+DONBURI_REPO="https://github.com/jonataseduardo/donburi.git"
 BIN_DIR="$HOME/.local/bin"
 
 # Colors
@@ -27,8 +27,8 @@ NC='\033[0m'
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $1"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $1"; }
+log_info() { echo -e "${GREEN}[INFO]${NC}  $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC}  $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # ---------------------------------------------------------------------------
@@ -43,27 +43,27 @@ echo ""
 
 # Check for custom brew path
 if [ -n "${DONBURI_BREW_PATH:-}" ]; then
-    log_info "Using custom brew path: $DONBURI_BREW_PATH"
+	log_info "Using custom brew path: $DONBURI_BREW_PATH"
 fi
 
 # Check for git
 if ! command -v git &>/dev/null; then
-    log_error "Git is required but not installed."
-    echo "  Install via: https://git-scm.com or 'xcode-select --install'"
-    exit 1
+	log_error "Git is required but not installed."
+	echo "  Install via: https://git-scm.com or 'xcode-select --install'"
+	exit 1
 fi
 
 # Clone or update repository
 if [ -d "$DONBURI_HOME" ]; then
-    log_info "Updating existing installation at $DONBURI_HOME"
-    if ! git -C "$DONBURI_HOME" pull --ff-only origin "$DONBURI_BRANCH" 2>/dev/null; then
-        log_warn "Fast-forward pull failed, fetching and resetting..."
-        git -C "$DONBURI_HOME" fetch origin "$DONBURI_BRANCH"
-        git -C "$DONBURI_HOME" reset --hard "origin/$DONBURI_BRANCH"
-    fi
+	log_info "Updating existing installation at $DONBURI_HOME"
+	if ! git -C "$DONBURI_HOME" pull --ff-only origin "$DONBURI_BRANCH" 2>/dev/null; then
+		log_warn "Fast-forward pull failed, fetching and resetting..."
+		git -C "$DONBURI_HOME" fetch origin "$DONBURI_BRANCH"
+		git -C "$DONBURI_HOME" reset --hard "origin/$DONBURI_BRANCH"
+	fi
 else
-    log_info "Cloning donburi to $DONBURI_HOME"
-    git clone --branch "$DONBURI_BRANCH" "$DONBURI_REPO" "$DONBURI_HOME"
+	log_info "Cloning donburi to $DONBURI_HOME"
+	git clone --branch "$DONBURI_BRANCH" "$DONBURI_REPO" "$DONBURI_HOME"
 fi
 
 # Make donburi executable
@@ -73,7 +73,7 @@ chmod +x "$DONBURI_HOME/donburi"
 mkdir -p "$BIN_DIR"
 # Remove existing file/symlink/directory at target path
 if [ -e "$BIN_DIR/donburi" ] || [ -L "$BIN_DIR/donburi" ]; then
-    rm -rf "$BIN_DIR/donburi"
+	rm -rf "$BIN_DIR/donburi"
 fi
 ln -s "$DONBURI_HOME/donburi" "$BIN_DIR/donburi"
 log_info "Created symlink: $BIN_DIR/donburi -> $DONBURI_HOME/donburi"
@@ -82,50 +82,50 @@ log_info "Created symlink: $BIN_DIR/donburi -> $DONBURI_HOME/donburi"
 # Shell Configuration
 # ---------------------------------------------------------------------------
 add_to_path() {
-    local shell_rc="$1"
-    # shellcheck disable=SC2016
-    local path_line='export PATH="$HOME/.local/bin:$PATH"'
+	local shell_rc="$1"
+	# shellcheck disable=SC2016
+	local path_line='export PATH="$HOME/.local/bin:$PATH"'
 
-    if [ -f "$shell_rc" ]; then
-        # Skip if .local/bin is already referenced in the file
-        if grep -q '\.local/bin' "$shell_rc" 2>/dev/null; then
-            log_info "PATH already configured in $shell_rc"
-            return 1
-        fi
-        {
-            echo ""
-            echo "# Added by donburi installer"
-            echo "$path_line"
-        } >> "$shell_rc"
-        log_info "Added ~/.local/bin to PATH in $shell_rc"
-        return 0
-    fi
-    return 1
+	if [ -f "$shell_rc" ]; then
+		# Skip if .local/bin is already referenced in the file
+		if grep -q '\.local/bin' "$shell_rc" 2>/dev/null; then
+			log_info "PATH already configured in $shell_rc"
+			return 1
+		fi
+		{
+			echo ""
+			echo "# Added by donburi installer"
+			echo "$path_line"
+		} >>"$shell_rc"
+		log_info "Added ~/.local/bin to PATH in $shell_rc"
+		return 0
+	fi
+	return 1
 }
 
 # Update shell configuration if needed
 PATH_UPDATED=false
 # Only modify shell config if .local/bin is not in current PATH
 if [[ ! ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
-    # Detect shell and update appropriate rc file
-    if [ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ] || [ -f "$HOME/.zshrc" ]; then
-        if add_to_path "$HOME/.zshrc"; then
-            PATH_UPDATED=true
-        fi
-    fi
-    if [ -n "$BASH_VERSION" ] || [ "$SHELL" = "/bin/bash" ]; then
-        if [ -f "$HOME/.bashrc" ]; then
-            if add_to_path "$HOME/.bashrc"; then
-                PATH_UPDATED=true
-            fi
-        elif [ -f "$HOME/.bash_profile" ]; then
-            if add_to_path "$HOME/.bash_profile"; then
-                PATH_UPDATED=true
-            fi
-        fi
-    fi
+	# Detect shell and update appropriate rc file
+	if [ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ] || [ -f "$HOME/.zshrc" ]; then
+		if add_to_path "$HOME/.zshrc"; then
+			PATH_UPDATED=true
+		fi
+	fi
+	if [ -n "$BASH_VERSION" ] || [ "$SHELL" = "/bin/bash" ]; then
+		if [ -f "$HOME/.bashrc" ]; then
+			if add_to_path "$HOME/.bashrc"; then
+				PATH_UPDATED=true
+			fi
+		elif [ -f "$HOME/.bash_profile" ]; then
+			if add_to_path "$HOME/.bash_profile"; then
+				PATH_UPDATED=true
+			fi
+		fi
+	fi
 else
-    log_info "PATH already includes ~/.local/bin"
+	log_info "PATH already includes ~/.local/bin"
 fi
 
 # ---------------------------------------------------------------------------
@@ -141,10 +141,10 @@ echo "  CLI command:  donburi"
 echo ""
 
 if [ "$PATH_UPDATED" = true ]; then
-    echo -e "${YELLOW}Note: Restart your terminal or run:${NC}"
-    # shellcheck disable=SC2016
-    echo '  export PATH="$HOME/.local/bin:$PATH"'
-    echo ""
+	echo -e "${YELLOW}Note: Restart your terminal or run:${NC}"
+	# shellcheck disable=SC2016
+	echo '  export PATH="$HOME/.local/bin:$PATH"'
+	echo ""
 fi
 
 echo "Next steps:"

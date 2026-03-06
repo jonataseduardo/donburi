@@ -1185,7 +1185,7 @@ Examples:
   su -l <admin> -c "donburi admin-setup"   # Run complete admin setup (IT staff)
   donburi admin-check           # Verify admin setup is complete
 
-For more information, see: https://github.com/jonatas/donburi
+For more information, see: https://github.com/jonataseduardo/donburi
 EOF
 }
 
@@ -1207,8 +1207,11 @@ cmd_admin_setup() {
     echo "This command will help administrators set up donburi for enterprise users."
     echo "It will:"
     echo "  1. Install all required Homebrew packages"
-    echo "  2. Start necessary services (sketchybar for the logged-in user)"
-    echo "  3. Guide you through granting system permissions"
+    echo ""
+    echo "Notes:"
+    echo "  - Homebrew must already be installed"
+    echo "  - This command does not start services"
+    echo "  - This command does not automate macOS permissions"
     echo ""
     echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
     read -r
@@ -1230,62 +1233,18 @@ cmd_admin_setup() {
     echo "This may take several minutes..."
     cmd_brew "all"
 
-    # Step 3: Start sketchybar service
+    # Step 3: Manual permission reminder
     echo ""
-    echo -e "${BOLD}Step 3: Starting services...${NC}"
-    console_user="$(get_console_user || true)"
-    if [[ -n "$console_user" ]]; then
-        echo "Starting sketchybar service for console user: $console_user"
-        if su -l "$console_user" -c "$BREW_CMD services start --user sketchybar" 2>&1 | grep -q "Successfully started"; then
-            echo -e "${GREEN}✓ Sketchybar service started${NC}"
-        elif su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
-            echo -e "${GREEN}✓ Sketchybar service already running${NC}"
-        else
-            echo -e "${YELLOW}⚠ Could not verify sketchybar service status${NC}"
-        fi
-    else
-        echo -e "${YELLOW}⚠ Console user not detected; cannot start sketchybar for a user session${NC}"
-        echo "  Ask the logged-in user to run: brew services start --user sketchybar"
-    fi
-
-    # Step 4: Grant permissions
+    echo -e "${BOLD}Step 3: Manual system permission${NC}"
     echo ""
-    echo -e "${BOLD}Step 4: System Permissions${NC}"
-    echo ""
-    echo "The following applications need system permissions."
-    echo "I'll open the System Settings to the correct panes for you."
+    echo "AeroSpace needs Accessibility permission for window management."
+    echo "Grant it manually in System Settings:"
+    echo "  Privacy & Security -> Accessibility -> enable AeroSpace"
     echo ""
 
-    echo -e "${CYAN}4a. Aerospace - Accessibility Permission${NC}"
-    echo "   Aerospace needs this to manage windows"
-    echo "   Action: Enable AeroSpace in the list"
+    # Step 4: Verify setup
     echo ""
-    echo -e "${YELLOW}Opening Accessibility settings...${NC}"
-    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension" 2>/dev/null || \
-        open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null
-    echo "Press Enter after granting permission..."
-    read -r
-
-    echo ""
-    echo -e "${CYAN}4b. Borders - Screen Recording Permission (Optional)${NC}"
-    echo "   JankyBorders adds colored borders to windows (visual enhancement only)"
-    echo "   This is OPTIONAL - skip if you don't want window borders"
-    echo "   Note: Despite the name, this does NOT record your screen"
-    echo ""
-    echo "Grant this permission? (y/N): "
-    read -r grant_borders
-    if [[ "$grant_borders" =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}Opening Screen Recording settings...${NC}"
-        open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture" 2>/dev/null
-        echo "Press Enter after granting permission (or skip)..."
-        read -r
-    else
-        echo "Skipping Borders permission (optional component)"
-    fi
-
-    # Step 5: Verify setup
-    echo ""
-    echo -e "${BOLD}Step 5: Verifying setup...${NC}"
+    echo -e "${BOLD}Step 4: Verifying setup...${NC}"
     echo ""
     cmd_admin_check
 
@@ -1293,8 +1252,9 @@ cmd_admin_setup() {
     echo -e "${GREEN}=== Admin setup complete! ===${NC}"
     echo ""
     echo "Next steps for users:"
-    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash"
+    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash"
     echo "  2. Setup configs: donburi setup --no-brew"
+    echo "  3. Grant AeroSpace Accessibility permission manually"
     echo ""
 }
 
@@ -1327,28 +1287,10 @@ cmd_admin_check() {
         fi
     done
 
-    # Check services
-    echo ""
-    echo -e "${BOLD}Services:${NC}"
-    console_user="$(get_console_user || true)"
-    if [[ -n "$console_user" ]]; then
-        if su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
-            echo -e "  ${GREEN}✓${NC} Sketchybar service running (user: $console_user)"
-        else
-            echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running (user: $console_user)"
-            echo "      Run: brew services start --user sketchybar"
-            all_good=false
-        fi
-    else
-        echo -e "  ${YELLOW}⚠${NC} Console user not detected; cannot verify sketchybar service"
-        echo "      Run: brew services start --user sketchybar"
-        all_good=false
-    fi
-
-    # Check permissions (basic check)
+    # Check permissions (informational only)
     echo ""
     echo -e "${BOLD}Permissions:${NC}"
-    echo "  Note: Permission checks require the apps to be launched once"
+    echo "  Note: Permission checks are informational only"
 
     # Check if Aerospace has accessibility
     if check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" 2>/dev/null; then
@@ -1356,6 +1298,7 @@ cmd_admin_check() {
     else
         echo -e "  ${YELLOW}⚠${NC} Aerospace needs Accessibility permission"
         echo "      Open: System Settings → Privacy & Security → Accessibility"
+        echo "      This does not block admin package setup"
     fi
 
     # Check if Borders has screen recording (optional)

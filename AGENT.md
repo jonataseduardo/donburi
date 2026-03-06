@@ -60,7 +60,7 @@ Two-phase process documented in `ENTERPRISE_SETUP.md`:
 **Phase 1 - Admin** (requires root via `su -l <admin>`):
 ```bash
 # Automated single-command install:
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash
 
 # Or via CLI:
 donburi admin-setup           # Interactive admin setup
@@ -70,7 +70,7 @@ donburi brew all              # Install all brew packages
 
 **Phase 2 - User** (no admin needed):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 donburi setup --no-brew       # Setup configs (packages already installed by admin)
 donburi permissions           # Check app permissions
 ```

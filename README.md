@@ -44,7 +44,7 @@ All other dependencies are installed automatically during setup (see below).
 **One-liner installation:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 ```
 
 This installs donburi to `~/.donburi` and adds the `donburi` command to your PATH.
@@ -52,7 +52,7 @@ This installs donburi to `~/.donburi` and adds the `donburi` command to your PAT
 **Or clone manually:**
 
 ```bash
-git clone https://github.com/jonatas/donburi.git ~/.donburi
+git clone https://github.com/jonataseduardo/donburi.git ~/.donburi
 ~/.donburi/donburi setup
 ```
 
@@ -194,13 +194,16 @@ For corporate environments where users don't have admin privileges:
 
 ```bash
 # Admin runs (single command, assumes Homebrew already installed):
-su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash"
+su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash"
 
 # Manual alternative (if not using admin-install.sh):
 su -l <admin> -c "donburi brew all"      # Install all brew packages system-wide
 
 # User runs:
 donburi setup --no-brew    # Setup configs without brew dependencies
+
+# Manual system permission step (user):
+# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
 ```
 
 See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup instructions.
@@ -296,10 +299,10 @@ Test the setup:
 3. Open `nvim` and run `:checkhealth` to verify plugins
 4. In tmux, press `Ctrl + hjkl` to navigate between Neovim splits and tmux panes
 
-Start Sketchybar if not running:
+Start services if needed:
 
 ```bash
-brew services start sketchybar
+donburi start
 ```
 
 ## Installing Code Formatters
@@ -434,7 +437,7 @@ Donburi includes `lsd` for a modern `ls` replacement:
 **Sketchybar not showing**
 
 ```bash
-brew services start sketchybar
+donburi start
 ```
 
 **Neovim plugins not loading**
@@ -478,7 +481,7 @@ For detailed contribution guidelines, see [AGENT.md](AGENT.md).
 ### Resources
 
 - **Upstream Neovim config**: [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim)
-- **Issues & PRs**: [GitHub repository](https://github.com/jonatas/donburi)
+- **Issues & PRs**: [GitHub repository](https://github.com/jonataseduardo/donburi)
 
 ## License
 
