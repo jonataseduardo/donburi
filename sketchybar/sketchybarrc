@@ -70,6 +70,21 @@ sketchybar --add item separator left \
         background.drawing=off \
         background.border_width=0
 
+# Next meeting (right side) — shows next event time and warning colors near start
+sketchybar --add item next_meeting right \
+    --set next_meeting \
+        icon="󰃭" \
+        icon.color=$KANAGAWA_FG_DIM \
+        icon.padding_left=8 \
+        icon.padding_right=4 \
+        label="Peace" \
+        label.color=$KANAGAWA_FG_DIM \
+        label.padding_left=0 \
+        label.padding_right=8 \
+        background.border_color=$KANAGAWA_FG_DIM \
+        update_freq=30 \
+        script="$PLUGIN_DIR/next_meeting.sh"
+
 # Current application (center) — floating orange text, no pill
 sketchybar --add item front_app center \
     --set front_app \
