@@ -9,6 +9,7 @@ return {
       { '<leader>gD', '<cmd>DiffviewOpen HEAD~1<cr>', desc = 'Git diff vs previous' },
       { '<leader>gf', '<cmd>DiffviewFileHistory %<cr>', desc = 'Git file history' },
       { '<leader>gF', '<cmd>DiffviewFileHistory<cr>', desc = 'Git branch history' },
+      { '<leader>gm', '<cmd>DiffviewOpen main<cr>', desc = 'Diff against main' },
       { '<leader>gq', '<cmd>DiffviewClose<cr>', desc = 'Close diff view' },
     },
     opts = {},
