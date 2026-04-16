@@ -54,6 +54,18 @@ alias oc=opencode
 # Shopify Hydrogen
 alias h2='$(npm prefix -s)/node_modules/.bin/shopify hydrogen'
 
+# GitHub CLI
+alias hl="gh auth login -p ssh"
+alias hs="gh auth status"
+alias hp="gh pr list"
+alias hm="gh pr list --search 'review-requested:jcesar'"
+alias ha="gh pr list --author jcesar"
+alias hv="gh pr view"
+alias hw="gh pr view --web"
+alias hd="gh pr diff"
+alias hr="gh repo view --web"
+alias hn="gh api notifications --jq '.[].subject.title'"
+
 # ---------------------------------------------------------------------------
 # Secrets
 # ---------------------------------------------------------------------------
