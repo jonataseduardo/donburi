@@ -32,7 +32,7 @@ _github_review_requests_time_ago() {
 
 main() {
   local limit="${1:-30}"
-  local viewer prs count pr host repo_full owner repo number url details timeline requested_at additions deletions changed_files branch reviewed waiting changes
+  local query result viewer count pr repo_full number requested_at additions deletions changed_files branch reviewed waiting changes
 
   if ! command -v gh >/dev/null 2>&1; then
     printf 'gh is required for github-review-requests\n' >&2
@@ -44,8 +44,34 @@ main() {
     return 1
   fi
 
-  prs="$(gh search prs --review-requested=@me --state=open --limit "$limit" --json number,repository,url 2>/dev/null)" || return
-  count="$(jq 'length' <<< "$prs")"
+  query='query($limit: Int!) {
+    viewer { login }
+    search(query: "review-requested:@me state:open type:pr", type: ISSUE, first: $limit) {
+      nodes {
+        ... on PullRequest {
+          number
+          additions
+          deletions
+          changedFiles
+          headRefName
+          repository { nameWithOwner }
+          reviews(last: 100) { nodes { author { login } } }
+          timelineItems(itemTypes: REVIEW_REQUESTED_EVENT, last: 100) {
+            nodes {
+              ... on ReviewRequestedEvent {
+                createdAt
+                requestedReviewer { ... on User { login } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }'
+
+  result="$(gh api graphql -F limit="$limit" -f query="$query" 2>/dev/null)" || return
+  viewer="$(jq -r '.data.viewer.login' <<< "$result")"
+  count="$(jq '.data.search.nodes | length' <<< "$result")"
 
   if ((count == 0)); then
     printf 'No PRs are waiting for your review.\n'
@@ -57,27 +83,17 @@ main() {
   while IFS= read -r pr; do
     repo_full="$(jq -r '.repository.nameWithOwner' <<< "$pr")"
     number="$(jq -r '.number' <<< "$pr")"
-    url="$(jq -r '.url' <<< "$pr")"
-    host="${url#https://}"
-    host="${host%%/*}"
-    owner="${repo_full%%/*}"
-    repo="${repo_full#*/}"
-
-    viewer="$(gh api --hostname "$host" user --jq '.login' 2>/dev/null)"
-    details="$(gh pr view "$number" --repo "$host/$repo_full" --json additions,deletions,changedFiles,headRefName,reviews 2>/dev/null)"
-    timeline="$(gh api --hostname "$host" "repos/$owner/$repo/issues/$number/timeline" --paginate 2>/dev/null)"
-
-    requested_at="$(jq -r --arg viewer "$viewer" '[.[]? | select(.event == "review_requested" and .requested_reviewer.login == $viewer) | .created_at] | last // empty' <<< "$timeline")"
-    additions="$(jq -r '.additions // 0' <<< "$details")"
-    deletions="$(jq -r '.deletions // 0' <<< "$details")"
-    changed_files="$(jq -r '.changedFiles // 0' <<< "$details")"
-    branch="$(jq -r '.headRefName // "unknown"' <<< "$details")"
-    reviewed="$(jq -r --arg viewer "$viewer" 'if ([.reviews[]? | select(.author.login == $viewer)] | length) > 0 then "yes" else "no" end' <<< "$details")"
+    requested_at="$(jq -r --arg viewer "$viewer" '[.timelineItems.nodes[]? | select(.requestedReviewer.login == $viewer) | .createdAt] | last // empty' <<< "$pr")"
+    additions="$(jq -r '.additions // 0' <<< "$pr")"
+    deletions="$(jq -r '.deletions // 0' <<< "$pr")"
+    changed_files="$(jq -r '.changedFiles // 0' <<< "$pr")"
+    branch="$(jq -r '.headRefName // "unknown"' <<< "$pr")"
+    reviewed="$(jq -r --arg viewer "$viewer" 'if ([.reviews.nodes[]? | select(.author.login == $viewer)] | length) > 0 then "yes" else "no" end' <<< "$pr")"
     waiting="$(_github_review_requests_time_ago "$requested_at")"
     changes="+$additions/-$deletions, ${changed_files}f"
 
     printf '%-32s #%-6s %-10s %-16s %-9s %s\n' "$repo_full" "$number" "$waiting" "$changes" "$reviewed" "$branch"
-  done < <(jq -c '.[]' <<< "$prs")
+  done < <(jq -c '.data.search.nodes[]' <<< "$result")
 }
 
 main "$@"
