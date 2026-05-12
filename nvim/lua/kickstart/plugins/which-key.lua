@@ -64,6 +64,7 @@ return {
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>g', group = '[G]it', mode = { 'n', 'v' } },
         { '<leader>i', group = 'ChatGPT [I]a', mode = { 'n', 'v' } },
+        { '<leader>m', group = '[M]arkdown' },
         { '<leader>o', group = '[O]cto (GitHub)' },
         { '<leader>or', group = '[R]eview' },
         { '<leader>oc', group = '[C]omments' },
