@@ -8,6 +8,9 @@
 unbind C-b
 set -g prefix C-a
 bind C-a send-prefix
+# Explicit detach bindings help inside interactive dev servers like bun/vite.
+bind d detach-client
+bind C-d detach-client
 
 # General
 set -g mouse on
