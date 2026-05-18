@@ -1,0 +1,48 @@
+# Minimal tmux config for remote servers.
+# Copy to a server with:
+#   scp tmux/tmux.conf.server user@server:~/.tmux.conf
+#
+# Uses Ctrl+a as prefix so it can run nested inside local tmux.
+
+# Prefix
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# General
+set -g mouse on
+set -g focus-events on
+set -g default-terminal "screen-256color"
+# tmux 2.7 does not support terminal-features; terminal-overrides keeps truecolor compatible.
+set -ga terminal-overrides ',xterm-256color:Tc'
+
+# Minimal status bar without plugin or font dependencies.
+# Use tmux's default green/black colors for maximum compatibility on tmux 2.7.
+set -g status-position top
+set -g status-bg green
+set -g status-fg black
+set -g status-left "#[bg=green,fg=black,bold] server:#S "
+set -g status-right "#[bg=green,fg=black,bold]%H:%M "
+set -g status-interval 5
+set -g allow-rename off
+set -g automatic-rename off
+
+# New windows and splits open in the current pane directory.
+bind c new-window -c "#{pane_current_path}"
+bind '"' split-window -v -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
+
+# Seamless Ctrl+hjkl navigation between Neovim splits and tmux panes.
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+    | grep -iqE '^[^TXZ ]+ +(\\S+\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
+
+bind-key -n C-h if-shell "$is_vim" 'send-keys C-h' 'select-pane -L'
+bind-key -n C-j if-shell "$is_vim" 'send-keys C-j' 'select-pane -D'
+bind-key -n C-k if-shell "$is_vim" 'send-keys C-k' 'select-pane -U'
+bind-key -n C-l if-shell "$is_vim" 'send-keys C-l' 'select-pane -R'
+
+# Resize tmux panes with prefix + h/j/k/l.
+bind -r h resize-pane -L 5
+bind -r j resize-pane -D 5
+bind -r k resize-pane -U 5
+bind -r l resize-pane -R 5
