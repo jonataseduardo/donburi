@@ -85,3 +85,10 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # Opencode
 # ---------------------------------------------------------------------------
 export PATH="$HOME/.opencode/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# Adding pass-cli auto completion script folder
+# ---------------------------------------------------------------------------
+# shellcheck disable=SC2206
+fpath=(~/.zfunc $fpath)
+autoload -Uz compinit && compinit
