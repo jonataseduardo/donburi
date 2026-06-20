@@ -128,6 +128,7 @@ Donburi's Sketchybar configuration includes these status indicators:
 |-----------|---------|
 | **Aerospace** | Current workspace number and available workspaces |
 | **Front App** | Name of currently focused application |
+| **Next Meeting** | Next/ongoing Google Calendar event with countdown and warning colors |
 | **Clock** | Current time and date |
 | **CPU** | CPU usage percentage |
 | **Memory** | RAM usage percentage |
@@ -137,6 +138,22 @@ Donburi's Sketchybar configuration includes these status indicators:
 | **VPN** | VPN connection status |
 
 Indicators auto-update and use the Kanagawa color scheme. Customize in `~/.config/sketchybar/`.
+
+The **Next Meeting** widget is **lazy / off by default** — it stays hidden and
+makes no calendar calls until you enable tracking with `donburi meeting on`
+(`donburi meeting off` hides it again). When enabled it reads Google Calendar
+through `uvx gcalcli` (OAuth — no macOS Calendar permission needed, which matters
+because Sketchybar runs under launchd). The first `donburi meeting on` walks you
+through a one-time Google OAuth setup (you supply your own Google Cloud "Desktop
+app" Client ID/Secret — set `GCALCLI_CLIENT_ID` / `GCALCLI_CLIENT_SECRET` to skip
+the prompts). If it can't reach the calendar (not authenticated, offline) the
+widget shows a red **`cal?`** instead of silently looking idle.
+
+**Terminal copy/paste:** With tmux mouse mode on, a plain mouse drag selects in
+tmux and copies to the clipboard on release. To make a *native* Ghostty
+selection across the whole terminal (bypassing tmux), hold **Shift while
+dragging** — that also auto-copies. Keyboard copy/paste is `Ctrl+Shift+C` /
+`Ctrl+Shift+V`.
 
 ## CLI Commands
 
@@ -148,6 +165,8 @@ The `donburi` command provides several utilities for managing your configuration
 donburi setup [component]     # Install configurations
 donburi status                # Check symlink status
 donburi permissions           # Check macOS permissions for apps
+donburi meeting on            # Enable + show the lazy next-meeting widget
+donburi meeting off           # Hide the next-meeting widget
 donburi update                # Update donburi via git pull
 donburi --version             # Show donburi version
 donburi help                  # Show help message

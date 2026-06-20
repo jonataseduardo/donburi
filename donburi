@@ -976,6 +976,20 @@ cmd_permissions() {
     fi
     echo ""
 
+    echo -e "${BOLD}Next Meeting Widget (Google Calendar)${NC}"
+    local uvx_bin=""
+    command -v uvx >/dev/null 2>&1 && uvx_bin="$(command -v uvx)"
+    [ -z "$uvx_bin" ] && [ -x "$HOME/.local/bin/uvx" ] && uvx_bin="$HOME/.local/bin/uvx"
+    if [ -z "$uvx_bin" ]; then
+        echo -e "${YELLOW}⚠${NC} uvx not found (install uv) — widget will show 'cal?'"
+    elif "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} gcalcli authenticated"
+    else
+        echo -e "${YELLOW}⚠${NC} gcalcli not authenticated — widget will show 'cal?'"
+        echo "  To authenticate: uvx gcalcli init"
+    fi
+    echo ""
+
     echo -e "${BOLD}Borders (Window Borders - Optional)${NC}"
     check_accessibility_permission "borders" "com.felixkratz.borders" || true
     echo "  Optional: Screen Recording permission for window borders"
@@ -1057,6 +1071,109 @@ cmd_stop() {
     else
         log_info "SketchyBar is not running"
     fi
+}
+
+# Authenticate gcalcli for the next-meeting widget. gcalcli needs your OWN Google
+# Cloud OAuth "Desktop app" client (it ships none). Provide credentials via the
+# GCALCLI_CLIENT_ID / GCALCLI_CLIENT_SECRET env vars, or let it prompt on the TTY.
+_meeting_gcalcli_auth() {
+    local uvx_bin="$1"
+
+    if [ ! -t 0 ] && [ ! -e /dev/tty ]; then
+        log_warn "No interactive terminal — run this directly to authenticate:"
+        echo "  uvx gcalcli init"
+        return 1
+    fi
+
+    if [ -z "${GCALCLI_CLIENT_ID:-}" ]; then
+        echo ""
+        echo "Google Calendar setup (one-time). gcalcli needs your own OAuth client:"
+        echo "  1. Google Cloud Console → create a project"
+        echo "  2. Enable the Google Calendar API for it"
+        echo "  3. OAuth consent screen → External, app name 'gcalcli', add yourself as a Test user"
+        echo "  4. Credentials → Create OAuth client ID → Application type: Desktop app"
+        echo "  5. Copy the Client ID and Client secret"
+        echo ""
+        echo "Then either export GCALCLI_CLIENT_ID / GCALCLI_CLIENT_SECRET and re-run,"
+        echo "or paste them at the prompts below."
+        echo ""
+    fi
+
+    # Run against the controlling terminal so the secret prompt + browser flow
+    # work even when invoked from a script (avoids the EOF on stdin).
+    if [ -n "${GCALCLI_CLIENT_ID:-}" ] && [ -n "${GCALCLI_CLIENT_SECRET:-}" ]; then
+        "$uvx_bin" gcalcli \
+            --client-id="$GCALCLI_CLIENT_ID" \
+            --client-secret="$GCALCLI_CLIENT_SECRET" \
+            init </dev/tty >/dev/tty 2>&1
+    else
+        "$uvx_bin" gcalcli init </dev/tty >/dev/tty 2>&1
+    fi
+
+    if "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+        log_info "gcalcli authenticated"
+    else
+        log_warn "gcalcli still not authenticated — widget will show 'cal?'"
+        log_warn "Re-run setup any time with: donburi meeting on  (or: uvx gcalcli init)"
+    fi
+}
+
+cmd_meeting() {
+    local action="${1:-status}"
+    local flag="${XDG_CONFIG_HOME:-$HOME/.config}/donburi/meeting-tracking"
+
+    # Resolve uvx the same way the sketchybar plugin does (launchd-safe).
+    local uvx_bin=""
+    command -v uvx >/dev/null 2>&1 && uvx_bin="$(command -v uvx)"
+    [ -z "$uvx_bin" ] && [ -x "$HOME/.local/bin/uvx" ] && uvx_bin="$HOME/.local/bin/uvx"
+
+    _meeting_refresh() {
+        # Re-run the widget script so it shows/hides immediately.
+        if pgrep -x sketchybar >/dev/null 2>&1; then
+            sketchybar --trigger routine 2>/dev/null
+            sketchybar --update 2>/dev/null
+        fi
+    }
+
+    case "$action" in
+        on|start|enable)
+            mkdir -p "$(dirname "$flag")"
+            touch "$flag"
+            log_info "Meeting tracking enabled"
+            if [ -z "$uvx_bin" ]; then
+                log_warn "uvx not found — install uv so the widget can read your calendar"
+            elif ! "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+                log_info "gcalcli not authenticated — starting Google Calendar setup..."
+                _meeting_gcalcli_auth "$uvx_bin"
+            fi
+            _meeting_refresh
+            ;;
+        off|stop|disable)
+            rm -f "$flag"
+            log_info "Meeting tracking disabled (widget hidden)"
+            _meeting_refresh
+            ;;
+        toggle)
+            if [ -f "$flag" ]; then
+                cmd_meeting off
+            else
+                cmd_meeting on
+            fi
+            ;;
+        status)
+            if [ -f "$flag" ]; then
+                echo -e "${GREEN}✓${NC} Meeting tracking is ON"
+            else
+                echo -e "${YELLOW}⚠${NC} Meeting tracking is OFF (widget hidden)"
+                echo "  Enable with: donburi meeting on"
+            fi
+            ;;
+        *)
+            log_error "Unknown meeting action: $action"
+            echo "Usage: donburi meeting [on|off|toggle|status]"
+            return 1
+            ;;
+    esac
 }
 
 cmd_reload() {
@@ -1146,6 +1263,8 @@ Commands:
   stop                  Stop AeroSpace and SketchyBar
   reload [target]       Reload AeroSpace config and/or SketchyBar (default: both)
                         Targets: aerospace, sketchybar
+  meeting [action]      Toggle the lazy next-meeting widget (default: status)
+                        Actions: on, off, toggle, status
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
@@ -1170,6 +1289,8 @@ Examples:
   donburi reload                # Reload configs for both
   donburi reload aerospace      # Reload only AeroSpace config
   donburi reload sketchybar     # Reload only SketchyBar
+  donburi meeting on            # Enable + show the next-meeting widget
+  donburi meeting off           # Hide the next-meeting widget
   donburi setup                 # Install all configurations
   donburi setup nvim            # Install only Neovim config
   donburi setup --dry-run       # Preview all setup changes
@@ -1446,6 +1567,9 @@ case "$COMMAND" in
         ;;
     reload)
         cmd_reload "${1:-all}"
+        ;;
+    meeting)
+        cmd_meeting "${1:-status}"
         ;;
     admin-setup)
         # No argument parsing needed, handled in the function

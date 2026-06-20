@@ -1,66 +1,121 @@
 #!/bin/bash
 
+# Next-meeting widget.
+#
+# Reads today's events from Google Calendar via `uvx gcalcli` (OAuth, no macOS
+# Calendar/TCC dependency — important because sketchybar runs under launchd and
+# cannot read Calendar.app). Run `uvx gcalcli init` once to authenticate.
+#
+# If uvx/gcalcli is unavailable or the call fails (e.g. not yet authenticated),
+# the widget shows a red "cal?" error state instead of silently looking idle.
+
 source "$CONFIG_DIR/colors.sh"
 
 CALENDAR_ICON="󰃭"
 NO_MEETINGS_LABEL="Peace"
+ERROR_LABEL="cal?"
 BEEP_STATE_FILE="${TMPDIR:-/tmp}/sketchybar_next_meeting_beep"
+CACHE_FILE="${TMPDIR:-/tmp}/sketchybar_next_meeting_cache"
 
-MEETING_STATE=$(
-	osascript <<'APPLESCRIPT'
-tell application "Calendar"
-    set nowDate to current date
-    set endOfDay to (current date)
-    set hours of endOfDay to 23
-    set minutes of endOfDay to 59
-    set seconds of endOfDay to 59
+# Lazy loading: the widget is hidden and does no calendar work unless meeting
+# tracking is enabled via `donburi meeting on`. Toggle creates/removes this flag.
+TRACKING_FLAG="${XDG_CONFIG_HOME:-$HOME/.config}/donburi/meeting-tracking"
+if [ ! -f "$TRACKING_FLAG" ]; then
+	sketchybar --set "$NAME" drawing=off
+	exit 0
+fi
+sketchybar --set "$NAME" drawing=on
 
-    set selectedEvent to missing value
-    set selectedMode to ""
+show_error() {
+	sketchybar --set "$NAME" \
+		icon="$CALENDAR_ICON" \
+		icon.color="$KANAGAWA_RED" \
+		label="$ERROR_LABEL" \
+		label.color="$KANAGAWA_RED" \
+		background.border_color="$KANAGAWA_RED"
+	exit 0
+}
 
-    repeat with cal in every calendar
-        set candidateEvents to (every event of cal whose allday event is false and start date <= endOfDay and end date > nowDate)
-        repeat with ev in candidateEvents
-            if (start date of ev) <= nowDate then
-                if selectedMode is not "live" then
-                    set selectedEvent to ev
-                    set selectedMode to "live"
-                else if (start date of ev) > (start date of selectedEvent) then
-                    set selectedEvent to ev
-                end if
-            else if selectedMode is "" then
-                set selectedEvent to ev
-                set selectedMode to "upcoming"
-            else if selectedMode is "upcoming" and (start date of ev) < (start date of selectedEvent) then
-                set selectedEvent to ev
-            end if
-        end repeat
-    end repeat
+# Resolve uvx by absolute path — launchd's PATH does not include ~/.local/bin.
+UVX="$(command -v uvx || true)"
+if [ -z "$UVX" ] && [ -x "$HOME/.local/bin/uvx" ]; then
+	UVX="$HOME/.local/bin/uvx"
+fi
+[ -z "$UVX" ] && show_error
 
-    if selectedEvent is missing value then
-        return "none|0|0|0"
-    end if
+# Fetch today's events as TSV. Default gcalcli TSV columns are:
+#   start_date \t start_time \t end_date \t end_time \t url \t title
+# All-day events have an empty start_time and are skipped below.
+TODAY=$(date '+%Y-%m-%d')
+TSV=$("$UVX" gcalcli --nocolor agenda --tsv "$TODAY 00:00" "$TODAY 23:59" 2>/dev/null)
+GCAL_RC=$?
 
-    set targetStart to (start date of selectedEvent)
-    set sameStartCount to 0
+if [ "$GCAL_RC" -ne 0 ]; then
+	# Transient failure (network/token refresh): fall back to last good output
+	# to avoid flicker; only error out if there is no usable cache.
+	if [ -s "$CACHE_FILE" ]; then
+		TSV=$(cat "$CACHE_FILE")
+	else
+		show_error
+	fi
+else
+	printf '%s' "$TSV" >"$CACHE_FILE"
+fi
 
-    repeat with cal in every calendar
-        set sameStartEvents to (every event of cal whose allday event is false and start date = targetStart)
-        set sameStartCount to sameStartCount + (count of sameStartEvents)
-    end repeat
+# Parse the TSV and compute the selected meeting, matching the previous
+# AppleScript precedence: prefer a live event (latest-started among live),
+# otherwise the earliest upcoming event today.
+NOW_EPOCH=$(date +%s)
+MODE="none"
+SELECTED_START=""
 
-    if selectedMode is "live" then
-        set secondsSinceStart to (nowDate - targetStart) as integer
-        return "live|0|" & (secondsSinceStart as text) & "|" & (sameStartCount as text)
-    end if
+while IFS=$'\t' read -r S_DATE S_TIME E_DATE E_TIME _REST; do
+	[ -z "$S_TIME" ] && continue # all-day event
+	START=$(date -j -f '%Y-%m-%d %H:%M' "$S_DATE $S_TIME" +%s 2>/dev/null) || continue
+	END=$(date -j -f '%Y-%m-%d %H:%M' "$E_DATE $E_TIME" +%s 2>/dev/null)
+	[ -z "$END" ] && END=$START
+	[ "$END" -lt "$START" ] && END=$((END + 86400)) # crosses midnight
 
-    set secondsUntilStart to (targetStart - nowDate) as integer
-    return "upcoming|" & (secondsUntilStart as text) & "|0|" & (sameStartCount as text)
-end tell
-APPLESCRIPT
-)
+	if [ "$START" -le "$NOW_EPOCH" ] && [ "$END" -gt "$NOW_EPOCH" ]; then
+		if [ "$MODE" != "live" ] || [ "$START" -gt "$SELECTED_START" ]; then
+			MODE="live"
+			SELECTED_START="$START"
+		fi
+	elif [ "$START" -gt "$NOW_EPOCH" ]; then
+		if [ "$MODE" = "none" ]; then
+			MODE="upcoming"
+			SELECTED_START="$START"
+		elif [ "$MODE" = "upcoming" ] && [ "$START" -lt "$SELECTED_START" ]; then
+			SELECTED_START="$START"
+		fi
+	fi
+done <<EOF
+$TSV
+EOF
 
-IFS='|' read -r MODE SECONDS_UNTIL_START SECONDS_SINCE_START SAME_START_COUNT <<<"$MEETING_STATE"
+# Count meetings sharing the selected start (the "xN" stacked-meeting badge).
+SAME_START_COUNT=0
+if [ "$MODE" != "none" ]; then
+	while IFS=$'\t' read -r S_DATE S_TIME _R; do
+		[ -z "$S_TIME" ] && continue
+		ST=$(date -j -f '%Y-%m-%d %H:%M' "$S_DATE $S_TIME" +%s 2>/dev/null) || continue
+		[ "$ST" = "$SELECTED_START" ] && SAME_START_COUNT=$((SAME_START_COUNT + 1))
+	done <<EOF
+$TSV
+EOF
+fi
+
+# Derive the legacy four-tuple consumed by the display logic below.
+if [ "$MODE" = "live" ]; then
+	SECONDS_UNTIL_START=0
+	SECONDS_SINCE_START=$((NOW_EPOCH - SELECTED_START))
+elif [ "$MODE" = "upcoming" ]; then
+	SECONDS_UNTIL_START=$((SELECTED_START - NOW_EPOCH))
+	SECONDS_SINCE_START=0
+else
+	SECONDS_UNTIL_START=0
+	SECONDS_SINCE_START=0
+fi
 
 if [ -z "$MODE" ] || [ "$MODE" = "none" ]; then
 	sketchybar --set "$NAME" \
