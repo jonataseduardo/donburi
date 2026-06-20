@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.0] - 2026-06-20
+
+### Added
+- **sketchybar**: Next-meeting widget — shows the next/ongoing Google Calendar event with a countdown and warning colors; reads the calendar via `uvx gcalcli` (OAuth, works under launchd). Lazy/off by default, toggled with `donburi meeting on|off|toggle|status`; shows a red `cal?` state when unauthenticated
+- **donburi**: `meeting` command and a Google Calendar entry in `donburi permissions`; `meeting on` runs one-time gcalcli auth (supports `GCALCLI_CLIENT_ID`/`GCALCLI_CLIENT_SECRET`)
+- **keybinds**: `hkeys` helper for discovering helpful commands
+- **tmux**: Server tmux config (`tmux.conf.server`), folder-based tab/session pickers, and pane-navigation highlighting
+- **nvim**: Markdown workflow improvements, diffview keymap to diff against main, and a new-file shortcut on the snacks dashboard
+- **zsh**: GitHub CLI aliases for PR/repo workflows, a GitHub review-request helper, pass-cli completion, and nvm loading
+- **env**: `.env.example` documenting the gcalcli credentials, with `.env`/`.secrets` gitignored
+
+### Changed
+- **tmux**: Tune copy and window behavior — mouse-drag copies to the macOS clipboard (`pbcopy`), folder-name window tabs, disable automatic-rename
+- **zsh**: Speed up the GitHub review-request helper
+
+### Fixed
+- **sketchybar**: Fix the next-meeting widget that was stuck/disabled — replace the permission-fragile Calendar AppleScript with `uvx gcalcli` so it works under launchd
+
 ## [0.6.1] - 2026-02-24
 
 ### Fixed
