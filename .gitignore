@@ -19,3 +19,9 @@ Gemfile.lock
 
 # LLM planning and conversation artifacts
 assets/llm/
+
+# Local environment / secrets (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+.secrets

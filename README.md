@@ -405,6 +405,36 @@ DONBURI_BRANCH=dev bash install.sh
 DONBURI_BREW_PATH=/opt/homebrew donburi setup --no-brew
 ```
 
+### Runtime Variables (`.env.example`)
+
+Runtime secrets (currently the Google Calendar credentials for the next-meeting
+widget) are documented in [`.env.example`](.env.example). `.env` and `.secrets`
+are gitignored, so your real values never get committed.
+
+Copy the template into `~/.secrets` (sourced automatically by `zsh/donburi.zsh`)
+and fill in your values:
+
+```bash
+# Copy the template, then edit and fill in real values
+cp .env.example ~/.secrets
+${EDITOR:-vim} ~/.secrets
+
+# Load it into the current shell (or just open a new terminal)
+source ~/.secrets
+
+# Enable the widget — it now authenticates without interactive prompts
+donburi meeting on
+```
+
+Variables:
+
+| Variable | Description |
+|----------|-------------|
+| `GCALCLI_CLIENT_ID` | Google Cloud OAuth (Desktop app) client ID for gcalcli |
+| `GCALCLI_CLIENT_SECRET` | Matching OAuth client secret |
+
+See `.env.example` for the one-time Google Cloud Console steps to create these.
+
 ## Config & Keybind Aliases
 
 Quick shortcuts to edit configurations and view keybindings (added to your shell):
