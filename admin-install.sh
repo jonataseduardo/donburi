@@ -92,7 +92,7 @@ echo -e "${BOLD}Installing required packages...${NC}"
 BREW_APPS_FORMULA=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
-BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua)
+BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua tree-sitter-cli)
 
 BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@18 sqlite go telnet)
 BREW_UTILS_CASK=(slack spotify)
