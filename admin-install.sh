@@ -94,7 +94,7 @@ BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua tree-sitter-cli)
 
-BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@18 sqlite go telnet)
+BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose-rust sd tokei postgresql@18 sqlite go telnet)
 BREW_UTILS_CASK=(slack spotify)
 
 BREW_DOCKER_FORMULA=(colima docker docker-compose docker-buildx)

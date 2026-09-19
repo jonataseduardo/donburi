@@ -18,6 +18,7 @@
 ### Fixed
 - **sketchybar**: Fix the next-meeting widget that was stuck/disabled — replace the permission-fragile Calendar AppleScript with `uvx gcalcli` so it works under launchd
 - **nvim**: Migrate nvim-treesitter from the archived `master` branch to `main` — on Neovim ≥ 0.12 the old branch crashed when opening markdown files with fenced code blocks (`attempt to call method 'range' (a nil value)`); adds `tree-sitter-cli` to the CLI brew list since `main` needs it to compile parsers
+- **brew**: Replace the `choose` formula (no longer in Homebrew) with `choose-rust` in the utils list so `donburi brew utils` installs it again
 
 ## [0.6.1] - 2026-02-24
 
