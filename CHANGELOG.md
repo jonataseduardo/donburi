@@ -7,6 +7,7 @@
 - **donburi**: `meeting` command and a Google Calendar entry in `donburi permissions`; `meeting on` runs one-time gcalcli auth (supports `GCALCLI_CLIENT_ID`/`GCALCLI_CLIENT_SECRET`)
 - **keybinds**: `hkeys` helper for discovering helpful commands
 - **tmux**: Server tmux config (`tmux.conf.server`), folder-based tab/session pickers, and pane-navigation highlighting
+- **tmux**: Focus-follows-mouse — hovering over a pane selects it (tmux 3.7+, silently ignored on older servers)
 - **nvim**: Markdown workflow improvements, diffview keymap to diff against main, and a new-file shortcut on the snacks dashboard
 - **zsh**: GitHub CLI aliases for PR/repo workflows, a GitHub review-request helper, pass-cli completion, and nvm loading
 - **env**: `.env.example` documenting the gcalcli credentials, with `.env`/`.secrets` gitignored
