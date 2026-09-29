@@ -30,6 +30,7 @@ The system supports two types of configuration:
 - **Ghostty** — Terminal keybindings (reads live from `ghostty/config`)
 - **Aerospace** — Window manager keybindings (reads live from `aerospace.toml`)
 - **macOS** — System-wide keyboard shortcuts (reference file only)
+- **Helpful commands** — GitHub aliases, Git commands, and Donburi helpers (reference file only)
 
 ## Quick Start
 
@@ -41,6 +42,7 @@ The system supports two types of configuration:
 ./bin/ghostty-keys   # Show Ghostty keybindings with pager (reads live)
 ./bin/aerospace-keys # Show Aerospace keybindings with pager (reads live)
 ./bin/macos-keys     # Show macOS keybindings with pager
+./bin/hkeys          # Show GitHub, Git, and Donburi commands
 ```
 
 ### View Without Pager
@@ -51,6 +53,7 @@ The system supports two types of configuration:
 ./bin/ghostty-keys --no-pager
 ./bin/aerospace-keys --no-pager
 ./bin/macos-keys --no-pager
+./bin/hkeys --no-pager
 ```
 
 ### Edit Source Configuration
@@ -61,6 +64,7 @@ The system supports two types of configuration:
 ./bin/ghostty-keys --edit     # Edit Ghostty live config (ghostty/config)
 ./bin/aerospace-keys --edit   # Edit Aerospace live config (aerospace.toml)
 ./bin/macos-keys --edit       # Edit macOS reference file
+./bin/hkeys --edit            # Edit helpful command reference
 ```
 
 ## Usage
@@ -89,6 +93,9 @@ chrome-keys --no-pager
 
 # Edit macOS keybindings config
 macos-keys --edit
+
+# Show GitHub aliases and common Git commands
+hkeys
 ```
 
 ### Pager Commands

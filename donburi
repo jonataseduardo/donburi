@@ -281,10 +281,10 @@ BREW_APPS_FORMULA=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders)
 BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
 
 # CLI: Essential command-line tools
-BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua)
+BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua tree-sitter-cli)
 
 # Utils: Development utilities, media processing, data tools, and communication apps
-BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose sd tokei postgresql@18 sqlite go telnet)
+BREW_UTILS_FORMULA=(node python ffmpeg imagemagick pandoc yq jless fd dust httpie watchexec direnv just glow tldr zoxide delta choose-rust sd tokei postgresql@18 sqlite go telnet)
 BREW_UTILS_CASK=(slack spotify)
 
 # Docker: Container development tools
@@ -976,6 +976,20 @@ cmd_permissions() {
     fi
     echo ""
 
+    echo -e "${BOLD}Next Meeting Widget (Google Calendar)${NC}"
+    local uvx_bin=""
+    command -v uvx >/dev/null 2>&1 && uvx_bin="$(command -v uvx)"
+    [ -z "$uvx_bin" ] && [ -x "$HOME/.local/bin/uvx" ] && uvx_bin="$HOME/.local/bin/uvx"
+    if [ -z "$uvx_bin" ]; then
+        echo -e "${YELLOW}⚠${NC} uvx not found (install uv) — widget will show 'cal?'"
+    elif "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} gcalcli authenticated"
+    else
+        echo -e "${YELLOW}⚠${NC} gcalcli not authenticated — widget will show 'cal?'"
+        echo "  To authenticate: uvx gcalcli init"
+    fi
+    echo ""
+
     echo -e "${BOLD}Borders (Window Borders - Optional)${NC}"
     check_accessibility_permission "borders" "com.felixkratz.borders" || true
     echo "  Optional: Screen Recording permission for window borders"
@@ -1005,6 +1019,209 @@ cmd_permissions() {
     fi
 
     return 0
+}
+
+# ---------------------------------------------------------------------------
+# Start / Stop / Reload Commands
+# ---------------------------------------------------------------------------
+
+cmd_start() {
+    echo -e "${CYAN}--- start ---${NC}"
+
+    # AeroSpace
+    if pgrep -x AeroSpace >/dev/null 2>&1; then
+        log_info "AeroSpace is already running"
+    else
+        log_info "Starting AeroSpace..."
+        open -a AeroSpace
+        log_info "AeroSpace started"
+    fi
+
+    # SketchyBar
+    if pgrep -x sketchybar >/dev/null 2>&1; then
+        log_info "SketchyBar is already running"
+    else
+        log_info "Starting SketchyBar..."
+        if find_brew && "$BREW_CMD" services start sketchybar 2>/dev/null | grep -q "Successfully started"; then
+            log_info "SketchyBar started via brew services"
+        else
+            sketchybar &>/dev/null &
+            log_info "SketchyBar started directly"
+        fi
+    fi
+}
+
+cmd_stop() {
+    echo -e "${CYAN}--- stop ---${NC}"
+
+    # AeroSpace
+    if pgrep -x AeroSpace >/dev/null 2>&1; then
+        log_info "Stopping AeroSpace..."
+        osascript -e 'quit app "AeroSpace"' 2>/dev/null || pkill AeroSpace 2>/dev/null || true
+        log_info "AeroSpace stopped"
+    else
+        log_info "AeroSpace is not running"
+    fi
+
+    # SketchyBar
+    if pgrep -x sketchybar >/dev/null 2>&1; then
+        log_info "Stopping SketchyBar..."
+        pkill sketchybar 2>/dev/null || true
+        log_info "SketchyBar stopped"
+    else
+        log_info "SketchyBar is not running"
+    fi
+}
+
+# Authenticate gcalcli for the next-meeting widget. gcalcli needs your OWN Google
+# Cloud OAuth "Desktop app" client (it ships none). Provide credentials via the
+# GCALCLI_CLIENT_ID / GCALCLI_CLIENT_SECRET env vars, or let it prompt on the TTY.
+_meeting_gcalcli_auth() {
+    local uvx_bin="$1"
+
+    if [ ! -t 0 ] && [ ! -e /dev/tty ]; then
+        log_warn "No interactive terminal — run this directly to authenticate:"
+        echo "  uvx gcalcli init"
+        return 1
+    fi
+
+    if [ -z "${GCALCLI_CLIENT_ID:-}" ]; then
+        echo ""
+        echo "Google Calendar setup (one-time). gcalcli needs your own OAuth client:"
+        echo "  1. Google Cloud Console → create a project"
+        echo "  2. Enable the Google Calendar API for it"
+        echo "  3. OAuth consent screen → External, app name 'gcalcli', add yourself as a Test user"
+        echo "  4. Credentials → Create OAuth client ID → Application type: Desktop app"
+        echo "  5. Copy the Client ID and Client secret"
+        echo ""
+        echo "Then either export GCALCLI_CLIENT_ID / GCALCLI_CLIENT_SECRET and re-run,"
+        echo "or paste them at the prompts below."
+        echo ""
+    fi
+
+    # Run against the controlling terminal so the secret prompt + browser flow
+    # work even when invoked from a script (avoids the EOF on stdin).
+    if [ -n "${GCALCLI_CLIENT_ID:-}" ] && [ -n "${GCALCLI_CLIENT_SECRET:-}" ]; then
+        "$uvx_bin" gcalcli \
+            --client-id="$GCALCLI_CLIENT_ID" \
+            --client-secret="$GCALCLI_CLIENT_SECRET" \
+            init </dev/tty >/dev/tty 2>&1
+    else
+        "$uvx_bin" gcalcli init </dev/tty >/dev/tty 2>&1
+    fi
+
+    if "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+        log_info "gcalcli authenticated"
+    else
+        log_warn "gcalcli still not authenticated — widget will show 'cal?'"
+        log_warn "Re-run setup any time with: donburi meeting on  (or: uvx gcalcli init)"
+    fi
+}
+
+cmd_meeting() {
+    local action="${1:-status}"
+    local flag="${XDG_CONFIG_HOME:-$HOME/.config}/donburi/meeting-tracking"
+
+    # Resolve uvx the same way the sketchybar plugin does (launchd-safe).
+    local uvx_bin=""
+    command -v uvx >/dev/null 2>&1 && uvx_bin="$(command -v uvx)"
+    [ -z "$uvx_bin" ] && [ -x "$HOME/.local/bin/uvx" ] && uvx_bin="$HOME/.local/bin/uvx"
+
+    _meeting_refresh() {
+        # Re-run the widget script so it shows/hides immediately.
+        if pgrep -x sketchybar >/dev/null 2>&1; then
+            sketchybar --trigger routine 2>/dev/null
+            sketchybar --update 2>/dev/null
+        fi
+    }
+
+    case "$action" in
+        on|start|enable)
+            mkdir -p "$(dirname "$flag")"
+            touch "$flag"
+            log_info "Meeting tracking enabled"
+            if [ -z "$uvx_bin" ]; then
+                log_warn "uvx not found — install uv so the widget can read your calendar"
+            elif ! "$uvx_bin" gcalcli --nocolor agenda --tsv now now >/dev/null 2>&1; then
+                log_info "gcalcli not authenticated — starting Google Calendar setup..."
+                _meeting_gcalcli_auth "$uvx_bin"
+            fi
+            _meeting_refresh
+            ;;
+        off|stop|disable)
+            rm -f "$flag"
+            log_info "Meeting tracking disabled (widget hidden)"
+            _meeting_refresh
+            ;;
+        toggle)
+            if [ -f "$flag" ]; then
+                cmd_meeting off
+            else
+                cmd_meeting on
+            fi
+            ;;
+        status)
+            if [ -f "$flag" ]; then
+                echo -e "${GREEN}✓${NC} Meeting tracking is ON"
+            else
+                echo -e "${YELLOW}⚠${NC} Meeting tracking is OFF (widget hidden)"
+                echo "  Enable with: donburi meeting on"
+            fi
+            ;;
+        *)
+            log_error "Unknown meeting action: $action"
+            echo "Usage: donburi meeting [on|off|toggle|status]"
+            return 1
+            ;;
+    esac
+}
+
+cmd_reload() {
+    local target="${1:-all}"
+    echo -e "${CYAN}--- reload: $target ---${NC}"
+
+    case "$target" in
+        aerospace)
+            if pgrep -x AeroSpace >/dev/null 2>&1; then
+                log_info "Reloading AeroSpace config..."
+                aerospace reload-config
+                log_info "AeroSpace config reloaded"
+            else
+                log_warn "AeroSpace is not running — skipping"
+            fi
+            ;;
+        sketchybar)
+            if pgrep -x sketchybar >/dev/null 2>&1; then
+                log_info "Reloading SketchyBar..."
+                sketchybar --reload
+                log_info "SketchyBar reloaded"
+            else
+                log_warn "SketchyBar is not running — skipping"
+            fi
+            ;;
+        all)
+            if pgrep -x AeroSpace >/dev/null 2>&1; then
+                log_info "Reloading AeroSpace config..."
+                aerospace reload-config
+                log_info "AeroSpace config reloaded"
+            else
+                log_warn "AeroSpace is not running — skipping"
+            fi
+
+            if pgrep -x sketchybar >/dev/null 2>&1; then
+                log_info "Reloading SketchyBar..."
+                sketchybar --reload
+                log_info "SketchyBar reloaded"
+            else
+                log_warn "SketchyBar is not running — skipping"
+            fi
+            ;;
+        *)
+            log_error "Unknown reload target: $target"
+            echo "Usage: donburi reload [aerospace|sketchybar]"
+            return 1
+            ;;
+    esac
 }
 
 # ---------------------------------------------------------------------------
@@ -1042,12 +1259,18 @@ Usage: donburi <command> [options]
 Commands:
   setup [component]     Install configurations (default: all)
                         Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds
+  start                 Start AeroSpace and SketchyBar (skips if already running)
+  stop                  Stop AeroSpace and SketchyBar
+  reload [target]       Reload AeroSpace config and/or SketchyBar (default: both)
+                        Targets: aerospace, sketchybar
+  meeting [action]      Toggle the lazy next-meeting widget (default: status)
+                        Actions: on, off, toggle, status
   status                Show symlink status
   brew [category]       Install packages via Homebrew
                         Categories: apps (default), cli, utils, docker, all
   brew-check            Check Homebrew installation and configuration
   permissions           Check macOS permissions for apps
-  update                Update donburi via git pull
+  update                Update donburi (git pull)
   help                  Show this help message
 
 Admin Commands (require admin/root):
@@ -1061,6 +1284,13 @@ Options:
   --list                Show packages without installing (brew only)
 
 Examples:
+  donburi start                 # Start AeroSpace and SketchyBar
+  donburi stop                  # Stop AeroSpace and SketchyBar
+  donburi reload                # Reload configs for both
+  donburi reload aerospace      # Reload only AeroSpace config
+  donburi reload sketchybar     # Reload only SketchyBar
+  donburi meeting on            # Enable + show the next-meeting widget
+  donburi meeting off           # Hide the next-meeting widget
   donburi setup                 # Install all configurations
   donburi setup nvim            # Install only Neovim config
   donburi setup --dry-run       # Preview all setup changes
@@ -1076,7 +1306,7 @@ Examples:
   su -l <admin> -c "donburi admin-setup"   # Run complete admin setup (IT staff)
   donburi admin-check           # Verify admin setup is complete
 
-For more information, see: https://github.com/jonatas/donburi
+For more information, see: https://github.com/jonataseduardo/donburi
 EOF
 }
 
@@ -1098,8 +1328,11 @@ cmd_admin_setup() {
     echo "This command will help administrators set up donburi for enterprise users."
     echo "It will:"
     echo "  1. Install all required Homebrew packages"
-    echo "  2. Start necessary services (sketchybar for the logged-in user)"
-    echo "  3. Guide you through granting system permissions"
+    echo ""
+    echo "Notes:"
+    echo "  - Homebrew must already be installed"
+    echo "  - This command does not start services"
+    echo "  - This command does not automate macOS permissions"
     echo ""
     echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
     read -r
@@ -1121,62 +1354,18 @@ cmd_admin_setup() {
     echo "This may take several minutes..."
     cmd_brew "all"
 
-    # Step 3: Start sketchybar service
+    # Step 3: Manual permission reminder
     echo ""
-    echo -e "${BOLD}Step 3: Starting services...${NC}"
-    console_user="$(get_console_user || true)"
-    if [[ -n "$console_user" ]]; then
-        echo "Starting sketchybar service for console user: $console_user"
-        if su -l "$console_user" -c "$BREW_CMD services start --user sketchybar" 2>&1 | grep -q "Successfully started"; then
-            echo -e "${GREEN}✓ Sketchybar service started${NC}"
-        elif su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
-            echo -e "${GREEN}✓ Sketchybar service already running${NC}"
-        else
-            echo -e "${YELLOW}⚠ Could not verify sketchybar service status${NC}"
-        fi
-    else
-        echo -e "${YELLOW}⚠ Console user not detected; cannot start sketchybar for a user session${NC}"
-        echo "  Ask the logged-in user to run: brew services start --user sketchybar"
-    fi
-
-    # Step 4: Grant permissions
+    echo -e "${BOLD}Step 3: Manual system permission${NC}"
     echo ""
-    echo -e "${BOLD}Step 4: System Permissions${NC}"
-    echo ""
-    echo "The following applications need system permissions."
-    echo "I'll open the System Settings to the correct panes for you."
+    echo "AeroSpace needs Accessibility permission for window management."
+    echo "Grant it manually in System Settings:"
+    echo "  Privacy & Security -> Accessibility -> enable AeroSpace"
     echo ""
 
-    echo -e "${CYAN}4a. Aerospace - Accessibility Permission${NC}"
-    echo "   Aerospace needs this to manage windows"
-    echo "   Action: Enable AeroSpace in the list"
+    # Step 4: Verify setup
     echo ""
-    echo -e "${YELLOW}Opening Accessibility settings...${NC}"
-    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension" 2>/dev/null || \
-        open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null
-    echo "Press Enter after granting permission..."
-    read -r
-
-    echo ""
-    echo -e "${CYAN}4b. Borders - Screen Recording Permission (Optional)${NC}"
-    echo "   JankyBorders adds colored borders to windows (visual enhancement only)"
-    echo "   This is OPTIONAL - skip if you don't want window borders"
-    echo "   Note: Despite the name, this does NOT record your screen"
-    echo ""
-    echo "Grant this permission? (y/N): "
-    read -r grant_borders
-    if [[ "$grant_borders" =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}Opening Screen Recording settings...${NC}"
-        open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture" 2>/dev/null
-        echo "Press Enter after granting permission (or skip)..."
-        read -r
-    else
-        echo "Skipping Borders permission (optional component)"
-    fi
-
-    # Step 5: Verify setup
-    echo ""
-    echo -e "${BOLD}Step 5: Verifying setup...${NC}"
+    echo -e "${BOLD}Step 4: Verifying setup...${NC}"
     echo ""
     cmd_admin_check
 
@@ -1184,8 +1373,9 @@ cmd_admin_setup() {
     echo -e "${GREEN}=== Admin setup complete! ===${NC}"
     echo ""
     echo "Next steps for users:"
-    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash"
+    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash"
     echo "  2. Setup configs: donburi setup --no-brew"
+    echo "  3. Grant AeroSpace Accessibility permission manually"
     echo ""
 }
 
@@ -1218,28 +1408,10 @@ cmd_admin_check() {
         fi
     done
 
-    # Check services
-    echo ""
-    echo -e "${BOLD}Services:${NC}"
-    console_user="$(get_console_user || true)"
-    if [[ -n "$console_user" ]]; then
-        if su -l "$console_user" -c "$BREW_CMD services list" 2>/dev/null | grep -q "sketchybar.*started"; then
-            echo -e "  ${GREEN}✓${NC} Sketchybar service running (user: $console_user)"
-        else
-            echo -e "  ${YELLOW}⚠${NC} Sketchybar service not running (user: $console_user)"
-            echo "      Run: brew services start --user sketchybar"
-            all_good=false
-        fi
-    else
-        echo -e "  ${YELLOW}⚠${NC} Console user not detected; cannot verify sketchybar service"
-        echo "      Run: brew services start --user sketchybar"
-        all_good=false
-    fi
-
-    # Check permissions (basic check)
+    # Check permissions (informational only)
     echo ""
     echo -e "${BOLD}Permissions:${NC}"
-    echo "  Note: Permission checks require the apps to be launched once"
+    echo "  Note: Permission checks are informational only"
 
     # Check if Aerospace has accessibility
     if check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" 2>/dev/null; then
@@ -1247,6 +1419,7 @@ cmd_admin_check() {
     else
         echo -e "  ${YELLOW}⚠${NC} Aerospace needs Accessibility permission"
         echo "      Open: System Settings → Privacy & Security → Accessibility"
+        echo "      This does not block admin package setup"
     fi
 
     # Check if Borders has screen recording (optional)
@@ -1385,6 +1558,18 @@ case "$COMMAND" in
         show_header
         cmd_update
         show_footer
+        ;;
+    start)
+        cmd_start
+        ;;
+    stop)
+        cmd_stop
+        ;;
+    reload)
+        cmd_reload "${1:-all}"
+        ;;
+    meeting)
+        cmd_meeting "${1:-status}"
         ;;
     admin-setup)
         # No argument parsing needed, handled in the function

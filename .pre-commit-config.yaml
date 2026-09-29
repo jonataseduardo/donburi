@@ -4,6 +4,10 @@ repos:
     hooks:
       - id: shellcheck
         args: ["--severity=warning"]
+        # zsh/bin/ holds genuine zsh scripts (#!/usr/bin/env zsh) that
+        # shellcheck cannot parse (SC1071). zsh/*.zsh files keep `# shellcheck
+        # shell=bash` directives and are still linted.
+        exclude: ^zsh/bin/
   - repo: https://github.com/JohnnyMorganz/StyLua
     rev: v2.3.1
     hooks:

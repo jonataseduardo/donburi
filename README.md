@@ -44,7 +44,7 @@ All other dependencies are installed automatically during setup (see below).
 **One-liner installation:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 ```
 
 This installs donburi to `~/.donburi` and adds the `donburi` command to your PATH.
@@ -52,7 +52,7 @@ This installs donburi to `~/.donburi` and adds the `donburi` command to your PAT
 **Or clone manually:**
 
 ```bash
-git clone https://github.com/jonatas/donburi.git ~/.donburi
+git clone https://github.com/jonataseduardo/donburi.git ~/.donburi
 ~/.donburi/donburi setup
 ```
 
@@ -128,6 +128,7 @@ Donburi's Sketchybar configuration includes these status indicators:
 |-----------|---------|
 | **Aerospace** | Current workspace number and available workspaces |
 | **Front App** | Name of currently focused application |
+| **Next Meeting** | Next/ongoing Google Calendar event with countdown and warning colors |
 | **Clock** | Current time and date |
 | **CPU** | CPU usage percentage |
 | **Memory** | RAM usage percentage |
@@ -137,6 +138,22 @@ Donburi's Sketchybar configuration includes these status indicators:
 | **VPN** | VPN connection status |
 
 Indicators auto-update and use the Kanagawa color scheme. Customize in `~/.config/sketchybar/`.
+
+The **Next Meeting** widget is **lazy / off by default** — it stays hidden and
+makes no calendar calls until you enable tracking with `donburi meeting on`
+(`donburi meeting off` hides it again). When enabled it reads Google Calendar
+through `uvx gcalcli` (OAuth — no macOS Calendar permission needed, which matters
+because Sketchybar runs under launchd). The first `donburi meeting on` walks you
+through a one-time Google OAuth setup (you supply your own Google Cloud "Desktop
+app" Client ID/Secret — set `GCALCLI_CLIENT_ID` / `GCALCLI_CLIENT_SECRET` to skip
+the prompts). If it can't reach the calendar (not authenticated, offline) the
+widget shows a red **`cal?`** instead of silently looking idle.
+
+**Terminal copy/paste:** With tmux mouse mode on, a plain mouse drag selects in
+tmux and copies to the clipboard on release. To make a *native* Ghostty
+selection across the whole terminal (bypassing tmux), hold **Shift while
+dragging** — that also auto-copies. Keyboard copy/paste is `Ctrl+Shift+C` /
+`Ctrl+Shift+V`.
 
 ## CLI Commands
 
@@ -148,6 +165,8 @@ The `donburi` command provides several utilities for managing your configuration
 donburi setup [component]     # Install configurations
 donburi status                # Check symlink status
 donburi permissions           # Check macOS permissions for apps
+donburi meeting on            # Enable + show the lazy next-meeting widget
+donburi meeting off           # Hide the next-meeting widget
 donburi update                # Update donburi via git pull
 donburi --version             # Show donburi version
 donburi help                  # Show help message
@@ -175,7 +194,7 @@ donburi brew --list           # Show available packages without installing
 Package categories:
 - `apps` — UI applications (neovim, ghostty, aerospace, sketchybar, btop)
 - `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
-- `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
+- `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose-rust, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
 - `all` — Install everything
 
@@ -194,13 +213,16 @@ For corporate environments where users don't have admin privileges:
 
 ```bash
 # Admin runs (single command, assumes Homebrew already installed):
-su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash"
+su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash"
 
 # Manual alternative (if not using admin-install.sh):
 su -l <admin> -c "donburi brew all"      # Install all brew packages system-wide
 
 # User runs:
 donburi setup --no-brew    # Setup configs without brew dependencies
+
+# Manual system permission step (user):
+# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
 ```
 
 See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup instructions.
@@ -273,7 +295,7 @@ Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar
 donburi brew               # Install apps only (default)
 donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, btop, jq, borders)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
-donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
+donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose-rust, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
 donburi brew all           # Install everything
 donburi brew --list        # Show all packages without installing
@@ -296,10 +318,10 @@ Test the setup:
 3. Open `nvim` and run `:checkhealth` to verify plugins
 4. In tmux, press `Ctrl + hjkl` to navigate between Neovim splits and tmux panes
 
-Start Sketchybar if not running:
+Start services if needed:
 
 ```bash
-brew services start sketchybar
+donburi start
 ```
 
 ## Installing Code Formatters
@@ -383,6 +405,36 @@ DONBURI_BRANCH=dev bash install.sh
 DONBURI_BREW_PATH=/opt/homebrew donburi setup --no-brew
 ```
 
+### Runtime Variables (`.env.example`)
+
+Runtime secrets (currently the Google Calendar credentials for the next-meeting
+widget) are documented in [`.env.example`](.env.example). `.env` and `.secrets`
+are gitignored, so your real values never get committed.
+
+Copy the template into `~/.secrets` (sourced automatically by `zsh/donburi.zsh`)
+and fill in your values:
+
+```bash
+# Copy the template, then edit and fill in real values
+cp .env.example ~/.secrets
+${EDITOR:-vim} ~/.secrets
+
+# Load it into the current shell (or just open a new terminal)
+source ~/.secrets
+
+# Enable the widget — it now authenticates without interactive prompts
+donburi meeting on
+```
+
+Variables:
+
+| Variable | Description |
+|----------|-------------|
+| `GCALCLI_CLIENT_ID` | Google Cloud OAuth (Desktop app) client ID for gcalcli |
+| `GCALCLI_CLIENT_SECRET` | Matching OAuth client secret |
+
+See `.env.example` for the one-time Google Cloud Console steps to create these.
+
 ## Config & Keybind Aliases
 
 Quick shortcuts to edit configurations and view keybindings (added to your shell):
@@ -434,7 +486,7 @@ Donburi includes `lsd` for a modern `ls` replacement:
 **Sketchybar not showing**
 
 ```bash
-brew services start sketchybar
+donburi start
 ```
 
 **Neovim plugins not loading**
@@ -478,7 +530,7 @@ For detailed contribution guidelines, see [AGENT.md](AGENT.md).
 ### Resources
 
 - **Upstream Neovim config**: [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim)
-- **Issues & PRs**: [GitHub repository](https://github.com/jonatas/donburi)
+- **Issues & PRs**: [GitHub repository](https://github.com/jonataseduardo/donburi)
 
 ## License
 

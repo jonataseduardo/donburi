@@ -31,7 +31,7 @@ Move to Workspace|alt-shift-6|move-node-to-workspace 6
 Move to Workspace|alt-shift-7|move-node-to-workspace 7
 Move to Workspace|alt-shift-8|move-node-to-workspace 8
 Move to Workspace|alt-shift-9|move-node-to-workspace 9
-Layout|alt-shift-f|fullscreen, exec-and-forget sketchybar --reload
+Layout|alt-shift-f|fullscreen; exec-and-forget  sketchybar --reload
 Window Resize|alt-shift-h|resize width -50
 Window Resize|alt-shift-j|resize height +50
 Window Resize|alt-shift-k|resize height -50

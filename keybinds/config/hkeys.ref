@@ -1,0 +1,37 @@
+GitHub Aliases|hl|gh auth login -p ssh
+GitHub Aliases|hs|gh auth status
+GitHub Aliases|hp|gh pr list
+GitHub Aliases|hm|PRs waiting for my review
+GitHub Aliases|ha|gh pr list --author jcesar
+GitHub Aliases|hv|gh pr view
+GitHub Aliases|hw|gh pr view --web
+GitHub Aliases|hd|gh pr diff
+GitHub Aliases|hr|gh repo view --web
+GitHub Aliases|hn|Unread GitHub notification titles
+Git Commands|git status --short|Compact worktree status
+Git Commands|git diff|Review unstaged changes
+Git Commands|git diff --cached|Review staged changes
+Git Commands|git add -p|Stage changes interactively
+Git Commands|git commit -m "msg"|Commit staged changes
+Git Commands|git log --oneline -10|Show recent commits
+Git Commands|git switch -c <branch>|Create and switch branch
+Git Commands|git restore --staged <file>|Unstage a file
+GitHub Commands|gh pr checkout <number>|Checkout a pull request
+GitHub Commands|gh pr create --web|Open PR creation in browser
+GitHub Commands|gh pr checks --watch|Watch PR CI checks
+GitHub Commands|gh pr review --approve|Approve current PR
+GitHub Commands|gh pr review --request-changes|Request PR changes
+GitHub Commands|gh pr merge --squash --delete-branch|Squash merge and delete branch
+Donburi Config|dconf|Open Donburi repo in editor
+Donburi Config|zconf|Edit zsh config
+Donburi Config|tconf|Edit tmux config
+Donburi Config|nconf|Edit Neovim config
+Donburi Config|gconf|Edit Ghostty config
+Donburi Config|aconf|Edit Aerospace config
+Key Helpers|hkeys|Show this command reference
+Key Helpers|nkeys|Show tmux and Neovim navigation keys
+Key Helpers|akeys|Show Aerospace keys
+Key Helpers|gkeys|Show Ghostty keys
+Key Helpers|mkeys|Show macOS keys
+Key Helpers|skeys|Show Slack keys
+Key Helpers|ckeys|Show Chrome keys

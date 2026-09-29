@@ -1,0 +1,150 @@
+#!/opt/homebrew/bin/bash
+# Helpful Commands Helper
+# Display GitHub, Git, Donburi, and key helper commands in a formatted table.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+source "$SCRIPT_DIR/lib/display.sh"
+
+CONFIG_FILE="$SCRIPT_DIR/config/hkeys.ref"
+USER_CONFIG_FILE="$HOME/.config/keybinds/hkeys.ref"
+
+show_usage() {
+    cat <<EOF
+Usage: $(basename "$0") [options]
+
+Display useful GitHub, Git, Donburi, and key helper commands.
+
+Options:
+  --no-pager  Output directly to terminal without pager
+  --edit      Open config file in \$EDITOR
+  -h, --help  Show this help message
+
+Examples:
+  $(basename "$0")              # Show commands in pager
+  $(basename "$0") --no-pager   # Show without pager
+  $(basename "$0") --edit       # Edit command reference
+
+Config file: $USER_CONFIG_FILE
+Default file: $CONFIG_FILE
+EOF
+}
+
+display_commands() {
+    local active_config="$CONFIG_FILE"
+    if [[ -f "$USER_CONFIG_FILE" ]]; then
+        active_config="$USER_CONFIG_FILE"
+    fi
+
+    draw_header "Helpful Commands"
+
+    declare -A category_keys
+    declare -A category_cmds
+    local -a categories=()
+    declare -A seen_categories
+
+    while IFS='|' read -r category command description; do
+        [[ "$category" =~ ^#.*$ ]] && continue
+        [[ -z "$category" ]] && continue
+
+        category="${category#"${category%%[![:space:]]*}"}"
+        category="${category%"${category##*[![:space:]]}"}"
+        command="${command#"${command%%[![:space:]]*}"}"
+        command="${command%"${command##*[![:space:]]}"}"
+        description="${description#"${description%%[![:space:]]*}"}"
+        description="${description%"${description##*[![:space:]]}"}"
+
+        if [[ -z "${seen_categories[$category]:-}" ]]; then
+            categories+=("$category")
+            seen_categories[$category]=1
+        fi
+
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            category_keys[$category]+=$'\n'"$command"
+            category_cmds[$category]+=$'\n'"$description"
+        else
+            category_keys[$category]="$command"
+            category_cmds[$category]="$description"
+        fi
+    done < "$active_config"
+
+    local first_category=true
+    for category in "${categories[@]}"; do
+        if [[ -n "${category_keys[$category]:-}" ]]; then
+            if [[ "$first_category" != true ]]; then
+                draw_line "$BOX_ML" "$BOX_X" "$BOX_MR"
+            fi
+            first_category=false
+
+            local color="$WHITE"
+            case "$category" in
+                "GitHub Aliases") color="$CYAN" ;;
+                "Git Commands") color="$YELLOW" ;;
+                "GitHub Commands") color="$BLUE" ;;
+                "Donburi Config") color="$GREEN" ;;
+                "Key Helpers") color="$MAGENTA" ;;
+            esac
+
+            draw_category "$category" "$color"
+
+            while IFS= read -r command && IFS= read -r description <&3; do
+                draw_row "$command" "$description"
+            done < <(printf '%s\n' "${category_keys[$category]}") 3< <(printf '%s\n' "${category_cmds[$category]}")
+        fi
+    done
+
+    draw_footer
+}
+
+main() {
+    local use_pager=true
+    local edit_mode=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            --no-pager)
+                use_pager=false
+                shift
+                ;;
+            --edit)
+                edit_mode=true
+                shift
+                ;;
+            *)
+                printf 'Unknown option: %s\n' "$1" >&2
+                show_usage >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    if [[ "$edit_mode" == true ]]; then
+        mkdir -p "$HOME/.config/keybinds"
+        if [[ ! -f "$USER_CONFIG_FILE" ]]; then
+            cp "$CONFIG_FILE" "$USER_CONFIG_FILE"
+            printf 'Created %s\n' "$USER_CONFIG_FILE"
+        fi
+
+        ${EDITOR:-nano} "$USER_CONFIG_FILE"
+        exit 0
+    fi
+
+    if [[ "$use_pager" == true ]]; then
+        pager_cmd=$(setup_pager)
+        if [[ -n "$pager_cmd" ]]; then
+            display_commands | eval "$pager_cmd"
+        else
+            display_commands
+        fi
+    else
+        display_commands
+    fi
+}
+
+main "$@"

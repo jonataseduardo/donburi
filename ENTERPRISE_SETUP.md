@@ -26,38 +26,34 @@ Donburi supports enterprise environments where:
 ### Prerequisites
 - macOS 15+ (Sequoia)
 - Administrator privileges
-- Homebrew installed (or permission to install it)
+- Homebrew already installed
 
 ### Quick Setup (5 minutes)
 
-1. **Install Homebrew** (if not already installed):
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-2. **Enter admin shell and run the install command**:
+1. **Enter admin shell and run the install command**:
 ```bash
 # Enter admin shell
 su -l <admin>
 
 # Run admin install
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash
 ```
 
 Note: `admin-install.sh` assumes Homebrew is already installed. Admin must be in `su` shell before running.
 
 This will:
 - ✅ Install all required packages (neovim, ghostty, aerospace, sketchybar, tmux, etc.)
-- ✅ Start the sketchybar service for the logged-in user (auto-detected via `/dev/console`)
-- ✅ Open the System Settings panes for required permissions
 
-3. **Tell users to run**:
+2. **Tell users to run**:
 ```bash
 # Install donburi
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 
 # Setup configs (packages already installed by admin)
 donburi setup --no-brew
+
+# Manual system permission step (user)
+# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
 ```
 
 That's it! For detailed manual setup, continue reading below.
@@ -68,7 +64,7 @@ That's it! For detailed manual setup, continue reading below.
 
 These tasks require administrative privileges and should be performed by IT staff.
 
-#### 1.1 Install Homebrew (if not already installed)
+#### 1.1 Check Homebrew
 
 Check if Homebrew is installed:
 ```bash
@@ -77,17 +73,14 @@ ls -la /usr/local/bin/brew      # Intel Macs
 ls -la /opt/homebrew/bin/brew    # Apple Silicon Macs
 ```
 
-If not installed, install Homebrew:
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+If Homebrew is not installed, ask your IT provisioning flow to install it first.
 
 #### 1.2 Install Required Packages
 
 Install all brew packages system-wide:
 ```bash
 # Clone donburi repository
-git clone https://github.com/jonatas/donburi.git /tmp/donburi
+git clone https://github.com/jonataseduardo/donburi.git /tmp/donburi
 
 # Enter admin shell
 su -l <admin>
@@ -108,24 +101,16 @@ su -l <admin>
 /tmp/donburi/donburi brew docker  # Container tools
 ```
 
-#### 1.3 Grant System Permissions
-
-If macOS asks for administrator authentication during this step, enter the admin password in the prompt.
+#### 1.3 Permission Notes
 
 **Aerospace (Window Manager)**
-1. Open System Settings → Privacy & Security → Accessibility
-2. Add and enable AeroSpace
-3. Users will need to launch AeroSpace once after installation
+```bash
+# Manual step (cannot be automated):
+# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
+```
 
 **Sketchybar (Menu Bar)**
-```bash
-# Enter admin shell first
-su -l <admin>
-
-# Start sketchybar service for the logged-in user (console session)
-CONSOLE_USER="$(stat -f %Su /dev/console)"
-su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
-```
+- Service start is user-managed. Admin setup only installs the package.
 
 **JankyBorders (Optional - Visual Window Borders)**
 1. Open System Settings → Privacy & Security → Screen Recording
@@ -153,8 +138,7 @@ su -l <admin>
 This will verify:
 - Homebrew installation
 - All required packages
-- Service status
-- System permissions (if apps have been launched)
+- Permission guidance (informational)
 
 ### Phase 2: User Configuration
 
@@ -164,7 +148,7 @@ These tasks can be performed by regular users without administrative privileges.
 
 ```bash
 # Install donburi to user's home directory
-curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
 ```
 
 #### 2.2 Setup Configurations
@@ -242,17 +226,9 @@ If users get permission errors:
    donburi permissions
    ```
 
-2. For service management:
+2. For service management (user-side):
    ```bash
-   # Admin runs (enter admin shell first):
-   su -l <admin>
-
-   # Then target console user:
-   CONSOLE_USER="$(stat -f %Su /dev/console)"
-   su -l "$CONSOLE_USER" -c "brew services start --user sketchybar"
-
-   # Or user runs (if allowed):
-   brew services start --user sketchybar
+   donburi start
    ```
 
 ### Missing Dependencies
@@ -304,15 +280,13 @@ This requires administrator privileges for initial setup.
 
 Quick Setup Instructions:
 1. Enter admin shell: su -l <admin>
-2. Run automated setup: curl -fsSL https://raw.githubusercontent.com/jonatas/donburi/main/admin-install.sh | bash
-3. Follow the on-screen prompts for permissions
+2. Run automated setup: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash
+3. User completes setup and grants AeroSpace permission in System Settings
 
 The admin install command will:
 - Install all required packages (assumes Homebrew is already installed)
-- Start the Sketchybar service for the logged-in user
-- Open System Settings panes for permissions
 
-Repository: https://github.com/jonatas/donburi
+Repository: https://github.com/jonataseduardo/donburi
 Full docs: ENTERPRISE_SETUP.md (Express Admin Setup section)
 
 After admin setup, I can configure my user environment without further admin access.
@@ -332,8 +306,8 @@ If Homebrew cannot be installed, users can:
 
 ## Contact and Support
 
-- **Repository**: https://github.com/jonatas/donburi
-- **Issues**: https://github.com/jonatas/donburi/issues
+- **Repository**: https://github.com/jonataseduardo/donburi
+- **Issues**: https://github.com/jonataseduardo/donburi/issues
 - **Documentation**: README.md and CLAUDE.md
 
 For enterprise-specific issues, please include:

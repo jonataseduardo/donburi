@@ -42,6 +42,8 @@ alias gkeys="$DONBURI_DIR/keybinds/bin/ghostty-keys"
 alias mkeys="$DONBURI_DIR/keybinds/bin/macos-keys"
 # shellcheck disable=SC2139
 alias nkeys="$DONBURI_DIR/keybinds/bin/navigation-keys"
+# shellcheck disable=SC2139
+alias hkeys="$DONBURI_DIR/keybinds/bin/hkeys"
 alias ipython="python -m IPython --no-autoindent"
 alias c=clear
 alias v=nvim
@@ -53,6 +55,19 @@ alias oc=opencode
 
 # Shopify Hydrogen
 alias h2='$(npm prefix -s)/node_modules/.bin/shopify hydrogen'
+
+# GitHub CLI
+alias hl="gh auth login -p ssh"
+alias hs="gh auth status"
+alias hp="gh pr list"
+# shellcheck disable=SC2139
+alias hm="$DONBURI_DIR/zsh/bin/github-review-requests"
+alias ha="gh pr list --author jcesar"
+alias hv="gh pr view"
+alias hw="gh pr view --web"
+alias hd="gh pr diff"
+alias hr="gh repo view --web"
+alias hn="gh api notifications --jq '.[].subject.title'"
 
 # ---------------------------------------------------------------------------
 # Secrets
@@ -70,3 +85,10 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # Opencode
 # ---------------------------------------------------------------------------
 export PATH="$HOME/.opencode/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# Adding pass-cli auto completion script folder
+# ---------------------------------------------------------------------------
+# shellcheck disable=SC2206
+fpath=(~/.zfunc $fpath)
+autoload -Uz compinit && compinit
