@@ -25,13 +25,13 @@ lua/
 ├── keymaps.lua             # Global keybindings and window navigation
 ├── lazy-bootstrap.lua      # Auto-installs lazy.nvim on first run
 ├── lazy-plugins.lua        # Master plugin registry
-├── kickstart/plugins/      # Core plugins (LSP, completion, telescope, etc.)
+├── kickstart/plugins/      # Core plugins (LSP, completion, telescope, treesitter, etc.)
 └── custom/plugins/         # User plugins (auto-imported via { import = 'custom.plugins' })
 ```
 
 ## Plugin Organization
 
-- **Core plugins** in `lua/kickstart/plugins/`: lspconfig, blink-cmp, telescope, conform, gitsigns, which-key, todo-comments, mini (syntax highlighting uses Neovim's built-in treesitter, no nvim-treesitter plugin)
+- **Core plugins** in `lua/kickstart/plugins/`: lspconfig, blink-cmp, telescope, treesitter, conform, gitsigns, which-key, todo-comments, mini
 - **Optional plugins** (commented out): debug, indent_line, lint, autopairs, neo-tree
 - **Custom plugins** in `lua/custom/plugins/`: dadbod, smart-splits, toggleterm, fugitive, lualine, kanagawa, chatgpt, ghostty, markdown-preview, render-markdown
 
