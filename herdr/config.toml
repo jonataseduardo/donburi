@@ -1,0 +1,135 @@
+# Herdr Configuration — Kanagawa Vibrant Theme
+# Replaces tmux. Keybinds mirror the old tmux.conf so muscle memory carries over.
+# Seamless Ctrl+hjkl navigation with Neovim via the smart-splits.nvim herdr plugin.
+# Reference: herdr --default-config | https://herdr.dev/docs/configuration/
+#
+# Concepts: tmux session = herdr workspace, tmux window = herdr tab, pane = pane.
+
+onboarding = false
+
+# ── Kanagawa Vibrant Color Palette ───────────────────────
+#   SUMI_INK0  = #16161D   (darkest background)
+#   SUMI_INK1  = #1F1F28   (deep background)
+#   SUMI_INK3  = #2A2A37   (bar background)
+#   SUMI_INK4  = #363646   (raised surface)
+#   SUMI_INK5  = #54546D   (inactive border)
+#   FUJI_GRAY  = #727169   (muted/inactive text)
+#   OLD_WHITE  = #C8C093   (secondary text)
+#   FUJI_WHITE = #DCD7BA   (primary text)
+#   SURIMI_ORANGE = #FF9E64 (active accent)
+#   SPRING_BLUE   = #7FB4CA (info accent)
+#   CARP_YELLOW   = #E6C384 (warm highlight)
+#   ONI_VIOLET    = #957FB8 (secondary accent)
+#   SPRING_GREEN  = #98BB6C (success/green)
+#   PEACH_RED     = #FF5D62 (alert/red)
+#   WAVE_AQUA2    = #7AA89F (teal)
+#   WAVE_BLUE2    = #2D4F67 (selection)
+[theme]
+name = "kanagawa"
+
+[theme.custom]
+accent = "#FF9E64"
+panel_bg = "#1F1F28"
+sidebar_bg = "#2A2A37"
+active_row_bg = "#363646"
+selection_bg = "#2D4F67"
+surface0 = "#2A2A37"
+surface1 = "#363646"
+surface_dim = "#16161D"
+overlay0 = "#54546D"
+overlay1 = "#727169"
+text = "#DCD7BA"
+subtext0 = "#C8C093"
+mauve = "#957FB8"
+green = "#98BB6C"
+yellow = "#E6C384"
+red = "#FF5D62"
+blue = "#7FB4CA"
+teal = "#7AA89F"
+peach = "#FF9E64"
+
+# ── General ──────────────────────────────────────────────
+[terminal]
+default_shell = "/bin/zsh"
+# New panes/tabs open in the current pane directory (tmux: -c "#{pane_current_path}")
+new_cwd = "follow"
+
+# ── Status Bar / Panes ───────────────────────────────────
+[ui]
+tab_bar_position = "top"
+pane_borders = "auto"
+status_indicators = "symbols"
+# prefix+c opens a tab immediately, like tmux new-window
+prompt_new_tab_name = false
+
+# Right: next meeting | git branch | path | time (same glyphs as the old tmux bar)
+tab_bar_right_separator = "  "
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "command", command = "~/.config/herdr/scripts/next-meeting.sh", interval_seconds = 60, timeout_seconds = 10 },
+  { type = "command", command = "~/.config/herdr/scripts/git-branch.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "command", command = "basename \"${HERDR_ACTIVE_PANE_CWD:-$PWD}\" | sed 's/^/ /'", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "datetime", format = " %H:%M" },
+]
+
+# ── Keybindings ──────────────────────────────────────────
+[keys]
+prefix = "ctrl+b"
+
+# Pickers (tmux: prefix+w window tree, prefix+s sessions)
+workspace_picker = "prefix+w"
+goto = ["prefix+s", "prefix+g"]
+settings = "prefix+comma"
+
+# Tabs (tmux windows)
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+switch_tab = "prefix+1..9"
+close_tab = ["prefix+ampersand", "prefix+shift+x"]
+
+# Splits (tmux: prefix+" stacked, prefix+% side by side)
+split_horizontal = ["prefix+\"", "prefix+minus"]
+split_vertical = ["prefix+%", "prefix+v"]
+close_pane = "prefix+x"
+zoom = "prefix+z"
+
+# Pane resizing (tmux: prefix+hjkl)
+# Pane focus lives on Ctrl+hjkl (smart-splits below), so prefix+hjkl resizes instead.
+focus_pane_left = ""
+focus_pane_down = ""
+focus_pane_up = ""
+focus_pane_right = ""
+resize_pane_left = "prefix+h"
+resize_pane_down = "prefix+j"
+resize_pane_up = "prefix+k"
+resize_pane_right = "prefix+l"
+
+# ── Smart-splits Navigation ─────────────────────────────
+# Seamless Ctrl+hjkl between neovim splits and herdr panes, same as the old
+# tmux is_vim binding: when vim/nvim/fzf is in the foreground the key is
+# forwarded (smart-splits.nvim crosses into herdr at its edges); otherwise
+# herdr moves focus, unzooming first and wrapping around at the edges.
+[[keys.command]]
+key = "ctrl+h"
+type = "shell"
+command = "~/.config/herdr/scripts/navigate.sh left"
+description = "navigate left (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "shell"
+command = "~/.config/herdr/scripts/navigate.sh down"
+description = "navigate down (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "shell"
+command = "~/.config/herdr/scripts/navigate.sh up"
+description = "navigate up (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "shell"
+command = "~/.config/herdr/scripts/navigate.sh right"
+description = "navigate right (nvim/herdr)"

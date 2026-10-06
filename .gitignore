@@ -25,3 +25,12 @@ assets/llm/
 .env.*
 !.env.example
 .secrets
+
+# herdr runtime state (written into ~/.config/herdr, which is symlinked here)
+herdr/plugins/
+herdr/plugins.json
+herdr/.plugins.lock
+
+# herdr session sockets/state
+herdr/sessions/
+herdr/*.sock

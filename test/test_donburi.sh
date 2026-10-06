@@ -267,11 +267,9 @@ fi
 # Verify all symlinks
 assert_symlink "nvim symlink"       "$TEST_HOME/.config/nvim"       "$REPO_DIR/nvim"
 assert_symlink "ghostty symlink"    "$TEST_HOME/Library/Application Support/com.mitchellh.ghostty/config" "$REPO_DIR/ghostty/config"
-assert_symlink "aerospace symlink"  "$TEST_HOME/.config/aerospace"  "$REPO_DIR/aerospace"
-assert_symlink "tmux symlink"       "$TEST_HOME/.tmux.conf"         "$REPO_DIR/tmux/tmux.conf"
+assert_symlink "herdr symlink"      "$TEST_HOME/.config/herdr"      "$REPO_DIR/herdr"
 assert_symlink "zsh symlink"        "$TEST_HOME/.zshrc"             "$REPO_DIR/zsh/zshrc"
 assert_symlink "zsh-donburi symlink" "$TEST_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
-assert_symlink "sketchybar symlink" "$TEST_HOME/.config/sketchybar" "$REPO_DIR/sketchybar"
 assert_symlink "btop symlink"       "$TEST_HOME/.config/btop"       "$REPO_DIR/btop"
 
 # --- Status after keybinds setup ---
@@ -283,7 +281,7 @@ else
 fi
 
 # Verify keybind scripts were created (and setup_keybinds made them executable)
-for script_name in aerospace-keys slack-keys chrome-keys ghostty-keys macos-keys; do
+for script_name in slack-keys chrome-keys ghostty-keys macos-keys; do
     if [[ -f "$REPO_DIR/keybinds/bin/$script_name" ]]; then
         pass "keybind script $script_name exists"
     else
@@ -294,7 +292,7 @@ done
 # --- Status after full setup ---
 run "$DONBURI" status
 ALL_OK=true
-for _component in nvim ghostty aerospace tmux zsh sketchybar btop; do
+for _component in nvim ghostty herdr zsh btop; do
     if echo "$OUTPUT" | grep -q "$_component.*OK"; then
         pass "status shows OK for $_component"
     else
@@ -343,11 +341,9 @@ fi
 
 # Verify all symlinks were created without brew
 assert_symlink "no-brew: nvim symlink"       "$NOBREW_HOME/.config/nvim"       "$REPO_DIR/nvim"
-assert_symlink "no-brew: aerospace symlink"  "$NOBREW_HOME/.config/aerospace"  "$REPO_DIR/aerospace"
-assert_symlink "no-brew: tmux symlink"       "$NOBREW_HOME/.tmux.conf"         "$REPO_DIR/tmux/tmux.conf"
+assert_symlink "no-brew: herdr symlink"      "$NOBREW_HOME/.config/herdr"      "$REPO_DIR/herdr"
 assert_symlink "no-brew: zsh symlink"        "$NOBREW_HOME/.zshrc"             "$REPO_DIR/zsh/zshrc"
 assert_symlink "no-brew: zsh-donburi symlink" "$NOBREW_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
-assert_symlink "no-brew: sketchybar symlink" "$NOBREW_HOME/.config/sketchybar" "$REPO_DIR/sketchybar"
 assert_symlink "no-brew: btop symlink"       "$NOBREW_HOME/.config/btop"       "$REPO_DIR/btop"
 
 # Verify idempotency with --no-brew
@@ -360,7 +356,7 @@ fi
 
 # Verify status reports correctly after --no-brew setup
 run "$DONBURI" status
-for _component in nvim aerospace tmux zsh sketchybar btop; do
+for _component in nvim herdr zsh btop; do
     if echo "$OUTPUT" | grep -q "$_component.*OK"; then
         pass "no-brew: status OK for $_component"
     else

@@ -24,13 +24,11 @@ GitHub Commands|gh pr review --request-changes|Request PR changes
 GitHub Commands|gh pr merge --squash --delete-branch|Squash merge and delete branch
 Donburi Config|dconf|Open Donburi repo in editor
 Donburi Config|zconf|Edit zsh config
-Donburi Config|tconf|Edit tmux config
+Donburi Config|hconf|Edit herdr config
 Donburi Config|nconf|Edit Neovim config
 Donburi Config|gconf|Edit Ghostty config
-Donburi Config|aconf|Edit Aerospace config
 Key Helpers|hkeys|Show this command reference
-Key Helpers|nkeys|Show tmux and Neovim navigation keys
-Key Helpers|akeys|Show Aerospace keys
+Key Helpers|nkeys|Show herdr and Neovim navigation keys
 Key Helpers|gkeys|Show Ghostty keys
 Key Helpers|mkeys|Show macOS keys
 Key Helpers|skeys|Show Slack keys

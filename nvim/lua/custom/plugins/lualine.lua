@@ -5,12 +5,12 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      -- Vibrant Kanagawa palette (matching tmux bar and aerospace borders)
+      -- Vibrant Kanagawa palette (matching the herdr theme)
       local colors = {
-        bg = '#2A2A37', -- sumiInk3 (matches tmux bar bg)
+        bg = '#2A2A37', -- sumiInk3 (matches herdr sidebar bg)
         fg = '#DCD7BA', -- fujiWhite
         dark = '#1F1F28', -- sumiInk1
-        orange = '#FF9E64', -- surimiOrange (active accent, matches aerospace)
+        orange = '#FF9E64', -- surimiOrange (active accent, matches herdr)
         blue = '#7FB4CA', -- springBlue
         yellow = '#E6C384', -- carpYellow
         violet = '#957FB8', -- oniViolet

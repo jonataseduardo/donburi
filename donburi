@@ -31,21 +31,17 @@ BACKUP_DIR="$HOME/.config/donburi-backup-$(date +%Y%m%d-%H%M%S)"
 # Source paths
 SRC_NVIM="$DONBURI_DIR/nvim"
 SRC_GHOSTTY="$DONBURI_DIR/ghostty/config"
-SRC_AEROSPACE="$DONBURI_DIR/aerospace"
-SRC_TMUX="$DONBURI_DIR/tmux/tmux.conf"
+SRC_HERDR="$DONBURI_DIR/herdr"
 SRC_ZSH="$DONBURI_DIR/zsh/zshrc"
 SRC_ZSH_DONBURI="$DONBURI_DIR/zsh/donburi.zsh"
-SRC_SKETCHYBAR="$DONBURI_DIR/sketchybar"
 SRC_BTOP="$DONBURI_DIR/btop"
 
 # Target paths
 DST_NVIM="$HOME/.config/nvim"
 DST_GHOSTTY="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-DST_AEROSPACE="$HOME/.config/aerospace"
-DST_TMUX="$HOME/.tmux.conf"
+DST_HERDR="$HOME/.config/herdr"
 DST_ZSH="$HOME/.zshrc"
 DST_ZSH_DONBURI="$HOME/.donburi.zsh"
-DST_SKETCHYBAR="$HOME/.config/sketchybar"
 DST_BTOP="$HOME/.config/btop"
 
 # ---------------------------------------------------------------------------
@@ -277,8 +273,8 @@ make_executable() {
 # ---------------------------------------------------------------------------
 
 # Apps: UI applications managed by donburi
-BREW_APPS_FORMULA=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders)
-BREW_APPS_CASK=(ghostty nikitabobko/tap/aerospace)
+BREW_APPS_FORMULA=(neovim btop jq)
+BREW_APPS_CASK=(ghostty)
 
 # CLI: Essential command-line tools
 BREW_CLI_FORMULA=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh stylua tree-sitter-cli)
@@ -359,66 +355,6 @@ setup_ghostty() {
     create_symlink "$SRC_GHOSTTY" "$DST_GHOSTTY"
 }
 
-setup_aerospace() {
-    echo -e "${CYAN}--- aerospace ---${NC}"
-
-    # Aerospace dependencies via Homebrew
-    if [[ "$NO_BREW" != true ]] && find_brew; then
-        local aero_deps=(jq bash FelixKratz/formulae/borders)
-        for pkg in "${aero_deps[@]}"; do
-            if ! "$BREW_CMD" list --formula "$pkg" &>/dev/null; then
-                if [[ "$DRY_RUN" == true ]]; then
-                    log_info "Would install formula: $pkg"
-                else
-                    log_info "Installing formula: $pkg"
-                    "$BREW_CMD" install "$pkg" || log_warn "Failed to install $pkg (continuing)"
-                fi
-            else
-                log_info "Already installed: $pkg"
-            fi
-        done
-    elif [[ "$NO_BREW" == true ]]; then
-        log_info "Skipping brew dependencies (--no-brew mode)"
-    else
-        log_warn "Homebrew not found — skipping aerospace dependencies"
-    fi
-
-    # Remove old ~/.aerospace.toml to avoid AeroSpace ambiguity error
-    local old_aerospace="$HOME/.aerospace.toml"
-    if [[ -e "$old_aerospace" || -L "$old_aerospace" ]]; then
-        backup_if_exists "$old_aerospace"
-    fi
-    make_executable "$DONBURI_DIR/aerospace/scripts" "*.sh"
-    create_symlink "$SRC_AEROSPACE" "$DST_AEROSPACE"
-}
-
-setup_tmux() {
-    echo -e "${CYAN}--- tmux ---${NC}"
-
-    # Install TPM (Tmux Plugin Manager) if missing
-    local tpm_dir="$HOME/.tmux/plugins/tpm"
-    if [[ ! -d "$tpm_dir" ]]; then
-        if [[ "$DRY_RUN" == true ]]; then
-            log_info "Would install TPM (Tmux Plugin Manager)"
-        else
-            log_info "Installing TPM (Tmux Plugin Manager)..."
-            git clone --depth=1 https://github.com/tmux-plugins/tpm "$tpm_dir" || log_warn "Failed to install TPM (continuing)"
-        fi
-    else
-        log_info "TPM already installed"
-    fi
-
-    create_symlink "$SRC_TMUX" "$DST_TMUX"
-
-    # Install TPM plugins
-    if [[ -x "$tpm_dir/bin/install_plugins" ]] && [[ "$DRY_RUN" != true ]]; then
-        log_info "Installing tmux plugins via TPM..."
-        "$tpm_dir/bin/install_plugins" || log_warn "Failed to install tmux plugins (continuing)"
-    elif [[ "$DRY_RUN" == true ]]; then
-        log_info "Would install tmux plugins via TPM"
-    fi
-}
-
 setup_zsh() {
     echo -e "${CYAN}--- zsh ---${NC}"
 
@@ -472,30 +408,51 @@ setup_zsh() {
     create_symlink "$SRC_ZSH_DONBURI" "$DST_ZSH_DONBURI"
 }
 
-setup_sketchybar() {
-    echo -e "${CYAN}--- sketchybar ---${NC}"
+setup_herdr() {
+    echo -e "${CYAN}--- herdr ---${NC}"
 
-    # Install JetBrains Mono Nerd Font (shared with ghostty)
+    # Install herdr via its official installer (no Homebrew needed; lands in ~/.local/bin)
+    if command -v herdr &>/dev/null || [[ -x "$HOME/.local/bin/herdr" ]]; then
+        log_info "herdr already installed (update with: herdr update)"
+    elif [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install herdr via https://herdr.dev/install.sh"
+    else
+        log_info "Installing herdr..."
+        if curl -fsSL https://herdr.dev/install.sh | sh; then
+            log_info "herdr installed successfully"
+        else
+            log_warn "Failed to install herdr (continuing)"
+        fi
+    fi
+    # Make a freshly installed herdr usable right away in this shell
+    [[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
+
+    # jq is required by herdr/scripts/navigate.sh (Ctrl+hjkl navigation)
     if [[ "$NO_BREW" != true ]] && find_brew; then
-        if ! "$BREW_CMD" list --cask font-jetbrains-mono-nerd-font &>/dev/null; then
+        if ! "$BREW_CMD" list --formula jq &>/dev/null; then
             if [[ "$DRY_RUN" == true ]]; then
-                log_info "Would install cask: font-jetbrains-mono-nerd-font"
+                log_info "Would install formula: jq"
             else
-                log_info "Installing cask: font-jetbrains-mono-nerd-font"
-                "$BREW_CMD" install --cask font-jetbrains-mono-nerd-font || log_warn "Failed to install font-jetbrains-mono-nerd-font (continuing)"
+                log_info "Installing formula: jq"
+                "$BREW_CMD" install jq || log_warn "Failed to install jq (continuing)"
             fi
         else
-            log_info "Already installed: font-jetbrains-mono-nerd-font"
+            log_info "Already installed: jq"
         fi
     elif [[ "$NO_BREW" == true ]]; then
-        log_info "Skipping font installation (--no-brew mode)"
+        log_info "Skipping jq install (--no-brew mode)"
     else
-        log_warn "Homebrew not found — skipping font installation"
+        log_warn "Homebrew not found — skipping jq (needed for Ctrl+hjkl herdr navigation)"
     fi
 
-    make_executable "$DONBURI_DIR/sketchybar" "sketchybarrc"
-    make_executable "$DONBURI_DIR/sketchybar/plugins" "*.sh"
-    create_symlink "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
+    make_executable "$DONBURI_DIR/herdr/scripts" "*.sh"
+    create_symlink "$SRC_HERDR" "$DST_HERDR"
+
+    # The old SketchyBar setup hid the native macOS menu bar
+    if [[ "$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null)" == "1" ]]; then
+        log_warn "macOS menu bar is hidden (left over from SketchyBar). To restore it:"
+        log_warn "  defaults write NSGlobalDomain _HIHideMenuBar -bool false && killall SystemUIServer"
+    fi
 }
 
 setup_btop() {
@@ -569,45 +526,6 @@ setup_bun() {
     fi
 }
 
-generate_aerospace_ref() {
-    local output_file="$DONBURI_DIR/keybinds/config/aerospace-main.ref"
-
-    if ! command -v aerospace &>/dev/null || ! command -v jq &>/dev/null; then
-        log_warn "Skipping aerospace.ref generation (aerospace or jq not installed)"
-        return 0
-    fi
-
-    log_info "Generating aerospace-main.ref from live configuration..."
-
-    # Extract main mode bindings and convert to .ref format
-    aerospace config --get "mode.main.binding" --json 2>/dev/null | \
-        jq -r 'to_entries | .[] | "\(.key)=\(.value)"' | \
-        while IFS='=' read -r key cmd; do
-            # Determine category based on command
-            local category
-            case "$cmd" in
-                focus\ *)           category="Focus Navigation" ;;
-                resize\ *)          category="Window Resize" ;;
-                move\ left*|move\ right*|move\ up*|move\ down*)  category="Window Movement" ;;
-                workspace\ [0-9]*)  category="Workspaces" ;;
-                move-node-to-workspace*)  category="Move to Workspace" ;;
-                move-workspace-to-monitor*)  category="Monitor" ;;
-                layout*|fullscreen*) category="Layout" ;;
-                mode*)              category="Mode" ;;
-                reload-config*)     category="Config" ;;
-                exec*)              category="Scripts" ;;
-                join-with*)         category="Join Windows" ;;
-                flatten*)           category="Workspace" ;;
-                close-all*)         category="Windows" ;;
-                balance*)           category="Layout" ;;
-                *)                  category="Other" ;;
-            esac
-            echo "$category|$key|$cmd"
-        done > "$output_file"
-
-    log_info "Generated: $output_file"
-}
-
 generate_ghostty_ref() {
     local input_file="$DONBURI_DIR/ghostty/config"
     local output_file="$DONBURI_DIR/keybinds/config/ghostty.ref"
@@ -633,15 +551,12 @@ setup_keybinds() {
     make_executable "$DONBURI_DIR/keybinds/bin" "slack-keys"
     make_executable "$DONBURI_DIR/keybinds/bin" "chrome-keys"
     make_executable "$DONBURI_DIR/keybinds/bin" "ghostty-keys"
-    make_executable "$DONBURI_DIR/keybinds/bin" "aerospace-keys"
     make_executable "$DONBURI_DIR/keybinds/bin" "macos-keys"
 
     # Generate reference files from live configs
-    generate_aerospace_ref
     generate_ghostty_ref
 
     log_info "Keybind helpers are ready to use"
-    log_info "  • akeys   - Aerospace keybindings"
     log_info "  • skeys   - Slack keybindings"
     log_info "  • ckeys   - Chrome keybindings"
     log_info "  • gkeys   - Ghostty keybindings"
@@ -654,10 +569,8 @@ setup_all() {
     setup_bun
     setup_nvim
     setup_ghostty
-    setup_aerospace
-    setup_tmux
+    setup_herdr
     setup_zsh
-    setup_sketchybar
     setup_btop
     setup_keybinds
 }
@@ -818,11 +731,9 @@ cmd_status() {
     echo "Symlink status:"
     check_link "nvim"       "$SRC_NVIM"       "$DST_NVIM"
     check_link "ghostty"    "$SRC_GHOSTTY"    "$DST_GHOSTTY"
-    check_link "aerospace"  "$SRC_AEROSPACE"  "$DST_AEROSPACE"
-    check_link "tmux"       "$SRC_TMUX"       "$DST_TMUX"
+    check_link "herdr"      "$SRC_HERDR"      "$DST_HERDR"
     check_link "zsh"        "$SRC_ZSH"        "$DST_ZSH"
     check_link "zsh-donburi" "$SRC_ZSH_DONBURI" "$DST_ZSH_DONBURI"
-    check_link "sketchybar" "$SRC_SKETCHYBAR" "$DST_SKETCHYBAR"
     check_link "btop"       "$SRC_BTOP"       "$DST_BTOP"
 }
 
@@ -865,7 +776,7 @@ cmd_brew_check() {
 
         echo ""
         echo "Brew package categories available:"
-        echo "  • apps: UI applications (nvim, ghostty, aerospace, etc.)"
+        echo "  • apps: UI applications (nvim, ghostty, btop, etc.)"
         echo "  • cli: Command-line tools (bat, fzf, ripgrep, etc.)"
         echo "  • utils: Dev utilities, media tools, data processing (ffmpeg, imagemagick, pandoc, etc.)"
         echo "  • docker: Container tools (colima, docker, docker-compose)"
@@ -908,72 +819,8 @@ cmd_brew_check() {
 # Permissions Command
 # ---------------------------------------------------------------------------
 
-check_accessibility_permission() {
-    local app_name="$1"
-    # shellcheck disable=SC2034  # bundle_id reserved for future TCC database checks
-    local bundle_id="$2"
-
-    # Check if app has accessibility permission (macOS TCC database)
-    # Note: Direct TCC database access requires Full Disk Access
-    # We'll check if the app can perform accessibility actions instead
-    if [[ "$DRY_RUN" == true ]]; then
-        echo "Would check accessibility for $app_name"
-        return 0
-    fi
-
-    # Try to detect if accessibility is granted by checking if process is running
-    # and if we can query its windows (requires accessibility)
-    if pgrep -x "$app_name" >/dev/null 2>&1; then
-        echo -e "${GREEN}✓${NC} $app_name is running"
-        return 0
-    else
-        echo -e "${YELLOW}⚠${NC} $app_name is not running - cannot verify permissions"
-        return 1
-    fi
-}
-
-check_service_status() {
-    local service="$1"
-
-    if [[ "$DRY_RUN" == true ]]; then
-        echo "Would check service status for $service"
-        return 0
-    fi
-
-    if ! find_brew; then
-        echo -e "${RED}✗${NC} Homebrew not found - cannot check service status"
-        return 1
-    fi
-
-    # Check if service is running
-    if "$BREW_CMD" services list 2>/dev/null | grep -q "^$service.*started"; then
-        echo -e "${GREEN}✓${NC} $service service is running"
-        return 0
-    else
-        echo -e "${YELLOW}⚠${NC} $service service is not running"
-        echo "    Run: brew services start --user $service"
-        return 1
-    fi
-}
-
 cmd_permissions() {
     echo -e "${CYAN}=== Permission Status Check ===${NC}"
-    echo ""
-
-    echo -e "${BOLD}Aerospace (Window Manager)${NC}"
-    check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" || true
-    echo "  Required: Accessibility permission"
-    echo "  To grant: System Settings → Privacy & Security → Accessibility → Enable AeroSpace"
-    echo ""
-
-    echo -e "${BOLD}Sketchybar (Menu Bar)${NC}"
-    check_service_status "sketchybar" || true
-    echo "  Required: Running as a service"
-    if ! find_brew; then
-        echo "  To start: Install Homebrew first, then run: brew services start --user sketchybar"
-    else
-        echo "  To start: brew services start --user sketchybar"
-    fi
     echo ""
 
     echo -e "${BOLD}Next Meeting Widget (Google Calendar)${NC}"
@@ -990,12 +837,6 @@ cmd_permissions() {
     fi
     echo ""
 
-    echo -e "${BOLD}Borders (Window Borders - Optional)${NC}"
-    check_accessibility_permission "borders" "com.felixkratz.borders" || true
-    echo "  Optional: Screen Recording permission for window borders"
-    echo "  To grant: System Settings → Privacy & Security → Screen Recording → Enable Borders"
-    echo ""
-
     echo -e "${BOLD}Ghostty (Terminal)${NC}"
     # Use ps instead of pgrep as pgrep has issues finding ghostty on macOS
     if ps aux | grep -q "[G]hostty.app"; then
@@ -1004,13 +845,6 @@ cmd_permissions() {
         echo -e "${YELLOW}⚠${NC} Ghostty is not running"
         echo "  Note: Launch Ghostty once to trigger any permission dialogs"
     fi
-    echo ""
-
-    echo -e "${CYAN}=== Quick Actions ===${NC}"
-    echo ""
-    echo "Open System Preferences directly:"
-    echo "  • Accessibility: open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'"
-    echo "  • Screen Recording: open 'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'"
     echo ""
 
     if is_sudo; then
@@ -1022,56 +856,8 @@ cmd_permissions() {
 }
 
 # ---------------------------------------------------------------------------
-# Start / Stop / Reload Commands
+# Meeting / Reload Commands
 # ---------------------------------------------------------------------------
-
-cmd_start() {
-    echo -e "${CYAN}--- start ---${NC}"
-
-    # AeroSpace
-    if pgrep -x AeroSpace >/dev/null 2>&1; then
-        log_info "AeroSpace is already running"
-    else
-        log_info "Starting AeroSpace..."
-        open -a AeroSpace
-        log_info "AeroSpace started"
-    fi
-
-    # SketchyBar
-    if pgrep -x sketchybar >/dev/null 2>&1; then
-        log_info "SketchyBar is already running"
-    else
-        log_info "Starting SketchyBar..."
-        if find_brew && "$BREW_CMD" services start sketchybar 2>/dev/null | grep -q "Successfully started"; then
-            log_info "SketchyBar started via brew services"
-        else
-            sketchybar &>/dev/null &
-            log_info "SketchyBar started directly"
-        fi
-    fi
-}
-
-cmd_stop() {
-    echo -e "${CYAN}--- stop ---${NC}"
-
-    # AeroSpace
-    if pgrep -x AeroSpace >/dev/null 2>&1; then
-        log_info "Stopping AeroSpace..."
-        osascript -e 'quit app "AeroSpace"' 2>/dev/null || pkill AeroSpace 2>/dev/null || true
-        log_info "AeroSpace stopped"
-    else
-        log_info "AeroSpace is not running"
-    fi
-
-    # SketchyBar
-    if pgrep -x sketchybar >/dev/null 2>&1; then
-        log_info "Stopping SketchyBar..."
-        pkill sketchybar 2>/dev/null || true
-        log_info "SketchyBar stopped"
-    else
-        log_info "SketchyBar is not running"
-    fi
-}
 
 # Authenticate gcalcli for the next-meeting widget. gcalcli needs your OWN Google
 # Cloud OAuth "Desktop app" client (it ships none). Provide credentials via the
@@ -1122,17 +908,14 @@ cmd_meeting() {
     local action="${1:-status}"
     local flag="${XDG_CONFIG_HOME:-$HOME/.config}/donburi/meeting-tracking"
 
-    # Resolve uvx the same way the sketchybar plugin does (launchd-safe).
+    # Resolve uvx the same way the herdr widget script does.
     local uvx_bin=""
     command -v uvx >/dev/null 2>&1 && uvx_bin="$(command -v uvx)"
     [ -z "$uvx_bin" ] && [ -x "$HOME/.local/bin/uvx" ] && uvx_bin="$HOME/.local/bin/uvx"
 
     _meeting_refresh() {
-        # Re-run the widget script so it shows/hides immediately.
-        if pgrep -x sketchybar >/dev/null 2>&1; then
-            sketchybar --trigger routine 2>/dev/null
-            sketchybar --update 2>/dev/null
-        fi
+        # Herdr polls the widget script (interval_seconds in herdr/config.toml)
+        log_info "The herdr tab bar picks up the change within a minute"
     }
 
     case "$action" in
@@ -1177,51 +960,19 @@ cmd_meeting() {
 }
 
 cmd_reload() {
-    local target="${1:-all}"
-    echo -e "${CYAN}--- reload: $target ---${NC}"
+    echo -e "${CYAN}--- reload: herdr ---${NC}"
 
-    case "$target" in
-        aerospace)
-            if pgrep -x AeroSpace >/dev/null 2>&1; then
-                log_info "Reloading AeroSpace config..."
-                aerospace reload-config
-                log_info "AeroSpace config reloaded"
-            else
-                log_warn "AeroSpace is not running — skipping"
-            fi
-            ;;
-        sketchybar)
-            if pgrep -x sketchybar >/dev/null 2>&1; then
-                log_info "Reloading SketchyBar..."
-                sketchybar --reload
-                log_info "SketchyBar reloaded"
-            else
-                log_warn "SketchyBar is not running — skipping"
-            fi
-            ;;
-        all)
-            if pgrep -x AeroSpace >/dev/null 2>&1; then
-                log_info "Reloading AeroSpace config..."
-                aerospace reload-config
-                log_info "AeroSpace config reloaded"
-            else
-                log_warn "AeroSpace is not running — skipping"
-            fi
+    if ! command -v herdr &>/dev/null; then
+        log_warn "herdr is not installed — skipping"
+        return 0
+    fi
 
-            if pgrep -x sketchybar >/dev/null 2>&1; then
-                log_info "Reloading SketchyBar..."
-                sketchybar --reload
-                log_info "SketchyBar reloaded"
-            else
-                log_warn "SketchyBar is not running — skipping"
-            fi
-            ;;
-        *)
-            log_error "Unknown reload target: $target"
-            echo "Usage: donburi reload [aerospace|sketchybar]"
-            return 1
-            ;;
-    esac
+    log_info "Reloading herdr config..."
+    if herdr server reload-config; then
+        log_info "herdr config reloaded"
+    else
+        log_warn "herdr server is not running — skipping"
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1258,11 +1009,8 @@ Usage: donburi <command> [options]
 
 Commands:
   setup [component]     Install configurations (default: all)
-                        Components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds
-  start                 Start AeroSpace and SketchyBar (skips if already running)
-  stop                  Stop AeroSpace and SketchyBar
-  reload [target]       Reload AeroSpace config and/or SketchyBar (default: both)
-                        Targets: aerospace, sketchybar
+                        Components: nvim, ghostty, herdr, zsh, btop, keybinds
+  reload                Reload the running herdr server config
   meeting [action]      Toggle the lazy next-meeting widget (default: status)
                         Actions: on, off, toggle, status
   status                Show symlink status
@@ -1284,11 +1032,7 @@ Options:
   --list                Show packages without installing (brew only)
 
 Examples:
-  donburi start                 # Start AeroSpace and SketchyBar
-  donburi stop                  # Stop AeroSpace and SketchyBar
-  donburi reload                # Reload configs for both
-  donburi reload aerospace      # Reload only AeroSpace config
-  donburi reload sketchybar     # Reload only SketchyBar
+  donburi reload                # Reload herdr config
   donburi meeting on            # Enable + show the next-meeting widget
   donburi meeting off           # Hide the next-meeting widget
   donburi setup                 # Install all configurations
@@ -1354,18 +1098,9 @@ cmd_admin_setup() {
     echo "This may take several minutes..."
     cmd_brew "all"
 
-    # Step 3: Manual permission reminder
+    # Step 3: Verify setup
     echo ""
-    echo -e "${BOLD}Step 3: Manual system permission${NC}"
-    echo ""
-    echo "AeroSpace needs Accessibility permission for window management."
-    echo "Grant it manually in System Settings:"
-    echo "  Privacy & Security -> Accessibility -> enable AeroSpace"
-    echo ""
-
-    # Step 4: Verify setup
-    echo ""
-    echo -e "${BOLD}Step 4: Verifying setup...${NC}"
+    echo -e "${BOLD}Step 3: Verifying setup...${NC}"
     echo ""
     cmd_admin_check
 
@@ -1375,7 +1110,6 @@ cmd_admin_setup() {
     echo "Next steps for users:"
     echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash"
     echo "  2. Setup configs: donburi setup --no-brew"
-    echo "  3. Grant AeroSpace Accessibility permission manually"
     echo ""
 }
 
@@ -1397,7 +1131,7 @@ cmd_admin_check() {
     # Check key packages
     echo ""
     echo -e "${BOLD}Required packages:${NC}"
-    local packages=("neovim" "ghostty" "aerospace" "sketchybar" "tmux" "jq" "borders")
+    local packages=("neovim" "ghostty" "jq")
     for pkg in "${packages[@]}"; do
         if "$BREW_CMD" list --formula 2>/dev/null | grep -q "^$pkg$" || \
            "$BREW_CMD" list --cask 2>/dev/null | grep -q "^$pkg$"; then
@@ -1407,27 +1141,6 @@ cmd_admin_check() {
             all_good=false
         fi
     done
-
-    # Check permissions (informational only)
-    echo ""
-    echo -e "${BOLD}Permissions:${NC}"
-    echo "  Note: Permission checks are informational only"
-
-    # Check if Aerospace has accessibility
-    if check_accessibility_permission "AeroSpace" "com.nikitabobko.AeroSpace" 2>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} Aerospace has Accessibility permission"
-    else
-        echo -e "  ${YELLOW}⚠${NC} Aerospace needs Accessibility permission"
-        echo "      Open: System Settings → Privacy & Security → Accessibility"
-        echo "      This does not block admin package setup"
-    fi
-
-    # Check if Borders has screen recording (optional)
-    if check_accessibility_permission "borders" "com.felixkratz.borders" 2>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} Borders has Screen Recording permission (optional)"
-    else
-        echo -e "  ${CYAN}ℹ${NC} Borders can use Screen Recording permission (optional)"
-    fi
 
     echo ""
     if [[ "$all_good" == true ]]; then
@@ -1496,15 +1209,13 @@ case "$COMMAND" in
             all)        setup_all ;;
             nvim)       setup_nvim ;;
             ghostty)    setup_ghostty ;;
-            aerospace)  setup_aerospace ;;
-            tmux)       setup_tmux ;;
+            herdr)      setup_herdr ;;
             zsh)        setup_zsh ;;
-            sketchybar) setup_sketchybar ;;
             btop)       setup_btop ;;
             keybinds)   setup_keybinds ;;
             *)
                 log_error "Unknown component: $SETUP_COMPONENT"
-                echo "Available components: nvim, ghostty, aerospace, tmux, zsh, sketchybar, btop, keybinds, all"
+                echo "Available components: nvim, ghostty, herdr, zsh, btop, keybinds, all"
                 exit 1
                 ;;
         esac
@@ -1559,14 +1270,8 @@ case "$COMMAND" in
         cmd_update
         show_footer
         ;;
-    start)
-        cmd_start
-        ;;
-    stop)
-        cmd_stop
-        ;;
     reload)
-        cmd_reload "${1:-all}"
+        cmd_reload
         ;;
     meeting)
         cmd_meeting "${1:-status}"

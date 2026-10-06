@@ -14,13 +14,12 @@ This folder contains:
 The system supports two types of configuration:
 
 1. **Live Config** (Source of Truth)
-   - Aerospace: `~/.config/aerospace/aerospace.toml`
    - Ghostty: `~/Library/Application Support/com.mitchellh.ghostty/config`
    - Scripts read these directly for always-current data
 
 2. **Reference Files** (`.ref`)
    - Static documentation for apps without accessible configs (Slack, Chrome, macOS)
-   - Generated snapshots for live configs (Aerospace, Ghostty) for fallback/documentation
+   - Generated snapshot for the live Ghostty config for fallback/documentation
    - Pipe-delimited format: `category|keybinding|description`
 
 ## Supported Applications
@@ -28,7 +27,7 @@ The system supports two types of configuration:
 - **Slack** — macOS keybindings (reference file only)
 - **Chrome** — Google Chrome keyboard shortcuts (reference file only)
 - **Ghostty** — Terminal keybindings (reads live from `ghostty/config`)
-- **Aerospace** — Window manager keybindings (reads live from `aerospace.toml`)
+- **Navigation** — Herdr & Neovim navigation/resize keybindings (reference file only)
 - **macOS** — System-wide keyboard shortcuts (reference file only)
 - **Helpful commands** — GitHub aliases, Git commands, and Donburi helpers (reference file only)
 
@@ -40,7 +39,7 @@ The system supports two types of configuration:
 ./bin/slack-keys     # Show Slack keybindings with pager
 ./bin/chrome-keys    # Show Chrome keybindings with pager
 ./bin/ghostty-keys   # Show Ghostty keybindings with pager (reads live)
-./bin/aerospace-keys # Show Aerospace keybindings with pager (reads live)
+./bin/navigation-keys # Show Herdr & Neovim navigation keybindings (alias: nkeys)
 ./bin/macos-keys     # Show macOS keybindings with pager
 ./bin/hkeys          # Show GitHub, Git, and Donburi commands
 ```
@@ -51,7 +50,7 @@ The system supports two types of configuration:
 ./bin/slack-keys --no-pager
 ./bin/chrome-keys --no-pager
 ./bin/ghostty-keys --no-pager
-./bin/aerospace-keys --no-pager
+./bin/navigation-keys --no-pager
 ./bin/macos-keys --no-pager
 ./bin/hkeys --no-pager
 ```
@@ -62,7 +61,6 @@ The system supports two types of configuration:
 ./bin/slack-keys --edit       # Edit Slack reference file
 ./bin/chrome-keys --edit      # Edit Chrome reference file
 ./bin/ghostty-keys --edit     # Edit Ghostty live config (ghostty/config)
-./bin/aerospace-keys --edit   # Edit Aerospace live config (aerospace.toml)
 ./bin/macos-keys --edit       # Edit macOS reference file
 ./bin/hkeys --edit            # Edit helpful command reference
 ```
@@ -122,11 +120,11 @@ keybinds/config/
 ├── slack.ref           # ~40 Slack shortcuts (static reference)
 ├── chrome.ref          # ~35 Chrome shortcuts (static reference)
 ├── ghostty.ref         # ~25 Ghostty shortcuts (generated from live config)
-├── aerospace-main.ref  # Aerospace main mode (generated from live config)
+├── navigation.ref      # Herdr & Neovim navigation (static reference)
 └── macos.ref           # ~60 macOS system shortcuts (static reference)
 ```
 
-**Generated Files**: `ghostty.ref` and `aerospace-main.ref` are auto-generated from live configs by `donburi setup keybinds`. Regenerate anytime you update the source configs.
+**Generated Files**: `ghostty.ref` is auto-generated from the live Ghostty config by `donburi setup keybinds`. Regenerate anytime you update the source config.
 
 ### Customizing Keybindings
 
@@ -146,11 +144,11 @@ This creates:
 ├── slack.ref
 ├── chrome.ref
 ├── ghostty.ref
-├── aerospace-main.ref
+├── navigation.ref
 └── macos.ref
 ```
 
-For live config apps (Ghostty, Aerospace), overriding the `.ref` file is optional — the scripts always read the live config first.
+For live config apps (Ghostty), overriding the `.ref` file is optional — the scripts always read the live config first.
 
 ### Config File Format
 
@@ -186,13 +184,13 @@ keybinds/
 │   ├── slack.ref               # Slack reference file (static)
 │   ├── chrome.ref              # Chrome reference file (static)
 │   ├── ghostty.ref             # Ghostty reference file (generated)
-│   ├── aerospace-main.ref      # Aerospace main mode reference (generated)
+│   ├── navigation.ref          # Herdr & Neovim navigation reference (static)
 │   └── macos.ref               # macOS reference file (static)
 ├── bin/
 │   ├── slack-keys              # Slack helper script (uses slack.ref)
 │   ├── chrome-keys             # Chrome helper script (uses chrome.ref)
 │   ├── ghostty-keys            # Ghostty helper script (reads live from ghostty/config)
-│   ├── aerospace-keys          # Aerospace helper script (reads live via aerospace CLI)
+│   ├── navigation-keys         # Herdr & Neovim navigation helper (uses navigation.ref)
 │   └── macos-keys              # macOS helper script (uses macos.ref)
 └── README.md
 ```
@@ -247,11 +245,6 @@ chmod +x bin/vscode-keys
 - **bash** (4.0+)
 - **bat** or **less** (for paging, optional)
 - **standard Unix tools** — awk, sed, xargs
-
-## Similar Projects
-
-- `aerospace/scripts/aerospace-keys-helper.sh` — Aerospace window manager keybindings
-- This keybinds system extracts the table rendering into a reusable library
 
 ## Notes
 

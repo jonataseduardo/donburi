@@ -86,7 +86,7 @@ echo -e "${BOLD}Step 2: Installing required packages...${NC}"
 echo "This may take several minutes..."
 
 # Core applications
-APPS=(neovim tmux sketchybar btop jq FelixKratz/formulae/borders ghostty nikitabobko/tap/aerospace)
+APPS=(neovim btop jq ghostty)
 # CLI tools
 CLI_TOOLS=(bat lsd fzf ripgrep htop wget bash gcc make gnu-sed gawk curl gh)
 # Development utilities
@@ -153,7 +153,7 @@ echo ""
 
 # Check packages
 echo "Installed packages:"
-for app in neovim tmux sketchybar btop jq borders ghostty aerospace; do
+for app in neovim btop jq ghostty; do
 	if "$BREW_CMD" list --formula "$app" &>/dev/null 2>&1 || "$BREW_CMD" list --cask "$app" &>/dev/null 2>&1; then
 		echo -e "  ${GREEN}✓${NC} $app"
 	else
@@ -174,9 +174,6 @@ echo "   curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/mai
 echo ""
 echo "2. Setup configurations:"
 echo "   donburi setup --no-brew"
-echo ""
-echo "3. Grant AeroSpace Accessibility permission manually:"
-echo "   System Settings -> Privacy & Security -> Accessibility -> enable AeroSpace"
 echo ""
 echo "For verification, users can run:"
 echo "   donburi status"

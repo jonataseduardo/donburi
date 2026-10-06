@@ -1,6 +1,6 @@
 -- Terminal colors and clipboard configuration
--- Works with Ghostty + tmux. Terminal colors match Kanagawa colorscheme.
--- Navigation between tmux panes and neovim splits handled by smart-splits.
+-- Works with Ghostty + herdr. Terminal colors match Kanagawa colorscheme.
+-- Navigation between herdr panes and neovim splits handled by smart-splits.
 
 local function setup_ghostty()
   -- Configure terminal behavior for Ghostty
@@ -43,7 +43,7 @@ local function setup_ghostty()
   end
 
   -- Terminal integration
-  -- Navigation keymaps handled by smart-splits with tmux multiplexer backend
+  -- Navigation keymaps handled by smart-splits with herdr multiplexer backend
 
   -- Enable true color for Kanagawa theme
   vim.opt.termguicolors = true

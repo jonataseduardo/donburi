@@ -14,11 +14,11 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- ── Navigation ──────────────────────────────────────────
--- Ctrl+hjkl: seamless navigation between neovim splits and tmux panes
---   handled by smart-splits.lua (with multiplexer_integration = 'tmux')
+-- Ctrl+hjkl: seamless navigation between neovim splits and herdr panes
+--   handled by smart-splits.lua (with multiplexer_integration = 'herdr')
 -- Ctrl+w H/J/K/L: resize neovim splits (overrides default reposition)
 -- Ctrl+w Arrow: reposition neovim splits (replaces Ctrl+w H/J/K/L default)
--- Resize tmux panes: prefix + h/j/k/l (defined in tmux.conf)
+-- Resize herdr panes: prefix + h/j/k/l (defined in herdr/config.toml)
 
 -- Terminal mode navigation — exit terminal first, then let smart-splits handle it
 vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-h>]], { desc = 'Navigate left from terminal', noremap = false, silent = true })

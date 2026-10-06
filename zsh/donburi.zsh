@@ -23,15 +23,11 @@ if [ -x "$(command -v lsd)" ]; then
 fi
 
 alias zconf='cd $DONBURI_DIR/zsh/ && $EDITOR zshrc'
-alias tconf='cd $DONBURI_DIR/tmux/ && $EDITOR tmux.conf'
+alias hconf='cd $DONBURI_DIR/herdr/ && $EDITOR config.toml'
 alias nconf='cd $DONBURI_DIR/nvim/ && $EDITOR init.lua'
-alias aconf='cd $DONBURI_DIR/aerospace/ && $EDITOR aerospace.toml'
 alias gconf='cd $DONBURI_DIR/ghostty/ && $EDITOR config'
-alias sconf='cd $DONBURI_DIR/sketchybar/ && $EDITOR sketchybarrc'
 alias dconf='cd $DONBURI_DIR && $EDITOR .'
 
-# shellcheck disable=SC2139
-alias akeys="$DONBURI_DIR/keybinds/bin/aerospace-keys"
 # shellcheck disable=SC2139
 alias skeys="$DONBURI_DIR/keybinds/bin/slack-keys"
 # shellcheck disable=SC2139

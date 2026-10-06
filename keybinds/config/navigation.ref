@@ -1,7 +1,7 @@
-Navigation|Ctrl+H|Navigate left (nvim split / tmux pane)
-Navigation|Ctrl+J|Navigate down (nvim split / tmux pane)
-Navigation|Ctrl+K|Navigate up (nvim split / tmux pane)
-Navigation|Ctrl+L|Navigate right (nvim split / tmux pane)
+Navigation|Ctrl+H|Navigate left (nvim split / herdr pane)
+Navigation|Ctrl+J|Navigate down (nvim split / herdr pane)
+Navigation|Ctrl+K|Navigate up (nvim split / herdr pane)
+Navigation|Ctrl+L|Navigate right (nvim split / herdr pane)
 Neovim Resize|Ctrl+W H|Resize split left (-5 cols)
 Neovim Resize|Ctrl+W J|Resize split down (-3 rows)
 Neovim Resize|Ctrl+W K|Resize split up (+3 rows)
@@ -15,20 +15,30 @@ Neovim Splits|Ctrl+W V|Split vertically
 Neovim Splits|Ctrl+W Q|Close split
 Neovim Splits|Ctrl+W =|Equalize splits
 Neovim Splits|Ctrl+W O|Close all other splits
-Tmux Resize|prefix+h|Resize pane left (repeatable)
-Tmux Resize|prefix+j|Resize pane down (repeatable)
-Tmux Resize|prefix+k|Resize pane up (repeatable)
-Tmux Resize|prefix+l|Resize pane right (repeatable)
-Tmux Splits|prefix+"|Split pane horizontally
-Tmux Splits|prefix+%|Split pane vertically
-Tmux Splits|prefix+X|Close pane
-Tmux Panes|prefix+{|Swap pane with previous
-Tmux Panes|prefix+}|Swap pane with next
-Tmux Panes|prefix+Space|Cycle pane layout
-Tmux Panes|prefix+Z|Toggle pane zoom
-Tmux Windows|prefix+C|New window
-Tmux Windows|prefix+N|Next window
-Tmux Windows|prefix+P|Previous window
-Tmux Windows|prefix+W|Window list
-Tmux Windows|prefix+<number>|Go to window <number>
-Tmux Windows|prefix+&|Close window
+Herdr Resize|prefix+h|Resize pane left
+Herdr Resize|prefix+j|Resize pane down
+Herdr Resize|prefix+k|Resize pane up
+Herdr Resize|prefix+l|Resize pane right
+Herdr Resize|prefix+r|Resize mode (hjkl, Esc to exit)
+Herdr Splits|prefix+"|Split pane stacked (also prefix+-)
+Herdr Splits|prefix+%|Split pane side by side (also prefix+v)
+Herdr Splits|prefix+x|Close pane
+Herdr Panes|prefix+Shift+hjkl|Swap pane with neighbor
+Herdr Panes|prefix+Tab|Cycle to next pane
+Herdr Panes|prefix+z|Toggle pane zoom
+Herdr Panes|prefix+[|Copy mode
+Herdr Panes|prefix+e|Open scrollback in $EDITOR
+Herdr Tabs|prefix+c|New tab
+Herdr Tabs|prefix+n|Next tab
+Herdr Tabs|prefix+p|Previous tab
+Herdr Tabs|prefix+<number>|Go to tab <number>
+Herdr Tabs|prefix+&|Close tab (also prefix+Shift+x)
+Herdr Tabs|prefix+Shift+t|Rename tab
+Herdr Workspaces|prefix+w|Workspace picker
+Herdr Workspaces|prefix+s|Session navigator (also prefix+g)
+Herdr Workspaces|prefix+Shift+n|New workspace
+Herdr Workspaces|prefix+Shift+w|Rename workspace
+Herdr Workspaces|prefix+b|Toggle sidebar
+Herdr Workspaces|prefix+q|Detach
+Herdr Workspaces|prefix+Shift+r|Reload config
+Herdr Workspaces|prefix+?|Show all herdr keybindings

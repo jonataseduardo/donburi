@@ -8,9 +8,9 @@
 
 ## Introduction
 
-Donburi is a unified dotfiles repository for macOS that brings together window management, terminal, editor, and shell configurations into a cohesive development environment. Rather than treating each tool as an island, donburi creates a seamless workflow where navigation feels natural across all applications.
+Donburi is a unified dotfiles repository for macOS that brings together terminal, multiplexer, editor, and shell configurations into a cohesive development environment. Rather than treating each tool as an island, donburi creates a seamless workflow where navigation feels natural across all applications.
 
-The philosophy centers on three principles: **consistent hjkl-based navigation** across all tools, a **unified Kanagawa color scheme** for visual harmony, and an **Aerospace-centric workflow** that makes window management effortless. Whether you're navigating Neovim splits or moving windows across workspaces, the muscle memory transfers.
+The philosophy centers on three principles: **consistent hjkl-based navigation** across all tools, a **unified Kanagawa color scheme** for visual harmony, and a **herdr-centric workflow** where one terminal window holds every workspace, tab, and AI agent. Whether you're navigating Neovim splits or herdr panes, the muscle memory transfers.
 
 Installation is **non-destructive**—existing configurations are automatically backed up before any changes are made. You can install everything at once or pick individual components to adopt incrementally.
 
@@ -22,11 +22,11 @@ Installation is **non-destructive**—existing configurations are automatically 
 
 ## Features
 
-- **Unified hjkl-based navigation** across window manager, editor, and terminal
+- **Unified hjkl-based navigation** across multiplexer, editor, and terminal
 - **Non-destructive installation** with automatic backups of existing configs
 - **Modular installation** — install all components or pick what you need
 - **Consistent Kanagawa color scheme** across all applications
-- **Workspace-centric workflow** via Aerospace tiling window manager
+- **Workspace-centric workflow** via [herdr](https://herdr.dev), an agent-aware terminal multiplexer
 - **Quick config aliases** for editing any configuration file
 
 ## Requirements
@@ -60,7 +60,7 @@ After installation:
 
 ```bash
 donburi brew-check      # Check Homebrew status
-donburi brew apps       # Install applications (nvim, ghostty, aerospace, etc.)
+donburi brew apps       # Install applications (nvim, ghostty, btop, etc.)
 donburi setup           # Install all configurations
 ```
 
@@ -74,11 +74,9 @@ donburi setup --no-brew # Setup configs without brew dependencies
 
 | Component      | Description                               | Config Location                                              |
 | -------------- | ----------------------------------------- | ------------------------------------------------------------ |
-| **Aerospace**  | Tiling window manager                     | `~/.config/aerospace`                                        |
 | **Neovim**     | Text editor with LSP, completions, AI     | `~/.config/nvim`                                             |
 | **Ghostty**    | Modern GPU-accelerated terminal           | `~/Library/Application Support/com.mitchellh.ghostty/config` |
-| **Sketchybar** | Custom menu bar with workspace indicators | `~/.config/sketchybar`                                       |
-| **tmux**       | Terminal multiplexer with Kanagawa theme  | `~/.tmux.conf`                                               |
+| **herdr**      | Agent-aware terminal multiplexer          | `~/.config/herdr`                                            |
 | **zsh**        | Shell configuration with Oh My Zsh        | `~/.zshrc`                                                   |
 | **btop**       | Resource monitor with Kanagawa theme      | `~/.config/btop`                                             |
 
@@ -90,9 +88,7 @@ Each `donburi setup` component installs its own dependencies via Homebrew, git, 
 | -------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **Neovim**     | ripgrep, gcc, make, [lazy.nvim](https://github.com/folke/lazy.nvim) plugin manager                                 |
 | **Ghostty**    | JetBrains Mono Nerd Font                                                                                           |
-| **Aerospace**  | jq, bash, [JankyBorders](https://github.com/FelixKratz/JankyBorders)                                               |
-| **Sketchybar** | JetBrains Mono Nerd Font                                                                                           |
-| **tmux**       | [TPM](https://github.com/tmux-plugins/tpm) + plugins                                                               |
+| **herdr**      | herdr (via the official `curl` installer into `~/.local/bin`), jq (used by the `Ctrl+hjkl` navigation script) |
 | **zsh**        | [Oh My Zsh](https://ohmyz.sh/), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), fzf, lsd, gnu-sed, gawk |
 | **btop**       | None (no external dependencies)                                                                                    |
 | **Language Runtimes** | [Rust](https://www.rust-lang.org/) (via rustup), [uv](https://astral.sh/uv) (Python), [bun](https://bun.sh) (JavaScript) |
@@ -115,45 +111,37 @@ In addition to kickstart-modular.nvim's core plugins, donburi includes these cus
 | **markdown-preview** | Live Markdown preview |
 | **python-debugger** | Python debugging support |
 | **render-markdown** | Enhanced Markdown rendering |
-| **smart-splits** | Seamless split navigation across Neovim and tmux panes |
+| **smart-splits** | Seamless split navigation across Neovim and herdr panes |
 | **toggleterm** | Integrated terminal multiplexer |
 
 All plugins auto-install on first Neovim launch. View/manage with `:Lazy`.
 
-### Sketchybar Indicators
+### herdr Tab Bar
 
-Donburi's Sketchybar configuration includes these status indicators:
+Donburi's herdr config ports the old tmux status bar to the right side of herdr's tab bar:
 
 | Indicator | Purpose |
 |-----------|---------|
-| **Aerospace** | Current workspace number and available workspaces |
-| **Front App** | Name of currently focused application |
-| **Next Meeting** | Next/ongoing Google Calendar event with countdown and warning colors |
-| **Clock** | Current time and date |
-| **CPU** | CPU usage percentage |
-| **Memory** | RAM usage percentage |
-| **Battery** | Battery level and charging status |
-| **Spotify** | Current playing track (if active) |
-| **Slack** | Slack status indicator |
-| **VPN** | VPN connection status |
+| **Next Meeting** | Next/ongoing Google Calendar event with countdown (`herdr/scripts/next-meeting.sh`) |
+| **Git branch** | Branch of the focused pane's directory (`herdr/scripts/git-branch.sh`) |
+| **Directory** | Basename of the focused pane's directory |
+| **Clock** | Current time |
 
-Indicators auto-update and use the Kanagawa color scheme. Customize in `~/.config/sketchybar/`.
+Workspaces, their git status, and agent state (working / blocked / idle) live in herdr's sidebar (`prefix+b` toggles it). Colors use the Kanagawa palette with the `#FF9E64` surimiOrange accent. Customize in `~/.config/herdr/config.toml`.
 
 The **Next Meeting** widget is **lazy / off by default** — it stays hidden and
 makes no calendar calls until you enable tracking with `donburi meeting on`
 (`donburi meeting off` hides it again). When enabled it reads Google Calendar
-through `uvx gcalcli` (OAuth — no macOS Calendar permission needed, which matters
-because Sketchybar runs under launchd). The first `donburi meeting on` walks you
-through a one-time Google OAuth setup (you supply your own Google Cloud "Desktop
-app" Client ID/Secret — set `GCALCLI_CLIENT_ID` / `GCALCLI_CLIENT_SECRET` to skip
-the prompts). If it can't reach the calendar (not authenticated, offline) the
-widget shows a red **`cal?`** instead of silently looking idle.
+through `uvx gcalcli` (OAuth — no macOS Calendar permission needed). The first
+`donburi meeting on` walks you through a one-time Google OAuth setup (you supply
+your own Google Cloud "Desktop app" Client ID/Secret — set `GCALCLI_CLIENT_ID` /
+`GCALCLI_CLIENT_SECRET` to skip the prompts). If it can't reach the calendar
+(not authenticated, offline) the widget shows **`cal?`** instead of silently
+looking idle.
 
-**Terminal copy/paste:** With tmux mouse mode on, a plain mouse drag selects in
-tmux and copies to the clipboard on release. To make a *native* Ghostty
-selection across the whole terminal (bypassing tmux), hold **Shift while
-dragging** — that also auto-copies. Keyboard copy/paste is `Ctrl+Shift+C` /
-`Ctrl+Shift+V`.
+**Terminal copy/paste:** herdr copies mouse selections to the clipboard
+automatically, and `prefix+[` enters keyboard copy mode. Ghostty keyboard
+copy/paste is `Ctrl+Shift+C` / `Ctrl+Shift+V`.
 
 ## CLI Commands
 
@@ -167,6 +155,7 @@ donburi status                # Check symlink status
 donburi permissions           # Check macOS permissions for apps
 donburi meeting on            # Enable + show the lazy next-meeting widget
 donburi meeting off           # Hide the next-meeting widget
+donburi reload                # Reload the running herdr config
 donburi update                # Update donburi via git pull
 donburi --version             # Show donburi version
 donburi help                  # Show help message
@@ -192,7 +181,7 @@ donburi brew --list           # Show available packages without installing
 ```
 
 Package categories:
-- `apps` — UI applications (neovim, ghostty, aerospace, sketchybar, btop)
+- `apps` — UI applications (neovim, ghostty, btop, jq)
 - `cli` — Command-line tools (bat, fzf, ripgrep, gh, etc.)
 - `utils` — Dev utilities, media & data processing, databases (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose-rust, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 - `docker` — Container tools (colima, docker, docker-compose)
@@ -220,33 +209,32 @@ su -l <admin> -c "donburi brew all"      # Install all brew packages system-wide
 
 # User runs:
 donburi setup --no-brew    # Setup configs without brew dependencies
-
-# Manual system permission step (user):
-# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
 ```
 
 See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup instructions.
 
 ## Keybinding Reference
 
-Donburi uses consistent modifier patterns across tools. Aerospace uses `Alt` as the base modifier. Neovim and tmux share seamless `Ctrl+hjkl` navigation via [smart-splits.nvim](https://github.com/mrjones2014/smart-splits.nvim) — pressing `Ctrl+h` moves between Neovim splits and tmux panes transparently.
+Donburi keeps the tmux keymap inside herdr (prefix `Ctrl+b`), so nothing changes for your fingers. Neovim and herdr share seamless `Ctrl+hjkl` navigation via [smart-splits.nvim](https://github.com/smart-splits-nvim/smart-splits.nvim) — pressing `Ctrl+h` moves between Neovim splits and herdr panes transparently.
 
-| Action              | Aerospace            | Neovim             | tmux              |
-| ------------------- | -------------------- | ------------------ | ----------------- |
-| Focus / Navigate    | `Alt + hjkl`         | `Ctrl + hjkl`      | `Ctrl + hjkl`     |
-| Resize              | `Alt + Shift + hjkl` | `Ctrl+W H/J/K/L`  | `prefix + hjkl`   |
-| Move / Reposition   | `Alt + Ctrl + hjkl`  | `Ctrl+W Arrow`     | `prefix + {/}`    |
-| Split               | —                    | `Ctrl+W S/V`       | `prefix + "/%`    |
-| Switch workspace    | `Alt + 1-9`          | —                  | `prefix + number` |
-| Toggle layout       | `Alt + /`            | —                  | `prefix + Space`  |
+| Action              | Neovim             | herdr                            |
+| ------------------- | ------------------ | -------------------------------- |
+| Focus / Navigate    | `Ctrl + hjkl`      | `Ctrl + hjkl`                    |
+| Resize              | `Ctrl+W H/J/K/L`   | `prefix + hjkl`                  |
+| Move / Swap         | `Ctrl+W Arrow`     | `prefix + Shift + hjkl`          |
+| Split               | `Ctrl+W S/V`       | `prefix + "/%`                   |
+| Zoom                | —                  | `prefix + z`                     |
+| New / next / prev tab | —                | `prefix + c / n / p`             |
+| Go to tab           | —                  | `prefix + 1-9`                   |
+| Workspaces          | —                  | `prefix + w` (picker), `prefix + Shift + n` (new) |
+| All herdr keys      | —                  | `prefix + ?`                     |
 
 ### Keybinding Helper Commands
 
 Display color-coded keybinding tables for various applications:
 
 ```bash
-akeys               # Aerospace window manager keybindings
-nkeys               # Tmux & Neovim navigation keybindings
+nkeys               # Herdr & Neovim navigation keybindings
 skeys               # Slack keybindings
 ckeys               # Chrome/Chromium keybindings
 gkeys               # Ghostty terminal keybindings
@@ -264,7 +252,6 @@ Each command supports:
 Example:
 
 ```bash
-akeys main          # Show only Aerospace main mode keybindings
 skeys --no-pager    # Show Slack keybindings without pager
 gkeys --edit        # Open Ghostty keybindings for editing
 ```
@@ -275,6 +262,7 @@ gkeys --edit        # Open Ghostty keybindings for editing
 donburi setup [component]     # Install configurations
 donburi status                # Check symlink status
 donburi brew [category]       # Install packages via Homebrew
+donburi reload                # Reload herdr config
 donburi update                # Update donburi (git pull)
 donburi help                  # Show help
 ```
@@ -287,13 +275,13 @@ donburi setup nvim         # Install a single component
 donburi setup --dry-run    # Preview changes without applying
 ```
 
-Available components: `nvim`, `ghostty`, `aerospace`, `tmux`, `zsh`, `sketchybar`
+Available components: `nvim`, `ghostty`, `herdr`, `zsh`, `btop`, `keybinds`
 
 ### Brew Categories
 
 ```bash
 donburi brew               # Install apps only (default)
-donburi brew apps          # Install apps (nvim, ghostty, aerospace, tmux, sketchybar, btop, jq, borders)
+donburi brew apps          # Install apps (nvim, ghostty, btop, jq)
 donburi brew cli           # Install CLI tools (bat, lsd, fzf, ripgrep, htop, wget, bash, gcc, make, gnu-sed, gawk, curl, gh)
 donburi brew utils         # Install dev, media & database tools (node, python, ffmpeg, imagemagick, pandoc, yq, jless, fd, dust, httpie, watchexec, direnv, just, glow, tldr, zoxide, delta, choose-rust, sd, tokei, postgresql@18, sqlite, go, slack, spotify)
 donburi brew docker        # Install container tools (colima, docker, docker-compose, docker-buildx)
@@ -313,16 +301,14 @@ source ~/.zshrc         # Reload shell configuration
 
 Test the setup:
 
-1. Press `Alt + hjkl` to test Aerospace window navigation
-2. Press `Alt + 1-9` to switch workspaces
+1. Run `herdr` in Ghostty (or uncomment `command = ...herdr` in the Ghostty config to always start in it)
+2. Split with `Ctrl+b %` / `Ctrl+b "` and open a new tab with `Ctrl+b c`
 3. Open `nvim` and run `:checkhealth` to verify plugins
-4. In tmux, press `Ctrl + hjkl` to navigate between Neovim splits and tmux panes
+4. Press `Ctrl + hjkl` to navigate between Neovim splits and herdr panes
 
-Start services if needed:
-
-```bash
-donburi start
-```
+Navigation behaves exactly like the old tmux setup: inside Neovim (or fzf) the key
+goes to the app, and smart-splits crosses into herdr at Neovim's edges. In a shell,
+focus wraps around at the edges, and a lone pane ignores the key.
 
 ## Installing Code Formatters
 
@@ -444,23 +430,20 @@ Quick shortcuts to edit configurations and view keybindings (added to your shell
 | Alias   | Opens             |
 | ------- | ----------------- |
 | `nconf` | Neovim config     |
-| `aconf` | Aerospace config  |
 | `gconf` | Ghostty config    |
-| `tconf` | tmux config       |
+| `hconf` | herdr config      |
 | `zconf` | zsh config        |
-| `sconf` | Sketchybar config |
 | `dconf` | Donburi root (all configs) |
 
 ### Keybind Aliases
 
 | Alias   | Shows                  |
 | ------- | ---------------------- |
-| `akeys` | Aerospace keybindings  |
 | `skeys` | Slack keybindings      |
 | `ckeys` | Chrome keybindings     |
 | `gkeys` | Ghostty keybindings    |
 | `mkeys` | macOS keybindings      |
-| `nkeys` | Tmux & Neovim navigation |
+| `nkeys` | Herdr & Neovim navigation |
 
 ### Shell Aliases
 
@@ -475,19 +458,23 @@ Donburi includes `lsd` for a modern `ls` replacement:
 
 ## Troubleshooting
 
-**Ghostty tabs and Aerospace compatibility**
+**Ctrl+hjkl doesn't move between herdr panes**
 
-- **Note:** Ghostty's native tab feature doesn't integrate well with Aerospace's window management. It's recommended to use Aerospace splits instead of Ghostty tabs for a smoother workflow. Create new Ghostty windows with `Alt+T` and let Aerospace manage them as separate tiles.
+- The keys run `~/.config/herdr/scripts/navigate.sh`; check `donburi status` shows the herdr link OK
+- Requires `jq` on `PATH`
+- Inside Neovim, `:lua print(require('smart-splits.mux').get().type)` should print `herdr`
 
-**Aerospace not responding to keybindings**
-
-- Grant accessibility permissions: System Settings → Privacy & Security → Accessibility → Enable AeroSpace
-
-**Sketchybar not showing**
+**herdr config changes not applied**
 
 ```bash
-donburi start
+donburi reload          # or: herdr server reload-config
+herdr config check      # Validate config.toml
 ```
+
+**macOS menu bar is hidden**
+
+- The old SketchyBar setup hid the native menu bar. Restore it with:
+  `defaults write NSGlobalDomain _HIHideMenuBar -bool false && killall SystemUIServer`
 
 **Neovim plugins not loading**
 
@@ -542,6 +529,6 @@ This project was built with significant assistance from [Claude Code](https://cl
 
 - [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim) — Neovim configuration foundation
 - [Kanagawa](https://github.com/rebelot/kanagawa.nvim) — color scheme
-- [Aerospace](https://github.com/nikitabobko/AeroSpace) — tiling window manager
+- [herdr](https://herdr.dev) — agent-aware terminal multiplexer
 - [Ghostty](https://ghostty.org/) — terminal emulator
-- [Sketchybar](https://github.com/FelixKratz/SketchyBar) — custom menu bar
+- [smart-splits.nvim](https://github.com/smart-splits-nvim/smart-splits.nvim) — seamless Neovim/multiplexer navigation

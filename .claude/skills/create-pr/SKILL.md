@@ -62,7 +62,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/). 
 - `style` -- formatting, whitespace (no logic change)
 
 **Scopes** (optional, use when changes are contained to one area):
-- `nvim`, `zsh`, `tmux`, `aerospace`, `sketchybar`, `btop`, `ghostty`, `keybinds`
+- `nvim`, `zsh`, `herdr`, `btop`, `ghostty`, `keybinds`
 - Omit scope for cross-cutting changes
 
 **Examples from this repo:**

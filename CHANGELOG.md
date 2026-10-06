@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **herdr**: Replace tmux with [herdr](https://herdr.dev) (agent-aware terminal multiplexer) — `herdr/config.toml` keeps the tmux keymap (prefix `ctrl+b`, `prefix+"`/`%` splits, `prefix+hjkl` resize, `prefix+c/n/p/1..9` tabs) and the Kanagawa palette with the surimiOrange accent; the tab bar ports the old tmux status (git branch, directory, clock) plus the next-meeting widget
+- **donburi**: `setup herdr` component — installs herdr via its official `curl` installer (`~/.local/bin`, no Homebrew needed) plus jq, and links `~/.config/herdr`; `reload` now runs `herdr server reload-config`
+- **zsh**: `hconf` alias to edit the herdr config
+- **herdr**: `Ctrl+hjkl` navigation script (`herdr/scripts/navigate.sh`) that matches the old tmux binding: forwards keys to vim/nvim/fzf, unzooms before moving, wraps around at edges
+
+### Changed
+- **nvim**: smart-splits.nvim moves to the `smart-splits-nvim` org and uses `multiplexer_integration = 'herdr'` for seamless `Ctrl+hjkl` across Neovim splits and herdr panes; reads herdr's real zoom state so a zoomed Neovim pane keeps navigation inside Neovim
+- **ghostty**: Drop Ghostty tab keybindings (herdr owns tabs now); add a commented `command` to start every window in herdr
+- **keybinds**: `nkeys` shows Herdr & Neovim navigation
+
+### Removed
+- **aerospace**, **sketchybar**, **tmux**, JankyBorders: configs, setup steps, brew packages, permission checks, `donburi start`/`stop`, `akeys`/`aconf`/`sconf`/`tconf` (preserved on the `archive/tmux-aerospace-sketchybar` branch)
+
 ## [0.7.0] - 2026-06-20
 
 ### Added

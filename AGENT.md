@@ -21,11 +21,9 @@ Guidance for Claude Code. For user-facing docs see [README.md](README.md).
 | Directory | Symlink Target |
 |-----------|----------------|
 | `nvim/` | `~/.config/nvim` (see `.claude/rules/nvim.md` for architecture) |
-| `aerospace/` | `~/.config/aerospace` |
-| `sketchybar/` | `~/.config/sketchybar` |
 | `btop/` | `~/.config/btop` |
 | `ghostty/` | `~/Library/Application Support/com.mitchellh.ghostty/config` |
-| `tmux/` | `~/.tmux.conf` |
+| `herdr/` | `~/.config/herdr` |
 | `zsh/` | `~/.zshrc` |
 | `keybinds/` | Keybinding reference docs |
 
@@ -77,7 +75,7 @@ donburi permissions           # Check app permissions
 
 ## Design Principles
 
-- **hjkl navigation**: Aerospace uses `Alt`, Neovim uses `Ctrl`. Add `Shift` = resize.
+- **hjkl navigation**: `Ctrl+hjkl` moves across Neovim splits and herdr panes (smart-splits.nvim); herdr resize is `prefix+hjkl` (prefix `ctrl+b`); Neovim resize is `Ctrl+w H/J/K/L`.
 - **Kanagawa theme**: Consistent colors across all components.
 - **Non-destructive**: `donburi` backs up existing configs to `~/.config/donburi-backup-<timestamp>/`.
 - **Upstream tracking**: Neovim forked from [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim) (`kickstart` git remote).

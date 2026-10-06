@@ -16,7 +16,6 @@ This guide helps IT administrators and users in corporate environments install a
 Donburi supports enterprise environments where:
 - Users don't have sudo/admin privileges
 - Homebrew needs to be installed by IT administrators
-- System permissions need to be granted for applications
 - Corporate security policies restrict software installation
 
 ## Express Admin Setup
@@ -42,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-i
 Note: `admin-install.sh` assumes Homebrew is already installed. Admin must be in `su` shell before running.
 
 This will:
-- ✅ Install all required packages (neovim, ghostty, aerospace, sketchybar, tmux, etc.)
+- ✅ Install all required packages (neovim, ghostty, btop, jq, etc.)
 
 2. **Tell users to run**:
 ```bash
@@ -51,10 +50,9 @@ curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install
 
 # Setup configs (packages already installed by admin)
 donburi setup --no-brew
-
-# Manual system permission step (user)
-# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
 ```
+
+No special macOS permissions (Accessibility, Screen Recording) are required.
 
 That's it! For detailed manual setup, continue reading below.
 
@@ -103,22 +101,11 @@ su -l <admin>
 
 #### 1.3 Permission Notes
 
-**Aerospace (Window Manager)**
-```bash
-# Manual step (cannot be automated):
-# System Settings -> Privacy & Security -> Accessibility -> Enable AeroSpace
-```
+No Accessibility or Screen Recording permissions are required by any donburi component.
 
-**Sketchybar (Menu Bar)**
-- Service start is user-managed. Admin setup only installs the package.
-
-**JankyBorders (Optional - Visual Window Borders)**
-1. Open System Settings → Privacy & Security → Screen Recording
-2. Add and enable Borders (if installed)
-3. Note: Despite the permission name, this tool does NOT record your screen
-   - It only draws colored borders around windows for visual enhancement
-   - The permission is needed to overlay content on other apps' windows
-   - This is completely optional and can be skipped
+**Herdr (Terminal Multiplexer)**
+- No special permissions needed; runs inside the terminal
+- Installed per user by `donburi setup herdr` via the official `curl` installer into `~/.local/bin` — no admin rights or Homebrew needed (works with `--no-brew`)
 
 **Ghostty (Terminal)**
 - No special permissions needed initially
@@ -163,7 +150,7 @@ Or setup individual components:
 ```bash
 donburi setup nvim --no-brew       # Neovim configuration
 donburi setup zsh --no-brew        # Zsh configuration
-donburi setup aerospace --no-brew  # Aerospace configuration
+donburi setup herdr --no-brew      # Herdr configuration
 # etc.
 ```
 
@@ -226,9 +213,9 @@ If users get permission errors:
    donburi permissions
    ```
 
-2. For service management (user-side):
+2. To reload the herdr configuration (user-side):
    ```bash
-   donburi start
+   donburi reload   # runs: herdr server reload-config
    ```
 
 ### Missing Dependencies
@@ -254,9 +241,7 @@ If setup fails due to missing dependencies:
 - **Review packages**: Check `donburi brew --list` to review all packages
 - **Audit scripts**: Review `donburi` and `install.sh` before deployment
 - **Custom registries**: Configure Homebrew to use internal package mirrors if required
-- **Permissions**: Only grant minimum required permissions:
-  - Accessibility: Required for Aerospace window management
-  - Screen Recording: Optional for JankyBorders visual effects (NOT actually recording)
+- **Permissions**: No special macOS permissions (Accessibility, Screen Recording) are required
   - No network access required for core functionality
 
 ### For Users
@@ -281,7 +266,7 @@ This requires administrator privileges for initial setup.
 Quick Setup Instructions:
 1. Enter admin shell: su -l <admin>
 2. Run automated setup: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash
-3. User completes setup and grants AeroSpace permission in System Settings
+3. User completes setup (no special macOS permissions required)
 
 The admin install command will:
 - Install all required packages (assumes Homebrew is already installed)

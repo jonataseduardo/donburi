@@ -1,6 +1,6 @@
 #!/opt/homebrew/bin/bash
 # Navigation Keybindings Helper
-# Display tmux and neovim navigation/resize keybindings in a formatted table with Kanagawa colors
+# Display herdr and neovim navigation/resize keybindings in a formatted table with Kanagawa colors
 
 set -euo pipefail
 
@@ -18,10 +18,10 @@ show_usage() {
     cat <<EOF
 Usage: $(basename "$0") [options]
 
-Display tmux and neovim navigation keybindings in a formatted table with pager support.
+Display herdr and neovim navigation keybindings in a formatted table with pager support.
 
 Covers seamless Ctrl+hjkl navigation (smart-splits), neovim split resize/reposition,
-and tmux pane management.
+and herdr pane/tab/workspace management.
 
 Options:
   --no-pager  Output directly to terminal without pager
@@ -50,7 +50,7 @@ display_keybindings() {
         return 1
     fi
 
-    draw_header "Tmux & Neovim Navigation"
+    draw_header "Herdr & Neovim Navigation"
 
     # Declare associative arrays for categories
     declare -A category_keys
@@ -97,10 +97,11 @@ display_keybindings() {
             "Neovim Resize")      echo "$GREEN" ;;
             "Neovim Reposition")  echo "$CYAN" ;;
             "Neovim Splits")      echo "$BLUE" ;;
-            "Tmux Resize")        echo "$GREEN" ;;
-            "Tmux Splits")        echo "$BLUE" ;;
-            "Tmux Panes")         echo "$MAGENTA" ;;
-            "Tmux Windows")       echo "$YELLOW" ;;
+            "Herdr Resize")       echo "$GREEN" ;;
+            "Herdr Splits")       echo "$BLUE" ;;
+            "Herdr Panes")        echo "$MAGENTA" ;;
+            "Herdr Tabs")         echo "$YELLOW" ;;
+            "Herdr Workspaces")   echo "$CYAN" ;;
             *)                    echo "$WHITE" ;;
         esac
     }
