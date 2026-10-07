@@ -139,6 +139,14 @@ your own Google Cloud "Desktop app" Client ID/Secret — set `GCALCLI_CLIENT_ID`
 (not authenticated, offline) the widget shows **`cal?`** instead of silently
 looking idle.
 
+**Focus follows mouse:** hovering a pane focuses it, like tmux's
+`focus-follows-mouse`. Stock herdr doesn't support this yet (requested upstream in
+[herdr#1195](https://github.com/herdrdev/herdr/discussions/1195)), so donburi
+carries a small patch: run `herdr/build-patched.sh` to build herdr from source with
+`herdr/patches/` applied (needs Rust and downloads Zig) and install it to
+`~/.local/bin`. `herdr update` reinstalls the stock binary — re-run the script
+afterwards. Stock herdr ignores the `focus_follows_mouse` setting with a warning.
+
 **Terminal copy/paste:** herdr copies mouse selections to the clipboard
 automatically, and `prefix+[` enters keyboard copy mode. Ghostty keyboard
 copy/paste is `Ctrl+Shift+C` / `Ctrl+Shift+V`.

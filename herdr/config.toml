@@ -58,6 +58,9 @@ new_cwd = "follow"
 [ui]
 tab_bar_position = "top"
 pane_borders = "auto"
+# Focus the pane under the mouse (tmux focus-follows-mouse). Needs the patched
+# herdr from herdr/build-patched.sh; stock herdr ignores this key with a warning.
+focus_follows_mouse = true
 status_indicators = "symbols"
 # prefix+c opens a tab immediately, like tmux new-window
 prompt_new_tab_name = false

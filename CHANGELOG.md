@@ -7,6 +7,7 @@
 - **donburi**: `setup herdr` component — installs herdr via its official `curl` installer (`~/.local/bin`, no Homebrew needed) plus jq, and links `~/.config/herdr`; `reload` now runs `herdr server reload-config`
 - **zsh**: `hconf` alias to edit the herdr config
 - **herdr**: tmux-style workspace switching — `prefix+(` / `prefix+)` previous/next workspace, `prefix+Shift+1..9` to jump to a workspace
+- **herdr**: Focus follows mouse (`ui.focus_follows_mouse`) via a local herdr patch — `herdr/build-patched.sh` builds herdr from source with `herdr/patches/` applied, since upstream doesn't support it yet
 - **herdr**: `Ctrl+hjkl` navigation script (`herdr/scripts/navigate.sh`) that matches the old tmux binding: forwards keys to vim/nvim/fzf, unzooms before moving, wraps around at edges
 
 ### Changed
