@@ -34,3 +34,7 @@ herdr/.plugins.lock
 # herdr session sockets/state
 herdr/sessions/
 herdr/*.sock
+herdr/*.log
+herdr/*.sock.*
+herdr/session.json
+herdr/session-snapshots/
