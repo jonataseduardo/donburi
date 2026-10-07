@@ -81,6 +81,11 @@ workspace_picker = "prefix+w"
 goto = ["prefix+s", "prefix+g"]
 settings = "prefix+comma"
 
+# Workspaces (tmux sessions: prefix+( / prefix+) previous/next)
+previous_workspace = "prefix+("
+next_workspace = "prefix+)"
+switch_workspace = "prefix+shift+1..9"
+
 # Tabs (tmux windows)
 new_tab = "prefix+c"
 next_tab = "prefix+n"

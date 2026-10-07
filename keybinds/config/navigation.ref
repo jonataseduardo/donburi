@@ -35,6 +35,9 @@ Herdr Tabs|prefix+<number>|Go to tab <number>
 Herdr Tabs|prefix+&|Close tab (also prefix+Shift+x)
 Herdr Tabs|prefix+Shift+t|Rename tab
 Herdr Workspaces|prefix+w|Workspace picker
+Herdr Workspaces|prefix+(|Previous workspace
+Herdr Workspaces|prefix+)|Next workspace
+Herdr Workspaces|prefix+Shift+1..9|Go to workspace 1-9
 Herdr Workspaces|prefix+s|Session navigator (also prefix+g)
 Herdr Workspaces|prefix+Shift+n|New workspace
 Herdr Workspaces|prefix+Shift+w|Rename workspace
