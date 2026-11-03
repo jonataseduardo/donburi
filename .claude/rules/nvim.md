@@ -10,7 +10,7 @@ Modular Neovim config based on [kickstart-modular.nvim](https://github.com/dam90
 ## Commands
 
 ```bash
-stylua lua/                                  # Format Lua files
+stylua nvim/lua/                             # Format Lua files from repository root
 nvim --headless -c "checkhealth" -c "qa"     # Check config for errors
 nvim -c ":Lazy"                              # View plugin status
 nvim -c ":Lazy update"                       # Update plugins
@@ -55,7 +55,7 @@ Leader key is `<Space>`. Main groups (via which-key):
 - `<leader>t` - Terminal
 - `<leader>i` - ChatGPT AI
 
-Window navigation: `<C-S-hjkl>` or `<C-arrows>` to move between splits, `<Alt-hjkl>` to resize.
+Window navigation: `<C-hjkl>` moves between Neovim splits and herdr panes via smart-splits. `<C-w> H/J/K/L` resizes Neovim splits; herdr uses `prefix+hjkl`.
 
 ## Code Style
 

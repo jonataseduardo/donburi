@@ -202,6 +202,21 @@ afterwards. Stock herdr ignores the `focus_follows_mouse` setting with a warning
 automatically, and `prefix+[` enters keyboard copy mode. Ghostty keyboard
 copy/paste is `Ctrl+Shift+C` / `Ctrl+Shift+V`.
 
+## AI Harnesses and Shared Instructions
+
+Cursor, OpenCode, and Claude Code share the repository's [AGENTS.md](AGENTS.md).
+`CLAUDE.md` imports it for compatibility with Claude Code versions that require
+that entry point. `AGENT.md` is a legacy pointer. Keep shared conventions in
+`AGENTS.md`; add harness-specific settings only when the harness requires them.
+The shared instructions explicitly direct agents working on Neovim to read
+`.claude/rules/nvim.md` as well.
+
+For concurrent editing, use **one branch and git worktree per agent**, opened in
+separate herdr panes/workspaces. Agree on the goal, owned files, acceptance
+criteria, and checks first. Panes alone do not isolate changes. Have one agent
+integrate the results and run cross-component checks; handoffs should include
+changed files, verification results, and remaining work.
+
 ## CLI Commands
 
 The `donburi` command provides several utilities for managing your configuration:
