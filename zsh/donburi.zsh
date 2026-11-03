@@ -45,6 +45,25 @@ alias c=clear
 alias v=nvim
 alias oc=opencode
 
+# Keep macOS awake for the lifetime of a foreground agent harness. caffeinate
+# owns the assertion, so normal exits and interrupts do not leave a background
+# sleep inhibitor behind. -i prevents idle system sleep without keeping the
+# display lit. Set DONBURI_CAFFEINATE=0 for an individual launch to opt out.
+_donburi_harness() {
+  if [[ "${DONBURI_CAFFEINATE:-1}" != 0 ]] && command -v caffeinate >/dev/null 2>&1; then
+    command caffeinate -i "$@"
+  else
+    command "$@"
+  fi
+}
+
+claude() { _donburi_harness claude "$@"; }
+opencode() { _donburi_harness opencode "$@"; }
+cursor-agent() { _donburi_harness cursor-agent "$@"; }
+agent() { _donburi_harness agent "$@"; }
+# Cursor's GUI launcher otherwise exits immediately, releasing the assertion.
+cursor() { _donburi_harness cursor --wait "$@"; }
+
 # GNU coreutils on macOS
 [[ -x "$(command -v gsed)" ]] && alias sed=gsed
 [[ -x "$(command -v gawk)" ]] && alias awk=gawk

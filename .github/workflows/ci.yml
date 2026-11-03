@@ -21,3 +21,10 @@ jobs:
 
       - name: Run quick tests
         run: DONBURI_TEST_LEVEL=quick bash test/test_donburi.sh
+
+      - name: Check harness launchers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh
+          zsh -n zsh/donburi.zsh
+          python3 test/test_harness.py

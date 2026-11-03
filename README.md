@@ -217,6 +217,34 @@ criteria, and checks first. Panes alone do not isolate changes. Have one agent
 integrate the results and run cross-component checks; handoffs should include
 changed files, verification results, and remaining work.
 
+### Keep macOS Awake While a Harness Runs
+
+After `donburi setup zsh`, open a new shell or run `source ~/.donburi.zsh`.
+These shell commands automatically run under macOS `caffeinate -i`:
+
+| Command | Awake period |
+|---------|--------------|
+| `claude` | Until Claude Code exits |
+| `opencode` / `oc` | Until OpenCode exits |
+| `agent` / `cursor-agent` | Until the installed Cursor agent CLI exits |
+| `cursor .` | Until Cursor's `--wait` launcher returns after the opened window/files close |
+
+Arguments and exit codes are preserved. The display may still sleep; idle system
+sleep is inhibited while the harness runs, including while it waits for input.
+This does not override closing the laptop lid or explicitly putting the Mac to
+sleep. Each session owns its assertion, so concurrent sessions stay awake until
+the last one exits. If `caffeinate` is unavailable, commands run normally.
+
+```zsh
+DONBURI_CAFFEINATE=0 claude    # Disable for one launch
+command cursor .             # Bypass the wrapper and open without waiting
+pmset -g assertions          # Inspect active macOS sleep assertions
+```
+
+Wrappers apply to commands launched from a shell that sources Donburi, including
+herdr panes. Launching an app from the Dock/Finder or invoking its binary directly
+does not use them. Harness binaries must already be installed and on PATH.
+
 ## CLI Commands
 
 The `donburi` command provides several utilities for managing your configuration:
