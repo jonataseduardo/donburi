@@ -116,6 +116,57 @@ In addition to kickstart-modular.nvim's core plugins, donburi includes these cus
 
 All plugins auto-install on first Neovim launch. View/manage with `:Lazy`.
 
+### herdr Workspace Search
+
+**Ctrl+f** opens a unified `fzf` popup containing open workspaces,
+recent folders from `zoxide` (when installed), and folders under **`$HOME`**,
+including projects such as `~/ia/charge-code-curator`. Type to search names and
+full paths; the list shows the full path
+and whether an item is a workspace or folder. **Open workspaces always come
+first**, including while filtering. Within each group, the most frequently
+selected items come first, with most recently selected items breaking ties.
+Selection counts appear as `[N uses]` and persist across Herdr restarts; a
+workspace inherits the usage history of its folder. Items without selection
+history retain their discovery order, including the order returned by `zoxide`.
+
+| Key inside search | Action |
+|-------------------|--------|
+| **Enter** on a Workspace | Switch to that open workspace |
+| **Enter** on a Folder | Create and focus a workspace in that existing folder |
+| **Ctrl+r** | Refresh the cached folder list |
+| **Esc** | Cancel |
+
+For example, type part of a project folder's name, select the matching Folder
+row, and press Enter to create its workspace immediately. Opening a folder
+already used by a workspace's pane focuses that workspace instead of creating
+a duplicate. New workspaces use the folder name as their label.
+
+The native workspace/pane navigator is available with **Ctrl+b, then w**;
+**Ctrl+b, then n** still switches to the next tab.
+
+The popup uses `herdr/scripts/workspaces.py` and requires `python3` and `fzf`.
+To restrict or change search roots, set `HERDR_PROJECT_ROOTS` in the popup command in
+`herdr/config.toml`, for example:
+
+```toml
+command = "HERDR_PROJECT_ROOTS=\"$HOME/c:$HOME/ia:$HOME/Projects\" python3 ~/.config/herdr/scripts/workspaces.py"
+```
+
+Discovery includes folders up to three levels below each root and the top 100
+recent folders. Hidden directories, macOS `Library`, and dependency/build folders
+(`node_modules`, `vendor`, `target`, `__pycache__`) are skipped to keep search fast.
+The scanner examines directory entries only and does not descend into folders
+at the depth limit. Folder discovery is cached for five minutes; reopening the
+picker uses that cache, while open workspaces are fetched live every time. Use
+**Ctrl+r** to discover newly created folders immediately. Removed folders may
+remain listed until refresh; selecting one reports that it no longer exists.
+
+Cache: `${XDG_CACHE_HOME:-~/.cache}/herdr/workspace-picker/folders.json`.
+Usage history: `${XDG_STATE_HOME:-~/.local/state}/herdr/workspace-picker/usage.json`.
+
+After changing bindings, use **Ctrl+b, then
+Shift+r** to reload both client and server configuration.
+
 ### herdr Tab Bar
 
 Donburi's herdr config ports the old tmux status bar to the right side of herdr's tab bar:

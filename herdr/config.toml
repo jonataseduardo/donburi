@@ -80,7 +80,7 @@ tab_bar_right = [
 prefix = "ctrl+b"
 
 # Pickers (tmux: prefix+w window tree, prefix+s sessions)
-workspace_picker = "prefix+w"
+workspace_picker = "prefix+w" # Native workspace/pane navigation
 goto = ["prefix+s", "prefix+g"]
 settings = "prefix+comma"
 
@@ -112,6 +112,15 @@ resize_pane_left = "prefix+h"
 resize_pane_down = "prefix+j"
 resize_pane_up = "prefix+k"
 resize_pane_right = "prefix+l"
+
+# Ctrl+f: fuzzy find an open workspace or create one from an existing folder.
+[[keys.command]]
+key = "ctrl+f"
+type = "popup"
+command = "python3 ~/.config/herdr/scripts/workspaces.py"
+description = "search workspaces and folders"
+width = "85%"
+height = "80%"
 
 # ── Smart-splits Navigation ─────────────────────────────
 # Seamless Ctrl+hjkl between neovim splits and herdr panes, same as the old
