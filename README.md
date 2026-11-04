@@ -167,6 +167,35 @@ Usage history: `${XDG_STATE_HOME:-~/.local/state}/herdr/workspace-picker/usage.j
 After changing bindings, use **Ctrl+b, then
 Shift+r** to reload both client and server configuration.
 
+### herdr Agent Coordinator
+
+**Ctrl+g** opens your agent coordinator in a centered popup: a long-lived
+Claude Code session that plans work and delegates it to other agents through
+the herdr CLI (`herdr agent start/prompt/wait/read`). It runs as the herdr agent
+**`coordinator`** in its own `coordinator` workspace, so it keeps working, and
+shows its state in the agent sidebar, while the popup is closed.
+
+| Key | Action |
+|-----|--------|
+| **Ctrl+g** | Open the coordinator; the first press creates its workspace and starts Claude |
+| **Ctrl+b, then q** (inside the popup) | Detach and close the popup; the coordinator keeps running |
+
+The coordinator's role and conventions live in `herdr/coordinator.md`, which is
+appended to Claude's system prompt (`--append-system-prompt-file`); it learns
+the CLI itself from `herdr --skill`. If you quit Claude inside the coordinator,
+the next **Ctrl+g** restarts it in the same workspace. It starts in `$HOME` by
+default (Claude asks once whether to trust that folder); change the directory
+or the agent name in the popup command in `herdr/config.toml`:
+
+```toml
+command = "HERDR_COORDINATOR_CWD=\"$HOME/c\" ~/.config/herdr/scripts/coordinator.sh"
+```
+
+Because herdr handles **Ctrl+g** globally, it no longer reaches apps in regular
+panes (Claude Code's own Ctrl+g "edit prompt in `$EDITOR`", Neovim's file info).
+Inside the coordinator popup every key goes to Claude, so Ctrl+g works there.
+Requires `jq`.
+
 ### herdr Tab Bar
 
 Donburi's herdr config ports the old tmux status bar to the right side of herdr's tab bar:

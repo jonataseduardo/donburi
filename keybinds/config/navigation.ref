@@ -45,3 +45,4 @@ Herdr Workspaces|prefix+b|Toggle sidebar
 Herdr Workspaces|prefix+q|Detach
 Herdr Workspaces|prefix+Shift+r|Reload config
 Herdr Workspaces|prefix+?|Show all herdr keybindings
+Herdr Agents|Ctrl+G|Open agent coordinator popup (prefix+q detaches)

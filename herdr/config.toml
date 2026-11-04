@@ -122,6 +122,17 @@ description = "search workspaces and folders"
 width = "85%"
 height = "80%"
 
+# Ctrl+g: agent coordinator — a persistent Claude Code session (herdr agent
+# "coordinator", in its own workspace) shown in a centered popup. Detach with
+# ctrl+b q; the coordinator keeps running. See herdr/coordinator.md.
+[[keys.command]]
+key = "ctrl+g"
+type = "popup"
+command = "~/.config/herdr/scripts/coordinator.sh"
+description = "open the agent coordinator"
+width = "85%"
+height = "80%"
+
 # ── Smart-splits Navigation ─────────────────────────────
 # Seamless Ctrl+hjkl between neovim splits and herdr panes, same as the old
 # tmux is_vim binding: when vim/nvim/fzf is in the foreground the key is
