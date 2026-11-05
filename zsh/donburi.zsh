@@ -49,7 +49,10 @@ alias oc=opencode
 # owns the assertion, so normal exits and interrupts do not leave a background
 # sleep inhibitor behind. -i prevents idle system sleep without keeping the
 # display lit. Set DONBURI_CAFFEINATE=0 for an individual launch to opt out.
-_donburi_harness() {
+# The helper must not start with "_": Claude Code rebuilds its tool shell from
+# a snapshot of your functions that skips such names (zsh completion
+# functions), which left the wrappers calling a missing command.
+keep_awake() {
   if [[ "${DONBURI_CAFFEINATE:-1}" != 0 ]] && command -v caffeinate >/dev/null 2>&1; then
     command caffeinate -i "$@"
   else
@@ -57,12 +60,12 @@ _donburi_harness() {
   fi
 }
 
-claude() { _donburi_harness claude "$@"; }
-opencode() { _donburi_harness opencode "$@"; }
-cursor-agent() { _donburi_harness cursor-agent "$@"; }
-agent() { _donburi_harness agent "$@"; }
+claude() { keep_awake claude "$@"; }
+opencode() { keep_awake opencode "$@"; }
+cursor-agent() { keep_awake cursor-agent "$@"; }
+agent() { keep_awake agent "$@"; }
 # Cursor's GUI launcher otherwise exits immediately, releasing the assertion.
-cursor() { _donburi_harness cursor --wait "$@"; }
+cursor() { keep_awake cursor --wait "$@"; }
 
 # GNU coreutils on macOS
 [[ -x "$(command -v gsed)" ]] && alias sed=gsed

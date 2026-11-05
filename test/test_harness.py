@@ -11,7 +11,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ZSH = shutil.which("zsh")
+ZSH = shutil.which("zsh") or ""
 
 
 @unittest.skipUnless(ZSH, "zsh is required")
@@ -98,6 +98,24 @@ except FileNotFoundError:
         result = self.launch("command cursor .")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.launches(), [["cursor", "."]])
+
+    def test_wrappers_survive_a_shell_snapshot(self):
+        # Claude Code runs its tools in a shell rebuilt from a snapshot of your
+        # functions that leaves out names starting with "_" (zsh completion
+        # functions), so a wrapper must not depend on such a helper.
+        snapshot = subprocess.run(
+            [ZSH, "-dfc", 'source "$1"; typeset -f -- ${(k)functions:#_*}', "snapshot",
+             str(ROOT / "zsh/donburi.zsh")],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout
+        for name in ("claude", "opencode", "cursor-agent", "agent", "cursor"):
+            with self.subTest(name=name):
+                self.log.unlink(missing_ok=True)
+                result = subprocess.run([ZSH, "-dfc", f"{snapshot}\n{name} --version"],
+                                        env=self.env, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                args = (["--wait"] if name == "cursor" else []) + ["--version"]
+                self.assertEqual(self.launches(), [["caffeinate", "-i", name, *args], [name, *args]])
 
 
 if __name__ == "__main__":

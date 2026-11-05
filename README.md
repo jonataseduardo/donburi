@@ -368,6 +368,7 @@ the last one exits. If `caffeinate` is unavailable, commands run normally.
 ```zsh
 DONBURI_CAFFEINATE=0 claude    # Disable for one launch
 command cursor .             # Bypass the wrapper and open without waiting
+keep_awake make test         # Keep any other command awake the same way
 pmset -g assertions          # Inspect active macOS sleep assertions
 ```
 
