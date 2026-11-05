@@ -62,6 +62,11 @@ pane_borders = "auto"
 # herdr from herdr/build-patched.sh; stock herdr ignores this key with a warning.
 focus_follows_mouse = true
 status_indicators = "symbols"
+# Agent panel as an attention queue (agents that need you first) instead of
+# grouped by workspace; rows are set in [ui.sidebar.agents] below.
+agent_panel_sort = "priority"
+# Pane borders show the agent's label, which starts with its marker (● ◆ ■ …).
+show_agent_labels_on_pane_borders = true
 # prefix+c opens a tab immediately, like tmux new-window
 prompt_new_tab_name = false
 
@@ -74,6 +79,39 @@ tab_bar_right = [
   { type = "command", command = "basename \"${HERDR_ACTIVE_PANE_CWD:-$PWD}\" | sed 's/^/ /'", interval_seconds = 5, timeout_seconds = 2 },
   { type = "datetime", format = " %H:%M" },
 ]
+
+# $mark is each agent's marker, set by scripts/agent_watch.py while the
+# coordinator runs and colored here from the Kanagawa palette (same list as
+# MARKS in agent_watch.py and transcript.lua). The second row shows what the
+# agent is doing (Claude/Codex set a task title).
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", { token = "$mark", rules = [
+    { equals = "◉", fg = "#FF9E64", bold = true },
+    { equals = "●", fg = "#7FB4CA" },
+    { equals = "◆", fg = "#957FB8" },
+    { equals = "■", fg = "#7E9CD8" },
+    { equals = "▲", fg = "#D27E99" },
+    { equals = "★", fg = "#DCD7BA" },
+    { equals = "▼", fg = "#C0A36E" },
+    { equals = "✚", fg = "#A3D4D5" },
+    { equals = "✦", fg = "#E46876" },
+  ] }, "machine", "workspace", "tab"],
+  ["agent", "terminal_title_stripped"],
+]
+
+# Workspaces keep herdr's default rows; the coordinator's workspace ("◉
+# coordinator", kept first by scripts/coordinator.sh) is drawn in the accent.
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", { token = "workspace", rules = [{ starts_with = "◉", fg = "#FF9E64", bold = true }] }],
+  ["branch", "git_status"],
+]
+
+# In-app toast when a background agent finishes or needs you; prefix+o jumps to
+# the agent behind the latest toast.
+[ui.toast]
+delivery = "herdr"
 
 # ── Keybindings ──────────────────────────────────────────
 [keys]
@@ -122,16 +160,26 @@ description = "search workspaces and folders"
 width = "85%"
 height = "80%"
 
-# Ctrl+g: agent coordinator — a persistent Claude Code session (herdr agent
-# "coordinator", in its own workspace) shown in a centered popup. Detach with
-# ctrl+b q; the coordinator keeps running. See herdr/coordinator.md.
+# Ctrl+a: toggle the agent coordinator — a persistent Claude Code session on a
+# fast model (herdr agent "coordinator") in its own workspace, started in the
+# ds-hq repo. The workspace is modal: Neovim history on top (normal mode, i to
+# prompt), Claude prompt below (Ctrl+k back up). See herdr/coordinator.md.
+# Takes Ctrl+a (line start) from shells, Claude Code and Neovim (increment).
 [[keys.command]]
-key = "ctrl+g"
+key = "ctrl+a"
+type = "shell"
+command = "HERDR_COORDINATOR_CWD=\"$HOME/ia/ds-hq\" ~/.config/herdr/scripts/coordinator.sh"
+description = "toggle the agent coordinator"
+
+# prefix+shift+h: the focused agent's Claude conversation in Neovim (read-only,
+# live); i jumps to its prompt, :q closes.
+[[keys.command]]
+key = "prefix+shift+h"
 type = "popup"
-command = "~/.config/herdr/scripts/coordinator.sh"
-description = "open the agent coordinator"
+command = "~/.config/herdr/scripts/transcript-view.sh"
+description = "agent conversation history"
 width = "85%"
-height = "80%"
+height = "85%"
 
 # ── Smart-splits Navigation ─────────────────────────────
 # Seamless Ctrl+hjkl between neovim splits and herdr panes, same as the old

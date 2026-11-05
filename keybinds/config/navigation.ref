@@ -45,4 +45,7 @@ Herdr Workspaces|prefix+b|Toggle sidebar
 Herdr Workspaces|prefix+q|Detach
 Herdr Workspaces|prefix+Shift+r|Reload config
 Herdr Workspaces|prefix+?|Show all herdr keybindings
-Herdr Agents|Ctrl+G|Open agent coordinator popup (prefix+q detaches)
+Herdr Agents|Ctrl+A|Toggle the agent coordinator workspace
+Herdr Agents|i (history pane)|Jump to the coordinator prompt (insert mode)
+Herdr Agents|prefix+Shift+h|Focused agent's conversation in Neovim (popup)
+Herdr Agents|prefix+o|Jump to the agent behind the latest toast

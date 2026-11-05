@@ -28,3 +28,6 @@ jobs:
           sudo apt-get install -y zsh
           zsh -n zsh/donburi.zsh
           python3 test/test_harness.py
+
+      - name: Test herdr coordinator scripts
+        run: python3 -m unittest discover -s herdr/scripts -p 'test_*.py'

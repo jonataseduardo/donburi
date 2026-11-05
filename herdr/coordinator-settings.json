@@ -1,0 +1,27 @@
+{
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "30"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python3 ~/.config/herdr/scripts/coordinator_status.py",
+    "refreshInterval": 5
+  },
+  "permissions": {
+    "allow": [
+      "Bash(herdr --skill)",
+      "Bash(herdr agent list)",
+      "Bash(herdr agent get *)",
+      "Bash(herdr agent read *)",
+      "Bash(herdr agent wait *)",
+      "Bash(herdr agent focus *)",
+      "Bash(herdr agent prompt *)",
+      "Bash(herdr workspace list)",
+      "Bash(herdr tab list *)",
+      "Bash(herdr pane list *)",
+      "Bash(jq *)",
+      "Bash(python3 ~/.config/herdr/scripts/agent_watch.py)",
+      "Bash(python3 ~/.config/herdr/scripts/agent_watch.py *)"
+    ]
+  }
+}
