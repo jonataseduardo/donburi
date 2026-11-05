@@ -270,10 +270,12 @@ commands (`herdr agent list/get/read/wait/focus/prompt`, the feed script, `jq`).
 Starting workers still asks first. It cannot send keys, so it never answers a
 blocked agent's prompt for you.
 
-**Visibility.** The herdr sidebar lists agents as an attention queue
-(`agent_panel_sort = "priority"`), each with its marker and its task title on
-a second row, and background agents raise an in-app toast when they finish or
-need you (`[ui.toast] delivery = "herdr"`).
+**Visibility.** The herdr sidebar lists agents grouped by workspace, in sidebar
+order (`agent_panel_sort = "spaces"`), so the coordinator is always the top
+agent; set `"priority"` instead for an attention queue with agents that need you
+first. Each agent shows its marker and its task title on a second row, and
+background agents raise an in-app toast when they finish or need you
+(`[ui.toast] delivery = "herdr"`).
 
 The coordinator's role and conventions live in `herdr/coordinator.md`, which is
 appended to Claude's system prompt (`--append-system-prompt-file`); it learns

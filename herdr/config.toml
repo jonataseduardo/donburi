@@ -62,9 +62,12 @@ pane_borders = "auto"
 # herdr from herdr/build-patched.sh; stock herdr ignores this key with a warning.
 focus_follows_mouse = true
 status_indicators = "symbols"
-# Agent panel as an attention queue (agents that need you first) instead of
-# grouped by workspace; rows are set in [ui.sidebar.agents] below.
-agent_panel_sort = "priority"
+# Agent panel grouped by workspace, in sidebar order, so the coordinator (its
+# "◉ coordinator" workspace is kept first) is the top agent. For an attention
+# queue (agents that need you first) use "priority" instead. Rows are set in
+# [ui.sidebar.agents] below.
+agent_panel_sort = "spaces"
+# agent_panel_sort = "priority"
 # Pane borders show the agent's label, which starts with its marker (● ◆ ■ …).
 show_agent_labels_on_pane_borders = true
 # prefix+c opens a tab immediately, like tmux new-window
