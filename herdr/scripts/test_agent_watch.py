@@ -138,7 +138,7 @@ class MarkTests(unittest.TestCase):
         herdr = Path(__file__).resolve().parent.parent
         config, lua = (herdr / "config.toml").read_text(), (herdr / "transcript.lua").read_text()
         for glyph, color, _ in [agent_watch.COORDINATOR_MARK, *agent_watch.MARKS]:
-            self.assertIn(f'{{ equals = "{glyph}", fg = "{color}"', config)
+            self.assertIn(f'{{ starts_with = "{glyph}", fg = "{color}"', config)
             self.assertIn(f'{{ "{glyph}", "{color}" }}', lua)
         self.assertIn(f'starts_with = "{agent_watch.COORDINATOR_MARK[0]}", fg = "{agent_watch.COORDINATOR_MARK[1]}"',
                       config)

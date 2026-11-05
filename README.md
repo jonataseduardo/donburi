@@ -200,7 +200,7 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
   (`herdr/scripts/coordinator_status.py`, set as `statusLine` in
   `herdr/coordinator-settings.json`, refreshed every 5 seconds). Your usual
   status line is unchanged in other sessions.
-- **Agents panel.** The coordinator's own row has the orange `◉` marker.
+- **Agents panel.** The coordinator's own row reads `◉ coordinator` in orange.
 
 | Key | Action |
 |-----|--------|
@@ -233,16 +233,18 @@ reusing their colors:
 | ✦ | rose `#E46876` | waveRed |
 | ◉ | orange `#FF9E64` | surimiOrange, the coordinator only |
 
-The marker stays with the agent's terminal. It shows in color in the herdr
-sidebar (`$mark`, colored by sidebar rules) and in the Neovim history pane, and
-as a plain shape on the agent's pane border
-(`show_agent_labels_on_pane_borders`) and in Claude's own pane, which herdr and
-Claude cannot color; that is why each color has its own shape. With more than
-eight agents markers repeat; `◉` is never reused. The feed script sets them as herdr pane metadata
-(source `donburi-marks`) while the coordinator runs; pass `--no-marks` to
+The marker stays with the agent's terminal and appears only where it can be
+colored. In the herdr sidebar it sits next to the harness name on each agent's
+second row (`▲ claude`, the label colored by its marker through
+`[ui.sidebar.agents]` rules). In the Neovim history pane the coordinator's
+replies and feed lines show it in color. Claude's own pane cannot color it, so
+each color also has its own shape, and pane borders show no agent labels. With
+more than eight agents markers repeat; `◉` is never reused. The feed script sets
+them as herdr pane metadata (token `mark`, plus the label prefix, source
+`donburi-marks`) while the coordinator runs; pass `--no-marks` to
 `agent_watch.py` to turn this off. The palette lives in three places that a test
-keeps in step: `MARKS` and `COORDINATOR_MARK` in `agent_watch.py`, the `$mark` rules in
-`herdr/config.toml`, and `herdr/transcript.lua`.
+keeps in step: `MARKS` and `COORDINATOR_MARK` in `agent_watch.py`, the agent
+label rules in `herdr/config.toml`, and `herdr/transcript.lua`.
 
 **Rolling feed.** At the start of a session the coordinator runs
 `herdr/scripts/agent_watch.py` under Claude Code's Monitor tool. The script

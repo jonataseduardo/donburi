@@ -23,11 +23,11 @@ READY = {"idle", "done"}
 BUSY = {"working", "blocked"}
 # A saved state older than this is ignored, so an old run cannot flood the feed.
 STALE_SECONDS = 600
-# Each agent gets one marker as the pane metadata token `mark`: a shape that
-# herdr shows on the agent's pane border and the coordinator writes in its
-# replies, colored from the Kanagawa palette wherever color is possible (herdr
-# sidebar rules in config.toml, highlights in transcript.lua). Shapes stay
-# distinct because borders and Claude's own pane are not colored. herdr's state
+# Each agent gets one marker as the pane metadata token `mark`, also put in
+# front of its label ("▲ claude"). The herdr sidebar colors that label by its
+# marker (rules in config.toml), the coordinator writes the marker in its
+# replies, and the history pane colors it (transcript.lua). Shapes stay distinct
+# because Claude's own pane cannot be colored. herdr's state
 # colors (yellow, red, teal, green) come last so a marker does not read as a
 # state, and orange (herdr's accent) is the coordinator's own ◉. Keep
 # config.toml and transcript.lua in step (test_agent_watch checks).

@@ -68,8 +68,9 @@ status_indicators = "symbols"
 # [ui.sidebar.agents] below.
 agent_panel_sort = "spaces"
 # agent_panel_sort = "priority"
-# Pane borders show the agent's label, which starts with its marker (● ◆ ■ …).
-show_agent_labels_on_pane_borders = true
+# Agent labels stay off pane borders: herdr draws borders in one color, and
+# markers only appear where they can be colored (sidebar, history pane).
+# show_agent_labels_on_pane_borders = true
 # prefix+c opens a tab immediately, like tmux new-window
 prompt_new_tab_name = false
 
@@ -83,24 +84,26 @@ tab_bar_right = [
   { type = "datetime", format = " %H:%M" },
 ]
 
-# $mark is each agent's marker, set by scripts/agent_watch.py while the
-# coordinator runs and colored here from the Kanagawa palette (same list as
-# MARKS in agent_watch.py and transcript.lua). The second row shows what the
-# agent is doing (Claude/Codex set a task title).
+# The second row is the harness (claude, codex...) and what it is doing. While
+# the coordinator runs, scripts/agent_watch.py prefixes each agent's label with
+# its marker ("▲ claude"); these rules color that label by its marker, from the
+# Kanagawa palette (same list as MARKS in agent_watch.py and transcript.lua).
+# herdr joins tokens with " · ", so the marker is part of the label rather
+# than a token of its own.
 [ui.sidebar.agents]
 rows = [
-  ["state_icon", { token = "$mark", rules = [
-    { equals = "◉", fg = "#FF9E64", bold = true },
-    { equals = "●", fg = "#7FB4CA" },
-    { equals = "◆", fg = "#957FB8" },
-    { equals = "■", fg = "#7E9CD8" },
-    { equals = "▲", fg = "#D27E99" },
-    { equals = "★", fg = "#DCD7BA" },
-    { equals = "▼", fg = "#C0A36E" },
-    { equals = "✚", fg = "#A3D4D5" },
-    { equals = "✦", fg = "#E46876" },
-  ] }, "machine", "workspace", "tab"],
-  ["agent", "terminal_title_stripped"],
+  ["state_icon", "machine", "workspace", "tab"],
+  [{ token = "agent", rules = [
+    { starts_with = "◉", fg = "#FF9E64", bold = true },
+    { starts_with = "●", fg = "#7FB4CA" },
+    { starts_with = "◆", fg = "#957FB8" },
+    { starts_with = "■", fg = "#7E9CD8" },
+    { starts_with = "▲", fg = "#D27E99" },
+    { starts_with = "★", fg = "#DCD7BA" },
+    { starts_with = "▼", fg = "#C0A36E" },
+    { starts_with = "✚", fg = "#A3D4D5" },
+    { starts_with = "✦", fg = "#E46876" },
+  ] }, "terminal_title_stripped"],
 ]
 
 # Workspaces keep herdr's default rows; the coordinator's workspace ("◉
