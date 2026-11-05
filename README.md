@@ -206,6 +206,9 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
 |-----|--------|
 | **Ctrl+a** | Switch to the coordinator; from the coordinator, back to where you were. The first press creates the workspace, starts Claude and its feed |
 | **i** `a` `o` **Enter** (in `history`) | Jump to the prompt (insert mode) |
+| **]e** / **[e** (in `history`) | Next / previous feed event (blocked, finished, started, gone); takes a count |
+| `:HerdrAgent [pane or name]` (in `history`) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
+| `:HerdrTag [tag]` (in `history`) | The sections (turns and feed blocks) tagged with that agent, in its color. Every section that names an agent carries a tag such as `[▲ w5:p2 donburi]` at the start of its heading, and a bar in the agent's color down its lines. Tags come only from the text: pane IDs, the marker written before them (else the agent's live marker), agent names from feed lines, and the workspace a feed line names |
 | **Ctrl+k** (in `prompt`) / **Ctrl+j** (in `history`) | Move between the panes (smart-splits) |
 | **Ctrl+b, then Shift+h** | The focused agent's conversation in the same Neovim view, as a popup (`:q` closes) |
 | **Ctrl+b, then o** | Jump to the agent behind the latest toast (works without the coordinator) |
