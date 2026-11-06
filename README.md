@@ -215,6 +215,9 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
 | **]e** / **[e** (in `history`) | Next / previous feed event (blocked, finished, started, gone); takes a count |
 | `:HerdrAgent [pane or name]` (in `history`) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
 | `:HerdrTag [tag]` (in `history`) | The sections (turns and feed blocks) tagged with that agent, in its color. Every section that names an agent carries a tag such as `[▲ w5:p2 donburi]` at the start of its heading, and a bar in the agent's color down its lines. Tags come only from the text: pane IDs, the marker written before them (else the agent's live marker), agent names from feed lines, and the workspace a feed line names |
+| **[d** / **]d** (in `history`) | Previous / next day of the coordinator's history in the same pane; **]d** past the last day returns to the live view |
+| `:HerdrDay [date]` (in `history`) | Open a day (`2026-11-04`); Tab completes the days in `index.md`. Without a date, or with `today`, the live view |
+| `:HerdrTag! [tag]` / `:HerdrAgent! [target]` (in `history`) | The same search across every day file, in one location list with each entry's file |
 | **Ctrl+k** (in `prompt`) / **Ctrl+j** (in `history`) | Move between the panes (smart-splits) |
 | **Ctrl+b, then Shift+h** | The focused agent's conversation in the same Neovim view, as a popup (`:q` closes) |
 | **Ctrl+b, then o** | Jump to the agent behind the latest toast (works without the coordinator) |
@@ -277,6 +280,19 @@ switches to the new one after `/clear` or a restart.
 `herdr/scripts/transcript-view.sh [agent]` opens it in Neovim with
 `herdr/transcript.lua`; `transcript.py --session <id|path>` prints any
 transcript.
+
+**History by day.** The coordinator's history is also kept as one Markdown file
+per local day in `${XDG_STATE_HOME:-~/.local/state}/herdr/coordinator/days/`
+(`transcript.py --days`), with `index.md` listing each day's sessions, turns,
+feed events and agents. A session that crosses midnight continues on the next
+day under "(continued)", and an entry Claude copies into a resumed session is
+shown once. Day files are an archive: written atomically and never replaced by
+a render with less in it (`sources.json` keeps every session that went into a
+day), so they outlive the five-session view and Claude's 30-day transcript
+cleanup. Only the live view reloads; day files are opened read-only, tagged
+like the live view. To build the files from every coordinator session still on
+disk, run once:
+`python3 herdr/scripts/transcript.py --agent coordinator --days ~/.local/state/herdr/coordinator/days --backfill`.
 
 **Models and permissions.** The coordinator only reads, focuses, and relays.
 Workers it starts run on their default Claude Code or Codex model unless you name

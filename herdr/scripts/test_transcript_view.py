@@ -3,6 +3,7 @@
 Drives herdr/transcript.lua in a headless Neovim (skipped when nvim is missing).
 """
 
+from datetime import date, timedelta
 import json
 import os
 from pathlib import Path
@@ -218,6 +219,214 @@ result = vim.tbl_filter(function(c) return c[1]:match("^%[") end, heading_tags()
 
     def test_turn_navigation_still_works(self):
         self.assertEqual(self.run_view('vim.cmd("normal! gg"); vim.cmd("normal ]]"); result = vim.fn.line(".")'), 2)
+
+    def test_day_keys_need_a_days_directory(self):
+        # Neovim's own [d / ]d (diagnostics) stay; no buffer-local day keys.
+        self.assertEqual(self.run_view("""
+local function local_map(key) return vim.fn.maparg(key, "n", false, true).buffer or 0 end
+result = { local_map("[d"), local_map("]d"), vim.fn.exists(":HerdrDay") }
+"""), [0, 0, 0])
+
+
+TODAY = date.today()
+D1, D2 = (TODAY - timedelta(days=1)).isoformat(), (TODAY - timedelta(days=2)).isoformat()
+
+# Two archived days, as transcript.py --days writes them; today's file mirrors
+# the live view.
+DAY2 = f"""# {D2} 09:00 · Old work
+## 09:00 · you
+
+check w5:p2
+
+### 09:01 · feed
+
+```text
+09:01:00 finished ▲ w5:p2 claude in donburi: Old commit
+```
+"""
+
+DAY1 = f"""# {D1} 10:00 · Yesterday
+## 10:00 · claude
+
+nothing to report
+
+### 10:01 · feed
+
+```text
+10:01:00 blocked  ◆ api-impl (wJ:p2) codex in curator: Approve
+10:01:30 finished ◆ api-impl (wJ:p2) codex in curator: Rebased
+```
+"""
+
+INDEX = f"""# History by day
+
+| Day | Sessions | Turns | Feed events | Agents |
+|-----|----------|-------|-------------|--------|
+| [{TODAY.isoformat()}]({TODAY.isoformat()}.md) | 1 | 4 | 3 | w5:p2 donburi, wJ:p2 api-impl |
+| [{D1}]({D1}.md) | 1 | 1 | 2 | wJ:p2 api-impl |
+| [{D2}]({D2}.md) | 1 | 1 | 1 | w5:p2 donburi |
+"""
+
+
+class DayViewTests(unittest.TestCase):
+    """The coordinator's history split by day (HERDR_TRANSCRIPT_DAYS)."""
+
+    def setUp(self):
+        if not NVIM:
+            self.skipTest("nvim is required")
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        self.view = root / "coordinator.md"
+        self.view.write_text(HISTORY)
+        self.days = root / "days"
+        self.days.mkdir()
+        for name, text in [(D2, DAY2), (D1, DAY1), (TODAY.isoformat(), HISTORY), ("index", INDEX)]:
+            (self.days / f"{name}.md").write_text(text)
+        self.socket = root / "no.sock"
+
+    def run_view(self, lua, agent="w9:p9"):
+        script = f"local result\n{lua}\nio.stdout:write(vim.json.encode(result))"
+        env = {**os.environ, "HERDR_TRANSCRIPT_AGENT": agent, "HERDR_BIN_PATH": "true",
+               "HERDR_TRANSCRIPT_DAYS": str(self.days), "HERDR_SOCKET_PATH": str(self.socket)}
+        out = subprocess.run(
+            [NVIM, "--headless", "-n", "-R", "-u", "NONE", "-c", f"luafile {LUA}",
+             "-c", f"lua {script}", "-c", "qa!", str(self.view)],
+            env=env, capture_output=True, text=True, timeout=60,
+        )
+        self.assertEqual(out.returncode, 0, out.stderr)
+        return json.loads(out.stdout.strip().splitlines()[-1])
+
+    # Where the history window is: the day shown (nil = live view) and the file.
+    WHERE = """local function where()
+  return { day = vim.b.herdr_day or "live", file = vim.fn.expand("%:t"), line = vim.fn.line(".") }
+end"""
+
+    def test_day_keys_step_through_the_days_and_back_to_the_live_view(self):
+        steps = self.run_view(self.WHERE + """
+result = { where() }
+for _, key in ipairs({ "[d", "[d", "[d", "]d", "]d", "]d" }) do
+  vim.cmd("normal " .. key)
+  table.insert(result, where())
+end
+""")
+        live = {"day": "live", "file": "coordinator.md", "line": len(HISTORY.splitlines())}
+        self.assertEqual([(s["day"], s["file"]) for s in steps], [
+            ("live", "coordinator.md"),
+            (D1, f"{D1}.md"), (D2, f"{D2}.md"),
+            (D2, f"{D2}.md"),               # no earlier day: stays
+            (D1, f"{D1}.md"),
+            ("live", "coordinator.md"),     # today's file is the live view
+            ("live", "coordinator.md"),
+        ])
+        self.assertEqual(steps[0], live)
+        self.assertEqual(steps[-1], live)   # back at the end, still following
+
+    def test_a_day_gets_the_same_view(self):
+        result = self.run_view("""
+vim.cmd("normal [d")
+local buf, ns = vim.api.nvim_get_current_buf(), vim.api.nvim_get_namespaces().herdr_sections
+local tags = {}
+for _, m in ipairs(vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })) do
+  if m[4].virt_text then tags[tostring(m[2] + 1)] = m[4].virt_text[1] end
+end
+vim.cmd("normal! gg")
+vim.cmd("normal 2]e")
+result = { tags = tags, event = vim.fn.line("."), readonly = vim.bo.readonly, modifiable = vim.bo.modifiable,
+           filetype = vim.bo.filetype, prompt = vim.fn.maparg("i", "n") ~= "", agent = vim.fn.exists(":HerdrAgent") }
+""")
+        # The first turn names no agent; the feed block names api-impl.
+        self.assertEqual(result["tags"], {"6": ["[◆ wJ:p2 api-impl]", "HerdrMark3"]})
+        self.assertEqual(result["event"], 10)
+        self.assertEqual([result[k] for k in ("readonly", "modifiable", "filetype", "prompt", "agent")],
+                         [True, False, "markdown", True, 2])
+
+    def test_day_command_opens_a_day_and_completes_from_the_index(self):
+        result = self.run_view(self.WHERE + f"""
+local out = {{ complete = vim.fn.getcompletion("HerdrDay ", "cmdline") }}
+vim.cmd("HerdrDay {D2}"); out.d2 = where()
+vim.cmd("HerdrDay 1999-01-01"); out.missing = where()
+vim.cmd("HerdrDay"); out.live = where()
+vim.cmd("HerdrDay {D1}"); vim.cmd("HerdrDay today"); out.today = where()
+result = out
+""")
+        self.assertEqual(result["complete"], [TODAY.isoformat(), D1, D2])  # newest first
+        self.assertEqual(result["d2"]["day"], D2)
+        self.assertEqual(result["missing"]["day"], D2)  # no such day: stays
+        self.assertEqual(result["live"]["file"], "coordinator.md")
+        self.assertEqual(result["today"]["file"], "coordinator.md")
+
+    def test_bang_searches_every_day_file(self):
+        result = self.run_view("""
+local out = {}
+for _, cmd in ipairs({ "HerdrTag! api-impl", "HerdrAgent! w5:p2", "HerdrTag api-impl" }) do
+  vim.cmd(cmd)
+  local list = vim.fn.getloclist(vim.fn.win_getid(vim.fn.winnr("#")), { title = 1, items = 1 })
+  out[cmd] = { title = list.title, items = vim.tbl_map(function(i)
+    return { vim.fn.fnamemodify(vim.fn.bufname(i.bufnr), ":t"), i.lnum, i.text:match("^%[[^]]*%]") }
+  end, list.items) }
+  vim.cmd("lclose")
+end
+result = out
+""")
+        today = f"{TODAY.isoformat()}.md"
+        tag = "[◆ wJ:p2 api-impl]"
+        self.assertEqual(result["HerdrTag! api-impl"]["title"], "herdr tag (all days): api-impl")
+        self.assertEqual(result["HerdrTag! api-impl"]["items"], [
+            [f"{D1}.md", 6, tag],
+            [today, 12, tag], [today, 31, tag], [today, 37, tag],
+        ])
+        self.assertEqual(result["HerdrAgent! w5:p2"]["title"], "herdr (all days): w5:p2")
+        self.assertEqual(result["HerdrAgent! w5:p2"]["items"], [  # (lines carry no tag)
+            [f"{D2}.md", 4], [f"{D2}.md", 9], [today, 4], [today, 8], [today, 10], [today, 15],
+        ])
+        # Without !, only the buffer on screen (the live view).
+        self.assertEqual([i[:2] for i in result["HerdrTag api-impl"]["items"]],
+                         [["coordinator.md", 12], ["coordinator.md", 31], ["coordinator.md", 37]])
+
+    def test_a_location_list_entry_opens_its_day_in_the_view(self):
+        result = self.run_view(self.WHERE + """
+vim.cmd("HerdrTag! api-impl")
+vim.cmd("ll 1")
+local tags = vim.api.nvim_buf_get_extmarks(0, vim.api.nvim_get_namespaces().herdr_sections, 0, -1, {})
+result = { where = where(), tagged = #tags > 0, signcolumn = vim.wo.signcolumn }
+""")
+        self.assertEqual(result, {"where": {"day": D1, "file": f"{D1}.md", "line": 6}, "tagged": True,
+                                  "signcolumn": "yes"})
+
+    def test_only_the_live_view_reloads_and_a_day_keeps_its_cursor(self):
+        result = self.run_view(self.WHERE + """
+local live = vim.api.nvim_get_current_buf()
+vim.cmd("normal [d")
+local day = vim.api.nvim_get_current_buf()
+local reloads = vim.tbl_map(function(a) return a.buffer end,
+  vim.api.nvim_get_autocmds({ group = "herdr_transcript", event = "FileChangedShell" }))
+vim.cmd("normal! gg")
+-- The renderer appends to the live file while a day is shown.
+local lines = vim.fn.readfile(vim.api.nvim_buf_get_name(live))
+vim.list_extend(lines, { "", "## 07:30 · claude", "", "done" })
+vim.fn.writefile(lines, vim.api.nvim_buf_get_name(live))
+vim.cmd("checktime")
+local day_view = where()
+vim.cmd("normal ]d")
+result = { reloads = reloads, live = live, day = day, day_view = day_view, back = where(),
+           live_lines = vim.api.nvim_buf_line_count(live) }
+""")
+        self.assertEqual(result["reloads"], [result["live"]])
+        self.assertEqual(result["day_view"], {"day": D1, "file": f"{D1}.md", "line": 1})
+        self.assertEqual(result["live_lines"], len(HISTORY.splitlines()) + 4)
+        self.assertEqual(result["back"]["line"], result["live_lines"])  # followed the new turn
+
+    def test_coordinator_banner_names_the_day_shown(self):
+        result = self.run_view("""
+local bars = { vim.wo.winbar }
+vim.cmd("normal [d"); table.insert(bars, vim.wo.winbar)
+vim.cmd("normal ]d"); table.insert(bars, vim.wo.winbar)
+result = bars
+""", agent="coordinator")
+        self.assertNotIn(D1, result[0])
+        self.assertIn(D1, result[1])
+        self.assertNotIn(D1, result[2])
 
 
 if __name__ == "__main__":

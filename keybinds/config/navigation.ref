@@ -50,5 +50,8 @@ Herdr Agents|i (history pane)|Jump to the coordinator prompt (insert mode)
 Herdr Agents|]e / [e (history pane)|Next / previous feed event
 Herdr Agents|:HerdrAgent [pane] (history pane)|Lines naming an agent, in the location list
 Herdr Agents|:HerdrTag [tag] (history pane)|Sections tagged with an agent, in its color
+Herdr Agents|[d / ]d (history pane)|Previous / next day of the coordinator history (]d past the last: live)
+Herdr Agents|:HerdrDay [date] (history pane)|Open a day of the history (no date: live view)
+Herdr Agents|:HerdrTag! / :HerdrAgent! (history pane)|Search every day file
 Herdr Agents|prefix+Shift+h|Focused agent's conversation in Neovim (popup)
 Herdr Agents|prefix+o|Jump to the agent behind the latest toast
