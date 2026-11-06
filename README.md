@@ -347,6 +347,10 @@ Donburi's herdr config ports the old tmux status bar to the right side of herdr'
 
 Workspaces, their git status, and agent state (working / blocked / idle) live in herdr's sidebar (`prefix+b` toggles it). Colors use the Kanagawa palette with the `#FF9E64` surimiOrange accent. Customize in `~/.config/herdr/config.toml`.
 
+A workspace whose folder is not in a Git repository shows **no git** where its
+branch would be. `herdr/scripts/space_tags.py` sets that tag every 5 s from a
+silent tab-bar command, so it follows a `cd` in the workspace's first pane.
+
 The **Next Meeting** widget is **lazy / off by default** — it stays hidden and
 makes no calendar calls until you enable tracking with `donburi meeting on`
 (`donburi meeting off` hides it again). When enabled it reads Google Calendar

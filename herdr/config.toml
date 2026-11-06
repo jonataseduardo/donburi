@@ -80,6 +80,9 @@ tab_bar_right = [
   { type = "zoom" },
   { type = "command", command = "~/.config/herdr/scripts/next-meeting.sh", interval_seconds = 60, timeout_seconds = 10 },
   { type = "command", command = "~/.config/herdr/scripts/git-branch.sh", interval_seconds = 5, timeout_seconds = 2 },
+  # Prints nothing: tags workspaces outside a Git repository "no git" for the
+  # sidebar ([ui.sidebar.spaces]). herdr has no event for a folder change.
+  { type = "command", command = "python3 -B ~/.config/herdr/scripts/space_tags.py", interval_seconds = 5, timeout_seconds = 2 },
   { type = "command", command = "basename \"${HERDR_ACTIVE_PANE_CWD:-$PWD}\" | sed 's/^/ /'", interval_seconds = 5, timeout_seconds = 2 },
   { type = "datetime", format = " %H:%M" },
 ]
@@ -108,11 +111,13 @@ rows = [
 
 # Workspaces keep herdr's default rows; the coordinator's workspace (ds-hq,
 # kept first by scripts/coordinator.sh) is drawn in the accent. Keep the name
-# in step with HERDR_COORDINATOR_CWD in the Ctrl+a command below.
+# in step with HERDR_COORDINATOR_CWD in the Ctrl+a command below. A workspace
+# whose folder is not in a Git repository shows "no git" where the branch goes
+# ($no_git, set by scripts/space_tags.py from the tab bar above).
 [ui.sidebar.spaces]
 rows = [
   ["state_icon", { token = "workspace", rules = [{ equals = "ds-hq", fg = "#FF9E64", bold = true }] }],
-  ["branch", "git_status"],
+  ["branch", "git_status", "$no_git"],
 ]
 
 # In-app toast when a background agent finishes or needs you; prefix+o jumps to
