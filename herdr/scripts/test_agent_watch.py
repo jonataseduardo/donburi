@@ -1,9 +1,14 @@
 """Run with: python3 -m unittest discover -s herdr/scripts -p 'test_*.py'."""
 
+import contextlib
+import io
+import json
+import os
 from pathlib import Path
 import tempfile
 import unicodedata
 import unittest
+from unittest.mock import patch
 
 import agent_watch
 
@@ -140,8 +145,6 @@ class MarkTests(unittest.TestCase):
         for glyph, color, _ in [agent_watch.COORDINATOR_MARK, *agent_watch.MARKS]:
             self.assertIn(f'{{ starts_with = "{glyph}", fg = "{color}"', config)
             self.assertIn(f'{{ "{glyph}", "{color}" }}', lua)
-        self.assertIn(f'starts_with = "{agent_watch.COORDINATOR_MARK[0]}", fg = "{agent_watch.COORDINATOR_MARK[1]}"',
-                      config)
 
     def test_coordinator_always_gets_its_own_mark(self):
         coordinator = dict(self.live("w9:p1", "t9", "●"), name="coordinator")
@@ -153,11 +156,76 @@ class MarkTests(unittest.TestCase):
     def test_a_worker_never_keeps_the_coordinator_mark(self):
         self.assertEqual(agent_watch.assign_marks([self.live("w1:p1", "t1", "◉")]), {"t1": "●"})
 
+    def test_labels_name_the_harness_like_every_agent(self):
+        coordinator = dict(self.live("w9:p1", "t9"), name="coordinator", agent="claude")
+        worker = dict(self.live("w1:p1", "t1"), name="api-impl", agent="codex")
+        with patch.object(agent_watch, "call") as call:
+            agent_watch.paint([coordinator, worker], {"t9": "◉", "t1": "●"}, set())
+        labels = [c.args[1]["display_agent"] for c in call.call_args_list]
+        self.assertEqual(labels, ["◉ claude", "● codex"])
+
+    def test_feed_never_reports_the_coordinator(self):
+        agents = [agent("w9:p1", "working", name="coordinator"), agent("w1:p1", "working")]
+        tracks, events = agent_watch.step({}, agents, 0, 3)
+        self.assertEqual(list(tracks), ["w1:p1"])
+        self.assertEqual([item["pane_id"] for _, item in events], ["w1:p1"])
+
     def test_counts_leave_out_the_coordinator_and_excluded_panes(self):
         agents = [agent("w1:p1", "blocked"), agent("w2:p1", "working"), agent("w3:p1", "working"),
                   agent("w4:p1", "idle", name="coordinator"), agent("w5:p1", "done")]
         self.assertEqual(agent_watch.counts(agents, exclude={"w5:p1"}),
                          {"agents": 3, "blocked": 1, "working": 2})
+
+    def counts_run(self, *flags):
+        """Run --counts against a fake herdr; return (printed JSON, metadata reports)."""
+        agents = [dict(self.live("w8:p1", "t1", "●"), agent="claude", agent_status="idle", display_agent="● claude"),
+                  dict(self.live("w8:p2", "t2"), agent="claude", agent_status="working")]
+        reports = []
+
+        def fake(method, params=None):
+            if method == "agent.list":
+                return {"agents": agents}
+            if method == "tab.list":
+                return {"tabs": []}
+            reports.append(params)
+            return {}
+
+        out = io.StringIO()
+        env = {k: v for k, v in os.environ.items() if k != "HERDR_PANE_ID"}
+        with patch.object(agent_watch, "call", side_effect=fake), patch.dict(os.environ, env, clear=True), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(agent_watch.main(["--counts", *flags]), 0)
+        return json.loads(out.getvalue()), reports
+
+    def test_an_unnamed_coordinator_is_found_by_its_tab(self):
+        # After /clear herdr forgets the name; the agent in the "coordinator" tab keeps ◉.
+        coordinator = dict(self.live("w3:p7", "t7", "●"), tab_id="w3:t3")
+        worker = dict(self.live("w1:p2", "t1", "●"), tab_id="w1:t1")
+        tabs = [{"tab_id": "w3:t3", "label": "coordinator"}, {"tab_id": "w1:t1", "label": "1"}]
+        agents = agent_watch.adopt_coordinator([coordinator, worker], tabs)
+        self.assertEqual([a.get("name") for a in agents], ["coordinator", None])
+        self.assertEqual(agent_watch.assign_marks(agents), {"t7": "◉", "t1": "●"})
+        self.assertEqual(agent_watch.counts(agents), {"agents": 1, "unknown": 1})
+
+    def test_a_named_coordinator_needs_no_tab_lookup(self):
+        named = [dict(self.live("w3:p7", "t7"), name="coordinator", tab_id="w3:t3")]
+        with patch.object(agent_watch, "call", side_effect=AssertionError("no tab.list")):
+            self.assertIs(agent_watch.adopt_coordinator(named), named)
+
+    def test_a_named_worker_in_the_coordinator_tab_keeps_its_name(self):
+        agents = [dict(self.live("w3:p8", "t8"), name="api-impl", tab_id="w3:t3")]
+        agent_watch.adopt_coordinator(agents, [{"tab_id": "w3:t3", "label": "coordinator"}])
+        self.assertEqual(agents[0]["name"], "api-impl")
+
+    def test_counts_give_a_new_agent_its_marker_without_the_feed(self):
+        printed, reports = self.counts_run()
+        self.assertEqual(printed, {"agents": 2, "idle": 1, "working": 1})
+        # Only the agent without a marker is reported; the marked one is left alone.
+        self.assertEqual([(r["pane_id"], r["tokens"], r["display_agent"]) for r in reports],
+                         [("w8:p2", {"mark": "◆"}, "◆ claude")])
+
+    def test_counts_with_no_marks_only_count(self):
+        self.assertEqual(self.counts_run("--no-marks"), ({"agents": 2, "idle": 1, "working": 1}, []))
 
 
 class StateTests(unittest.TestCase):

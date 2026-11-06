@@ -45,7 +45,7 @@ Herdr Workspaces|prefix+b|Toggle sidebar
 Herdr Workspaces|prefix+q|Detach
 Herdr Workspaces|prefix+Shift+r|Reload config
 Herdr Workspaces|prefix+?|Show all herdr keybindings
-Herdr Agents|Ctrl+A|Toggle the agent coordinator workspace
+Herdr Agents|Ctrl+A|Toggle the agent coordinator tab (in the ds-hq workspace)
 Herdr Agents|i (history pane)|Jump to the coordinator prompt (insert mode)
 Herdr Agents|]e / [e (history pane)|Next / previous feed event
 Herdr Agents|:HerdrAgent [pane] (history pane)|Lines naming an agent, in the location list

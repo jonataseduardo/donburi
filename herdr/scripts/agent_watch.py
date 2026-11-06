@@ -86,6 +86,25 @@ def info(agent):
     }
 
 
+def adopt_coordinator(agents, tabs=None):
+    """herdr drops an agent's name when Claude starts a new session in its pane
+    (/clear, a resume), so the coordinator can be unnamed. It is still the agent
+    in the tab labelled with its name (scripts/coordinator.sh): name it here, in
+    these dicts only, so it keeps ◉ and stays out of the feed and the counts."""
+    name = coordinator_name()
+    if any(a.get("name") == name for a in agents):
+        return agents
+    try:
+        tabs = call("tab.list")["tabs"] if tabs is None else tabs
+    except (OSError, ValueError, RuntimeError, KeyError):
+        return agents
+    coordinator_tabs = {t.get("tab_id") for t in tabs if t.get("label") == name}
+    for agent in agents:
+        if agent.get("tab_id") in coordinator_tabs and not agent.get("name"):
+            agent["name"] = name
+    return agents
+
+
 def assign_marks(agents, exclude=()):
     """Map each live agent's terminal to a marker: the coordinator always gets
     ◉; others keep the one herdr already has, and new agents get the least-used
@@ -112,7 +131,7 @@ def paint(agents, marks, failed):
         mark = marks.get(agent.get("terminal_id"))
         if not mark:
             continue
-        label = f"{mark} {agent.get('name') or agent.get('agent') or 'agent'}"
+        label = f"{mark} {agent.get('agent') or 'agent'}"  # the harness, like "▲ claude"
         tokens = agent["tokens"] if isinstance(agent.get("tokens"), dict) else {}
         if (tokens.get("mark") != mark or agent.get("display_agent") != label) and agent["terminal_id"] not in failed:
             try:
@@ -130,10 +149,12 @@ def step(tracks, agents, now, settle, exclude=(), announce_new=True):
     when a busy agent has stayed idle/done for `settle` seconds, which hides
     brief flickers between tool calls.
     """
-    events, result = [], {}
+    events, result, coordinator = [], {}, coordinator_name()
     for agent in agents:
         pane = agent["pane_id"]
-        if pane in exclude:
+        # The coordinator never reports itself, even when its pane ID changed
+        # under it (HERDR_PANE_ID is fixed when its shell starts).
+        if pane in exclude or agent.get("name") == coordinator:
             continue
         status = agent.get("agent_status") or "unknown"
         old = tracks.get(pane)
@@ -251,7 +272,13 @@ def main(argv=None):
         exclude.add(os.environ["HERDR_PANE_ID"])
     if args.counts:
         try:
-            emit(json.dumps(counts(call("agent.list")["agents"], exclude)))
+            agents = adopt_coordinator(call("agent.list")["agents"])
+            # The history pane's banner runs this every 3 seconds, so a new agent
+            # gets its marker even when the coordinator's feed is not running
+            # (a new or /clear-ed session that has not started its Monitor yet).
+            if not args.no_marks:
+                paint(agents, assign_marks(agents, exclude), set())
+            emit(json.dumps(counts(agents, exclude)))
             return 0
         except (OSError, ValueError, RuntimeError, KeyError) as error:
             emit(json.dumps({"error": str(error)}))
@@ -264,7 +291,7 @@ def main(argv=None):
     while True:
         now = time.time()
         try:
-            agents = call("agent.list")["agents"]
+            agents = adopt_coordinator(call("agent.list")["agents"])
         except (OSError, ValueError, RuntimeError, KeyError) as error:
             if not down:
                 emit(f"{time.strftime('%H:%M:%S')} herdr unavailable, retrying: {error}")

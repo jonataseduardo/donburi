@@ -169,15 +169,18 @@ Shift+r** to reload both client and server configuration.
 
 ### herdr Agent Coordinator
 
-**Ctrl+a** toggles your rolling assistant: a long-lived Claude Code session on a
-**fast model (Haiku by default)** that follows every agent in herdr, tells you
-which ones need you, takes you to them, and relays your messages to the
-stronger agents doing the work. It runs as the herdr agent **`coordinator`** in
-its own **`◉ coordinator`** workspace, started in your ops repo **`~/ia/ds-hq`**
-(GitHub `jcesar/ds-hq`), so it picks up that repo's `CLAUDE.md`, skills and team
-config, and keeps watching while you work elsewhere.
+**Ctrl+a** toggles your rolling assistant: a long-lived Claude Code session on
+**Opus 5.5 at low effort** (by default; fast mode off) that follows every agent
+in herdr, tells you which ones need you, takes you to them, and relays your
+messages to the agents doing the work. It runs as the herdr agent
+**`coordinator`** in a **`coordinator` tab of the `ds-hq` workspace**, started
+in your ops repo **`~/ia/ds-hq`** (GitHub `jcesar/ds-hq`), so it picks up that
+repo's `CLAUDE.md`, skills and team config, and keeps watching while you work
+elsewhere. The repo keeps a single workspace: the coordinator's tab sits next to
+any other ds-hq agents, and Ctrl+a reuses an existing `ds-hq` workspace (it
+creates one only if none exists).
 
-**Modal, like vim.** The coordinator workspace has two panes:
+**Modal, like vim.** The coordinator tab has two panes:
 
 | Pane | Mode | What it is |
 |------|------|------------|
@@ -187,11 +190,12 @@ config, and keeps watching while you work elsewhere.
 **You always know you are in it.** The coordinator's color is herdr's orange
 accent (`#FF9E64`, surimiOrange), and no worker uses it:
 
-- **Sidebar and window title.** The workspace is labelled `◉ coordinator`, drawn
-  in orange by a `[ui.sidebar.spaces]` rule, and kept first in the list
-  (`coordinator.sh` moves it there on each **Ctrl+a**). herdr's default window
-  title then reads `<host>: ◉ coordinator`. Keeping it first shifts the other
-  workspaces' **Ctrl+b, then Shift+1..9** numbers down by one.
+- **Sidebar.** The `ds-hq` workspace is drawn in orange by a
+  `[ui.sidebar.spaces]` rule and kept first in the list, with the coordinator's
+  tab first in it (`coordinator.sh` moves both on each **Ctrl+a**), so the
+  coordinator is the top agent. Keeping it first shifts the other workspaces'
+  **Ctrl+b, then Shift+1..9** numbers down by one. If you point Ctrl+a at
+  another repo, change the workspace name in that rule too.
 - **History pane.** One shade darker than Kanagawa's background (sumiInk0), with
   a banner across the top: an orange `◉ COORDINATOR` block, the agent count with
   blocked and working agents in herdr's state colors, and the `i` / **Ctrl+a**
@@ -200,11 +204,13 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
   (`herdr/scripts/coordinator_status.py`, set as `statusLine` in
   `herdr/coordinator-settings.json`, refreshed every 5 seconds). Your usual
   status line is unchanged in other sessions.
-- **Agents panel.** The coordinator's own row reads `◉ coordinator` in orange.
+- **Agents panel.** The coordinator follows the same pattern as every agent:
+  its workspace on the first row, and `◉ claude` in orange next to its task
+  title on the second.
 
 | Key | Action |
 |-----|--------|
-| **Ctrl+a** | Switch to the coordinator; from the coordinator, back to where you were. The first press creates the workspace, starts Claude and its feed |
+| **Ctrl+a** | Switch to the coordinator's tab; from it, back to the tab you came from. The first press creates the tab (and the `ds-hq` workspace if needed), starts Claude and its feed |
 | **i** `a` `o` **Enter** (in `history`) | Jump to the prompt (insert mode) |
 | **]e** / **[e** (in `history`) | Next / previous feed event (blocked, finished, started, gone); takes a count |
 | `:HerdrAgent [pane or name]` (in `history`) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
@@ -242,11 +248,15 @@ second row (`▲ claude`, the label colored by its marker through
 `[ui.sidebar.agents]` rules). In the Neovim history pane the coordinator's
 replies and feed lines show it in color. Claude's own pane cannot color it, so
 each color also has its own shape, and pane borders show no agent labels. With
-more than eight agents markers repeat; `◉` is never reused. The feed script sets
-them as herdr pane metadata (token `mark`, plus the label prefix, source
-`donburi-marks`) while the coordinator runs; pass `--no-marks` to
-`agent_watch.py` to turn this off. The palette lives in three places that a test
-keeps in step: `MARKS` and `COORDINATOR_MARK` in `agent_watch.py`, the agent
+more than eight agents markers repeat; `◉` is never reused. `agent_watch.py`
+sets them as herdr pane metadata (token `mark`, plus the label prefix, source
+`donburi-marks`): the coordinator's feed does, and so does the history pane's
+banner every 3 seconds, so a new agent gets its marker even when the feed is not
+running (a new or `/clear`-ed coordinator session that has not started its
+Monitor yet). herdr forgets the coordinator's name after a `/clear`; the agent
+in the `coordinator` tab still gets `◉` and stays out of the feed. Pass
+`--no-marks` to `agent_watch.py` to turn markers off. The palette lives in three
+places that a test keeps in step: `MARKS` and `COORDINATOR_MARK` in `agent_watch.py`, the agent
 label rules in `herdr/config.toml`, and `herdr/transcript.lua`.
 
 **Rolling feed.** At the start of a session the coordinator runs
@@ -285,13 +295,17 @@ background agents raise an in-app toast when they finish or need you
 The coordinator's role and conventions live in `herdr/coordinator.md`, which is
 appended to Claude's system prompt (`--append-system-prompt-file`); it learns
 the CLI itself from `herdr --skill`. If you quit Claude or Neovim in the
-coordinator workspace, the next **Ctrl+a** restarts it; changes to the model,
-brief, or settings apply then. If you close one of its panes, close the
-workspace (**Ctrl+b, then Shift+d**) and press **Ctrl+a** to rebuild it. Change
-the directory, model, or agent name in the Ctrl+a command in `herdr/config.toml`:
+coordinator tab, the next **Ctrl+a** restarts it; changes to the model,
+effort, brief, or settings apply then. If you close one of its panes, close the
+`coordinator` tab (**Ctrl+b, then &**) and press **Ctrl+a** to rebuild it.
+When herdr restarts, it restores agents with a bare `claude --resume`, which
+drops the coordinator's name, model, effort, brief and settings. The next
+**Ctrl+a** gives the name back and shows a toast asking you to `/exit` it and
+press **Ctrl+a** twice to start it properly. Change the directory, model,
+effort, or agent name in the Ctrl+a command in `herdr/config.toml`:
 
 ```toml
-command = "HERDR_COORDINATOR_CWD=\"$HOME/ia/ds-hq\" HERDR_COORDINATOR_MODEL=sonnet ~/.config/herdr/scripts/coordinator.sh"
+command = "HERDR_COORDINATOR_CWD=\"$HOME/ia/ds-hq\" HERDR_COORDINATOR_MODEL=sonnet HERDR_COORDINATOR_EFFORT=medium ~/.config/herdr/scripts/coordinator.sh"
 ```
 
 Blocked detection depends on herdr recognising each agent's prompt UI. herdr

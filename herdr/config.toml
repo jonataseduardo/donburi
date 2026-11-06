@@ -62,10 +62,10 @@ pane_borders = "auto"
 # herdr from herdr/build-patched.sh; stock herdr ignores this key with a warning.
 focus_follows_mouse = true
 status_indicators = "symbols"
-# Agent panel grouped by workspace, in sidebar order, so the coordinator (its
-# "◉ coordinator" workspace is kept first) is the top agent. For an attention
-# queue (agents that need you first) use "priority" instead. Rows are set in
-# [ui.sidebar.agents] below.
+# Agent panel grouped by workspace, in sidebar order, so the coordinator is the
+# top agent: coordinator.sh keeps the ds-hq workspace first, and the
+# coordinator's tab first in it. For an attention queue (agents that need you
+# first) use "priority" instead. Rows are set in [ui.sidebar.agents] below.
 agent_panel_sort = "spaces"
 # agent_panel_sort = "priority"
 # Agent labels stay off pane borders: herdr draws borders in one color, and
@@ -106,11 +106,12 @@ rows = [
   ] }, "terminal_title_stripped"],
 ]
 
-# Workspaces keep herdr's default rows; the coordinator's workspace ("◉
-# coordinator", kept first by scripts/coordinator.sh) is drawn in the accent.
+# Workspaces keep herdr's default rows; the coordinator's workspace (ds-hq,
+# kept first by scripts/coordinator.sh) is drawn in the accent. Keep the name
+# in step with HERDR_COORDINATOR_CWD in the Ctrl+a command below.
 [ui.sidebar.spaces]
 rows = [
-  ["state_icon", { token = "workspace", rules = [{ starts_with = "◉", fg = "#FF9E64", bold = true }] }],
+  ["state_icon", { token = "workspace", rules = [{ equals = "ds-hq", fg = "#FF9E64", bold = true }] }],
   ["branch", "git_status"],
 ]
 
@@ -166,10 +167,11 @@ description = "search workspaces and folders"
 width = "85%"
 height = "80%"
 
-# Ctrl+a: toggle the agent coordinator — a persistent Claude Code session on a
-# fast model (herdr agent "coordinator") in its own workspace, started in the
-# ds-hq repo. The workspace is modal: Neovim history on top (normal mode, i to
-# prompt), Claude prompt below (Ctrl+k back up). See herdr/coordinator.md.
+# Ctrl+a: toggle the agent coordinator — a persistent Claude Code session on
+# Opus 5.5 at low effort (herdr agent "coordinator") in a "coordinator" tab of
+# the ds-hq workspace, started in the ds-hq repo. The tab is modal: Neovim
+# history on top (normal mode, i to prompt), Claude prompt below (Ctrl+k back
+# up). See herdr/coordinator.md.
 # Takes Ctrl+a (line start) from shells, Claude Code and Neovim (increment).
 [[keys.command]]
 key = "ctrl+a"
