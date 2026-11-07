@@ -37,8 +37,6 @@ Installation is **non-destructive**—existing configurations are automatically 
 
 All other dependencies are installed automatically during setup (see below).
 
-**Note for corporate users**: See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for installation in restricted environments.
-
 ## Quick Start
 
 **One-liner installation:**
@@ -435,17 +433,6 @@ donburi --version             # Show donburi version
 donburi help                  # Show help message
 ```
 
-### Admin Commands (Enterprise)
-
-For corporate environments with system-wide Homebrew installations:
-
-```bash
-donburi admin-setup           # Setup as administrator
-donburi admin-check           # Check admin setup status
-```
-
-See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate installation instructions.
-
 ### Homebrew Management
 
 ```bash
@@ -469,23 +456,6 @@ donburi setup nvim         # Install a single component
 donburi setup --dry-run    # Preview changes without applying
 donburi setup --no-brew    # Setup without Homebrew dependencies
 ```
-
-### Enterprise Usage
-
-For corporate environments where users don't have admin privileges:
-
-```bash
-# Admin runs (single command, assumes Homebrew already installed):
-su -l <admin> -c "curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash"
-
-# Manual alternative (if not using admin-install.sh):
-su -l <admin> -c "donburi brew all"      # Install all brew packages system-wide
-
-# User runs:
-donburi setup --no-brew    # Setup configs without brew dependencies
-```
-
-See [ENTERPRISE_SETUP.md](ENTERPRISE_SETUP.md) for detailed corporate setup instructions.
 
 ## Keybinding Reference
 
@@ -650,7 +620,7 @@ Set these when running `install.sh` or during manual setup:
 |----------|-------------|---------|
 | `DONBURI_HOME` | Custom installation directory | `~/.donburi` |
 | `DONBURI_BRANCH` | Git branch to install from | `main` |
-| `DONBURI_BREW_PATH` | Custom Homebrew installation path (enterprise) | Auto-detected |
+| `DONBURI_BREW_PATH` | Custom Homebrew installation path | Auto-detected |
 
 Example:
 
@@ -661,7 +631,7 @@ DONBURI_HOME=~/MyApps/donburi bash install.sh
 # Install from development branch
 DONBURI_BRANCH=dev bash install.sh
 
-# Set custom Homebrew path (enterprise environments)
+# Use a Homebrew installed outside the standard locations
 DONBURI_BREW_PATH=/opt/homebrew donburi setup --no-brew
 ```
 
@@ -744,11 +714,6 @@ Donburi includes `lsd` for a modern `ls` replacement:
 donburi reload          # or: herdr server reload-config
 herdr config check      # Validate config.toml
 ```
-
-**macOS menu bar is hidden**
-
-- The old SketchyBar setup hid the native menu bar. Restore it with:
-  `defaults write NSGlobalDomain _HIHideMenuBar -bool false && killall SystemUIServer`
 
 **Neovim plugins not loading**
 

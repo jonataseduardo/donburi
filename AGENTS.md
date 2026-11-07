@@ -26,9 +26,6 @@ Shared guidance for Cursor, OpenCode, and Claude Code. For user-facing docs see 
 |------|---------|
 | `donburi` | Main CLI script (all commands) |
 | `install.sh` | Curl-friendly one-liner installer |
-| `admin-install.sh` | Enterprise admin install (run as root) |
-| `admin-setup.sh` | Enterprise admin setup (interactive) |
-| `ENTERPRISE_SETUP.md` | Enterprise deployment guide |
 | `README.md` | Primary user-facing documentation |
 | `CHANGELOG.md` | Release history |
 | `VERSION` | Current version string |
@@ -69,28 +66,6 @@ donburi update                # Git pull latest changes
 donburi setup                 # Re-apply all symlinks
 donburi setup <component>     # Re-apply one component
 donburi status                # Verify symlink health
-```
-
-### Enterprise Installation
-
-Two-phase process documented in `ENTERPRISE_SETUP.md`:
-
-**Phase 1 - Admin** (requires root via `su -l <admin>`):
-```bash
-# Automated single-command install:
-curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/admin-install.sh | bash
-
-# Or via CLI:
-donburi admin-setup           # Interactive admin setup
-donburi admin-check           # Verify admin tasks complete
-donburi brew all              # Install all brew packages
-```
-
-**Phase 2 - User** (no admin needed):
-```bash
-curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash
-donburi setup --no-brew       # Setup configs (packages already installed by admin)
-donburi permissions           # Check app permissions
 ```
 
 ## Design Principles

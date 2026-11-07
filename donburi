@@ -106,18 +106,9 @@ find_brew() {
     return 1
 }
 
-# Check if running with admin/root privileges
+# Check if running with root privileges
 is_sudo() {
     [[ -n "${SUDO_USER:-}" ]] || [[ "$EUID" -eq 0 ]]
-}
-
-get_console_user() {
-    local user
-    user="$(stat -f %Su /dev/console 2>/dev/null || true)"
-    if [[ -z "$user" || "$user" == "root" ]]; then
-        return 1
-    fi
-    echo "$user"
 }
 
 # ---------------------------------------------------------------------------
@@ -447,12 +438,6 @@ setup_herdr() {
 
     make_executable "$DONBURI_DIR/herdr/scripts" "*.sh"
     create_symlink "$SRC_HERDR" "$DST_HERDR"
-
-    # The old SketchyBar setup hid the native macOS menu bar
-    if [[ "$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null)" == "1" ]]; then
-        log_warn "macOS menu bar is hidden (left over from SketchyBar). To restore it:"
-        log_warn "  defaults write NSGlobalDomain _HIHideMenuBar -bool false && killall SystemUIServer"
-    fi
 }
 
 setup_btop() {
@@ -594,17 +579,15 @@ brew_check() {
         echo "1. Install Homebrew: Visit https://brew.sh"
         echo "2. If Homebrew is installed in a custom location:"
         echo "   export DONBURI_BREW_PATH=/path/to/brew"
-        echo "3. If you're in a corporate environment:"
-        echo "   Ask your admin to run: su -l <admin> -c \"donburi brew all\""
-        echo "4. Skip brew dependencies: donburi setup --no-brew"
+        echo "3. Skip brew dependencies: donburi setup --no-brew"
         return 1
     fi
 
     log_info "Using Homebrew at: $BREW_CMD"
 
-    # Check if running with admin/root privileges when it might be needed
+    # Check if running with root privileges when it might be needed
     if is_sudo; then
-        log_warn "Running with admin/root privileges - packages will be installed system-wide"
+        log_warn "Running with root privileges - packages will be installed system-wide"
     fi
 
     return 0
@@ -766,9 +749,9 @@ cmd_brew_check() {
             echo "  Version: $BREW_VERSION"
         fi
 
-        # Check if running with admin/root privileges
+        # Check if running with root privileges
         if is_sudo; then
-            echo -e "${YELLOW}⚠${NC} Running with admin/root privileges"
+            echo -e "${YELLOW}⚠${NC} Running with root privileges"
             echo "  Packages will be installed system-wide"
         else
             echo "  Running as: $(whoami)"
@@ -804,11 +787,7 @@ cmd_brew_check() {
         echo "   export DONBURI_BREW_PATH=/path/to/brew"
         echo "   donburi brew-check"
         echo ""
-        echo "3. For corporate environments:"
-        echo "   • Ask your IT admin to install Homebrew"
-        echo "   • Then run: su -l <admin> -c \"donburi brew all\""
-        echo ""
-        echo "4. Skip brew dependencies:"
+        echo "3. Skip brew dependencies:"
         echo "   donburi setup --no-brew"
         echo ""
         return 1
@@ -848,8 +827,8 @@ cmd_permissions() {
     echo ""
 
     if is_sudo; then
-        echo -e "${YELLOW}Note: Running with admin/root privileges - some permission checks may not work correctly${NC}"
-        echo "Permission checks should be run as the regular user, not with admin/root privileges."
+        echo -e "${YELLOW}Note: Running with root privileges - some permission checks may not work correctly${NC}"
+        echo "Permission checks should be run as the regular user, not with root privileges."
     fi
 
     return 0
@@ -1021,10 +1000,6 @@ Commands:
   update                Update donburi (git pull)
   help                  Show this help message
 
-Admin Commands (require admin/root):
-  admin-setup           Complete admin setup for enterprise
-  admin-check           Verify admin setup is complete
-
 Options:
   --version, -v         Show version
   --dry-run             Preview changes without applying
@@ -1047,109 +1022,9 @@ Examples:
   donburi brew-check            # Check Homebrew installation
   donburi permissions           # Check app permissions
   donburi update                # Update donburi to latest version
-  su -l <admin> -c "donburi admin-setup"   # Run complete admin setup (IT staff)
-  donburi admin-check           # Verify admin setup is complete
 
 For more information, see: https://github.com/jonataseduardo/donburi
 EOF
-}
-
-# ---------------------------------------------------------------------------
-# Admin Commands for Enterprise Setup
-# ---------------------------------------------------------------------------
-
-cmd_admin_setup() {
-    echo -e "${CYAN}=== Donburi Admin Setup ===${NC}"
-    echo ""
-
-    # Check if running as root
-    if ! is_sudo; then
-        echo -e "${RED}ERROR: This command requires admin/root privileges${NC}"
-        echo "Please run: su -l <admin> -c \"donburi admin-setup\""
-        exit 1
-    fi
-
-    echo "This command will help administrators set up donburi for enterprise users."
-    echo "It will:"
-    echo "  1. Install all required Homebrew packages"
-    echo ""
-    echo "Notes:"
-    echo "  - Homebrew must already be installed"
-    echo "  - This command does not start services"
-    echo "  - This command does not automate macOS permissions"
-    echo ""
-    echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
-    read -r
-
-    # Step 1: Check Homebrew installation
-    echo ""
-    echo -e "${BOLD}Step 1: Checking Homebrew...${NC}"
-    if ! find_brew; then
-        echo -e "${RED}Homebrew is not installed!${NC}"
-        echo "Please install Homebrew first:"
-        echo '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-        exit 1
-    fi
-    echo -e "${GREEN}✓ Homebrew found at: $BREW_CMD${NC}"
-
-    # Step 2: Install all packages
-    echo ""
-    echo -e "${BOLD}Step 2: Installing required packages...${NC}"
-    echo "This may take several minutes..."
-    cmd_brew "all"
-
-    # Step 3: Verify setup
-    echo ""
-    echo -e "${BOLD}Step 3: Verifying setup...${NC}"
-    echo ""
-    cmd_admin_check
-
-    echo ""
-    echo -e "${GREEN}=== Admin setup complete! ===${NC}"
-    echo ""
-    echo "Next steps for users:"
-    echo "  1. Install donburi: curl -fsSL https://raw.githubusercontent.com/jonataseduardo/donburi/main/install.sh | bash"
-    echo "  2. Setup configs: donburi setup --no-brew"
-    echo ""
-}
-
-cmd_admin_check() {
-    local all_good=true
-
-    echo -e "${CYAN}=== Admin Setup Status ===${NC}"
-    echo ""
-
-    # Check Homebrew
-    echo -e "${BOLD}Homebrew:${NC}"
-    if find_brew; then
-        echo -e "  ${GREEN}✓${NC} Installed at: $BREW_CMD"
-    else
-        echo -e "  ${RED}✗${NC} Not installed"
-        all_good=false
-    fi
-
-    # Check key packages
-    echo ""
-    echo -e "${BOLD}Required packages:${NC}"
-    local packages=("neovim" "ghostty" "jq")
-    for pkg in "${packages[@]}"; do
-        if "$BREW_CMD" list --formula 2>/dev/null | grep -q "^$pkg$" || \
-           "$BREW_CMD" list --cask 2>/dev/null | grep -q "^$pkg$"; then
-            echo -e "  ${GREEN}✓${NC} $pkg"
-        else
-            echo -e "  ${RED}✗${NC} $pkg not installed"
-            all_good=false
-        fi
-    done
-
-    echo ""
-    if [[ "$all_good" == true ]]; then
-        echo -e "${GREEN}✓ All admin tasks completed successfully!${NC}"
-        return 0
-    else
-        echo -e "${YELLOW}⚠ Some admin tasks still need completion${NC}"
-        return 1
-    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1275,14 +1150,6 @@ case "$COMMAND" in
         ;;
     meeting)
         cmd_meeting "${1:-status}"
-        ;;
-    admin-setup)
-        # No argument parsing needed, handled in the function
-        cmd_admin_setup
-        ;;
-    admin-check)
-        # No argument parsing needed
-        cmd_admin_check
         ;;
     help|--help|-h)
         cmd_help

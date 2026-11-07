@@ -181,47 +181,12 @@ fi
 
 assert_output_contains "nvim" "setup nvim --dry-run mentions nvim" "$DONBURI" setup nvim --dry-run
 
-# --- Package list consistency (admin-install.sh vs donburi) ---
-echo "--- package list consistency ---"
-
-# Helper: extract a BREW_* array from a file, sort it, and print one package per line
-extract_brew_list() {
-    local varname="$1"
-    local file="$2"
-    grep "^${varname}=" "$file" | sed 's/.*=(//' | sed 's/)//' | tr ' ' '\n' | sort
-}
-
-# Compare each package category between donburi (source of truth) and admin-install.sh
-for category in BREW_APPS_FORMULA BREW_APPS_CASK BREW_CLI_FORMULA BREW_UTILS_FORMULA BREW_UTILS_CASK BREW_DOCKER_FORMULA; do
-    donburi_val="$(extract_brew_list "$category" "$DONBURI")"
-    admin_val="$(extract_brew_list "$category" "$REPO_DIR/admin-install.sh")"
-    if [[ "$donburi_val" == "$admin_val" ]]; then
-        pass "admin-install.sh $category matches donburi"
-    else
-        fail "admin-install.sh $category matches donburi" "diff: donburi has [$(echo "$donburi_val" | tr '\n' ' ')] vs admin-install has [$(echo "$admin_val" | tr '\n' ' ')]"
-    fi
-done
-
-# --- Enterprise script syntax validation ---
-echo "--- enterprise script syntax ---"
+# --- Script syntax validation ---
+echo "--- script syntax ---"
 assert_exit_code 0 "donburi has valid bash syntax" bash -n "$DONBURI"
-assert_exit_code 0 "admin-install.sh has valid bash syntax" bash -n "$REPO_DIR/admin-install.sh"
-assert_exit_code 0 "admin-setup.sh has valid bash syntax" bash -n "$REPO_DIR/admin-setup.sh"
 assert_exit_code 0 "install.sh has valid bash syntax" bash -n "$REPO_DIR/install.sh"
 
-# --- admin-check (does not require root, just reports status) ---
-echo "--- admin-check ---"
-run "$DONBURI" admin-check
-if [[ "$EXIT_CODE" -eq 0 || "$EXIT_CODE" -eq 1 ]]; then
-    pass "admin-check exits with valid code"
-else
-    fail "admin-check exits with valid code" "exit=$EXIT_CODE"
-fi
-assert_output_contains "Admin Setup Status" "admin-check shows status header" "$DONBURI" admin-check
-assert_output_contains "Homebrew" "admin-check checks homebrew" "$DONBURI" admin-check
-assert_output_contains "Required packages" "admin-check checks packages" "$DONBURI" admin-check
-
-# --- setup --no-brew --dry-run (enterprise user flow) ---
+# --- setup --no-brew --dry-run ---
 echo "--- setup --no-brew --dry-run ---"
 run "$DONBURI" setup --no-brew --dry-run
 if [[ "$EXIT_CODE" -eq 0 ]]; then
@@ -323,8 +288,8 @@ assert_exit_code 0 "update --dry-run exits 0" "$DONBURI" update --dry-run
 echo "--- permissions ---"
 assert_exit_code 0 "permissions command exits 0" "$DONBURI" permissions
 
-# --- Enterprise: setup --no-brew (real, clean environment) ---
-echo "--- enterprise: setup --no-brew ---"
+# --- setup --no-brew (real, clean environment) ---
+echo "--- setup --no-brew ---"
 
 # Create a fresh isolated HOME for --no-brew test
 NOBREW_HOME="$(mktemp -d)"
