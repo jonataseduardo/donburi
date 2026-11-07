@@ -63,8 +63,8 @@ pane_borders = "auto"
 focus_follows_mouse = true
 status_indicators = "symbols"
 # Agent panel grouped by workspace, in sidebar order, so the coordinator is the
-# top agent: coordinator.sh keeps the ds-hq workspace first, and the
-# coordinator's tab first in it. For an attention queue (agents that need you
+# top agent: coordinator.sh keeps the coordinator's workspace first, and its
+# tab first in it. For an attention queue (agents that need you
 # first) use "priority" instead. Rows are set in [ui.sidebar.agents] below.
 agent_panel_sort = "spaces"
 # agent_panel_sort = "priority"
@@ -112,14 +112,14 @@ rows = [
   ] }, "terminal_title_stripped"],
 ]
 
-# Workspaces keep herdr's default rows; the coordinator's workspace (ds-hq,
-# kept first by scripts/coordinator.sh) is drawn in the accent. Keep the name
-# in step with HERDR_COORDINATOR_CWD in the Ctrl+a command below. A workspace
-# whose folder is not in a Git repository shows "no git" where the branch goes
-# ($no_git, set by scripts/space_tags.py from the tab bar above).
+# Workspaces keep herdr's default rows plus two tags that scripts/space_tags.py
+# sets from the tab bar above: an orange ◉ after the name of the workspace that
+# holds the coordinator's tab ($coordinator, kept first by coordinator.sh), and
+# "no git" where the branch goes for a folder outside a Git repository
+# ($no_git). The ◉ color is COORDINATOR_MARK in scripts/agent_watch.py.
 [ui.sidebar.spaces]
 rows = [
-  ["state_icon", { token = "workspace", rules = [{ equals = "ds-hq", fg = "#FF9E64", bold = true }] }],
+  ["state_icon", "workspace", { token = "$coordinator", fg = "#FF9E64", bold = true }],
   ["branch", "git_status", "$no_git"],
 ]
 
@@ -177,14 +177,15 @@ height = "80%"
 
 # Ctrl+a: toggle the agent coordinator — a persistent Claude Code session on
 # Opus 5.5 at low effort (herdr agent "coordinator") in a "coordinator" tab of
-# the ds-hq workspace, started in the ds-hq repo. The tab is modal: Neovim
-# history on top (normal mode, i to prompt), Claude prompt below (Ctrl+k back
-# up). See herdr/coordinator.md.
+# its folder's workspace. Each Mac sets the folder in ~/.config/donburi/local.env
+# (HERDR_COORDINATOR_CWD; see coordinator.sh). The tab is modal: Neovim history
+# on top (normal mode, i to prompt), Claude prompt below (Ctrl+k back up). See
+# herdr/coordinator.md.
 # Takes Ctrl+a (line start) from shells, Claude Code and Neovim (increment).
 [[keys.command]]
 key = "ctrl+a"
 type = "shell"
-command = "HERDR_COORDINATOR_CWD=\"$HOME/ia/ds-hq\" ~/.config/herdr/scripts/coordinator.sh"
+command = "~/.config/herdr/scripts/coordinator.sh"
 description = "toggle the agent coordinator"
 
 # prefix+shift+h: the focused agent's Claude conversation in Neovim (read-only,

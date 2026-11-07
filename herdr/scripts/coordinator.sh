@@ -22,7 +22,8 @@
 # The history pane has a darker background and an orange "◉ COORDINATOR"
 # banner, and Claude's status line repeats it (scripts/coordinator_status.py).
 #
-# Overrides (prefix the command in herdr/config.toml):
+# Settings, read from ~/.config/donburi/local.env (one per Mac, not in the
+# repo; plain `NAME=value` lines in sh syntax), else from the environment:
 #   HERDR_COORDINATOR_NAME       agent and tab name         (default: coordinator)
 #   HERDR_COORDINATOR_CWD        coordinator working dir    (default: $HOME)
 #   HERDR_COORDINATOR_WORKSPACE  workspace label            (default: basename of the dir)
@@ -30,6 +31,15 @@
 #   HERDR_COORDINATOR_EFFORT     its effort level: low, medium, high, xhigh, max (default: low)
 
 set -uo pipefail
+
+# Per-machine settings win over the environment.
+local_env="${XDG_CONFIG_HOME:-$HOME/.config}/donburi/local.env"
+if [[ -f "$local_env" ]]; then
+	set -a
+	# shellcheck source=/dev/null
+	. "$local_env"
+	set +a
+fi
 
 herdr="${HERDR_BIN_PATH:-herdr}"
 name="${HERDR_COORDINATOR_NAME:-coordinator}"

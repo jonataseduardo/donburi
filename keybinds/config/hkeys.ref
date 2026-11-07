@@ -2,7 +2,7 @@ GitHub Aliases|hl|gh auth login -p ssh
 GitHub Aliases|hs|gh auth status
 GitHub Aliases|hp|gh pr list
 GitHub Aliases|hm|PRs waiting for my review
-GitHub Aliases|ha|gh pr list --author jcesar
+GitHub Aliases|ha|gh pr list --author @me
 GitHub Aliases|hv|gh pr view
 GitHub Aliases|hw|gh pr view --web
 GitHub Aliases|hd|gh pr diff

@@ -171,12 +171,14 @@ Shift+r** to reload both client and server configuration.
 **Opus 5.5 at low effort** (by default; fast mode off) that follows every agent
 in herdr, tells you which ones need you, takes you to them, and relays your
 messages to the agents doing the work. It runs as the herdr agent
-**`coordinator`** in a **`coordinator` tab of the `ds-hq` workspace**, started
-in your ops repo **`~/ia/ds-hq`** (GitHub `jcesar/ds-hq`), so it picks up that
-repo's `CLAUDE.md`, skills and team config, and keeps watching while you work
-elsewhere. The repo keeps a single workspace: the coordinator's tab sits next to
-any other ds-hq agents, and Ctrl+a reuses an existing `ds-hq` workspace (it
-creates one only if none exists).
+**`coordinator`** in a **`coordinator` tab of its folder's workspace**. Each Mac
+sets that folder in its [per-machine settings](#per-machine-settings); on the
+work Mac it is the ops repo **`~/ia/ds-hq`** (GitHub `jcesar/ds-hq`). Started
+there, the coordinator picks up the repo's `CLAUDE.md`, skills and team config,
+and keeps watching while you work elsewhere. The folder keeps a single
+workspace: the coordinator's tab sits next to any other agents there, and Ctrl+a
+reuses an existing workspace for the folder (it creates one only if none
+exists).
 
 **Modal, like vim.** The coordinator tab has two panes:
 
@@ -188,12 +190,12 @@ creates one only if none exists).
 **You always know you are in it.** The coordinator's color is herdr's orange
 accent (`#FF9E64`, surimiOrange), and no worker uses it:
 
-- **Sidebar.** The `ds-hq` workspace is drawn in orange by a
-  `[ui.sidebar.spaces]` rule and kept first in the list, with the coordinator's
+- **Sidebar.** The workspace that holds the coordinator's tab shows an orange
+  `◉` after its name (`herdr/scripts/space_tags.py` tags it, on any Mac and
+  after herdr restarts). It is kept first in the list, with the coordinator's
   tab first in it (`coordinator.sh` moves both on each **Ctrl+a**), so the
   coordinator is the top agent. Keeping it first shifts the other workspaces'
-  **Ctrl+b, then Shift+1..9** numbers down by one. If you point Ctrl+a at
-  another repo, change the workspace name in that rule too.
+  **Ctrl+b, then Shift+1..9** numbers down by one.
 - **History pane.** One shade darker than Kanagawa's background (sumiInk0), with
   a banner across the top: an orange `◉ COORDINATOR` block, the agent count with
   blocked and working agents in herdr's state colors, and the `i` / **Ctrl+a**
@@ -208,7 +210,7 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
 
 | Key | Action |
 |-----|--------|
-| **Ctrl+a** | Switch to the coordinator's tab; from it, back to the tab you came from. The first press creates the tab (and the `ds-hq` workspace if needed), starts Claude and its feed |
+| **Ctrl+a** | Switch to the coordinator's tab; from it, back to the tab you came from. The first press creates the tab (and its folder's workspace if needed), starts Claude and its feed |
 | **i** `a` `o` **Enter** (in `history`) | Jump to the prompt (insert mode) |
 | **]e** / **[e** (in `history`) | Next / previous feed event (blocked, finished, started, gone); takes a count |
 | `:HerdrAgent [pane or name]` (in `history`) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
@@ -315,12 +317,8 @@ effort, brief, or settings apply then. If you close one of its panes, close the
 When herdr restarts, it restores agents with a bare `claude --resume`, which
 drops the coordinator's name, model, effort, brief and settings. The next
 **Ctrl+a** gives the name back and shows a toast asking you to `/exit` it and
-press **Ctrl+a** twice to start it properly. Change the directory, model,
-effort, or agent name in the Ctrl+a command in `herdr/config.toml`:
-
-```toml
-command = "HERDR_COORDINATOR_CWD=\"$HOME/ia/ds-hq\" HERDR_COORDINATOR_MODEL=sonnet HERDR_COORDINATOR_EFFORT=medium ~/.config/herdr/scripts/coordinator.sh"
-```
+press **Ctrl+a** twice to start it properly. Set the folder, model and effort
+for each Mac in [per-machine settings](#per-machine-settings).
 
 Blocked detection depends on herdr recognising each agent's prompt UI. herdr
 0.9.5 fixes Claude Code questions not showing as blocked in named sessions;
@@ -634,6 +632,25 @@ DONBURI_BRANCH=dev bash install.sh
 # Use a Homebrew installed outside the standard locations
 DONBURI_BREW_PATH=/opt/homebrew donburi setup --no-brew
 ```
+
+### Per-machine settings
+
+Settings that differ between Macs live in `~/.config/donburi/local.env`, which
+stays out of the repo. It holds plain `NAME=value` lines in sh syntax, and the
+coordinator script (`herdr/scripts/coordinator.sh`) reads it on every **Ctrl+a**,
+however herdr was started. Values there win over the environment.
+
+```sh
+# ~/.config/donburi/local.env
+HERDR_COORDINATOR_CWD="$HOME/ia/ds-hq"   # folder the coordinator starts in (default: ~)
+# HERDR_COORDINATOR_MODEL=sonnet          # default: claude-opus-5-5
+# HERDR_COORDINATOR_EFFORT=medium         # low (default), medium, high, xhigh, max
+```
+
+A new folder applies the next time **Ctrl+a** creates the coordinator's tab:
+close the old `coordinator` tab (**Ctrl+b, then &**) first. The `ha` alias lists
+your pull requests with `gh pr list --author @me`, so it works with whichever
+GitHub account `gh` is logged into.
 
 ### Runtime Variables (`.env.example`)
 

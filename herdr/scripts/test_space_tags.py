@@ -52,6 +52,13 @@ class SpaceTagTests(unittest.TestCase):
         self.assertEqual(space_tags.workspace_folders(tabs, panes), {"w3": "/first", "w5": "/five"})
 
     def test_only_changed_tags_are_reported(self):
+        tabs = [tab(f"w{n}:t1") for n in range(1, 6)]
+        panes = [
+            pane("w1:p1", "w1:t1", str(self.root / "plain")),
+            pane("w2:p1", "w2:t1", str(self.root / "plain")),
+            pane("w3:p1", "w3:t1", str(self.root / "repo")),
+            pane("w4:p1", "w4:t1", str(self.root / "repo/src")),
+        ]
         workspaces = [
             {"workspace_id": "w1"},
             {"workspace_id": "w2", "tokens": {"no_git": "no git"}},
@@ -59,13 +66,25 @@ class SpaceTagTests(unittest.TestCase):
             {"workspace_id": "w4"},
             {"workspace_id": "w5"},
         ]
-        folders = {
-            "w1": str(self.root / "plain"),
-            "w2": str(self.root / "plain"),
-            "w3": str(self.root / "repo"),
-            "w4": str(self.root / "repo/src"),
-        }
-        self.assertEqual(list(space_tags.changes(workspaces, folders)), [("w1", "no git"), ("w3", None)])
+        self.assertEqual(list(space_tags.changes(workspaces, tabs, panes)),
+                         [("w1", {"no_git": "no git"}), ("w3", {"no_git": None})])
+
+    def test_coordinator_tag_follows_its_tab(self):
+        tabs = [tab("w3:t3"), tab("w3:t1"), tab("w5:t1")]
+        tabs[0]["label"] = "coordinator"
+        panes = [pane("w3:p7", "w3:t3", str(self.root / "repo")),
+                 pane("w5:p1", "w5:t1", str(self.root / "repo"))]
+        workspaces = [{"workspace_id": "w3"}, {"workspace_id": "w5", "tokens": {"coordinator": "◉"}}]
+        with patch.object(space_tags, "coordinator_name", return_value="coordinator"):
+            self.assertEqual(list(space_tags.changes(workspaces, tabs, panes)),
+                             [("w3", {"coordinator": "◉"}), ("w5", {"coordinator": None})])
+
+    def test_coordinator_tag_uses_the_configured_name(self):
+        tabs = [tab("w3:t1"), tab("w5:t1")]
+        tabs[0]["label"], tabs[1]["label"] = "coordinator", "hq"
+        with patch.object(space_tags, "coordinator_name", return_value="hq"):
+            self.assertEqual(list(space_tags.changes([{"workspace_id": "w3"}, {"workspace_id": "w5"}], tabs, [])),
+                             [("w5", {"coordinator": "◉"})])
 
     def test_main_reports_tags_and_prints_nothing(self):
         replies = {
@@ -93,13 +112,15 @@ class SpaceTagTests(unittest.TestCase):
         with patch.object(space_tags, "call", side_effect=ConnectionRefusedError):
             self.assertEqual(space_tags.main(), 0)
 
-    def test_config_shows_the_tag_and_runs_the_script(self):
+    def test_config_shows_the_tags_and_runs_the_script(self):
         config = tomllib.loads((Path(__file__).parent.parent / "config.toml").read_text())
-        rows = config["ui"]["sidebar"]["spaces"]["rows"]
-        self.assertIn("$" + space_tags.TOKEN, [token for row in rows for token in row])
+        tokens = [token for row in config["ui"]["sidebar"]["spaces"]["rows"] for token in row]
+        self.assertIn("$" + space_tags.NO_GIT, tokens)
+        coordinator = [t for t in tokens if isinstance(t, dict) and t.get("token") == "$" + space_tags.COORDINATOR]
+        self.assertEqual(len(coordinator), 1)
+        self.assertEqual(coordinator[0]["fg"].upper(), space_tags.COORDINATOR_MARK[1].upper())
         commands = [item.get("command", "") for item in config["ui"]["tab_bar_right"]]
         self.assertTrue(any("scripts/space_tags.py" in command for command in commands))
-
 
 if __name__ == "__main__":
     unittest.main()
