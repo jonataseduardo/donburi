@@ -25,6 +25,7 @@ Herdr Splits|prefix+%|Split pane side by side (also prefix+v)
 Herdr Splits|prefix+x|Close pane
 Herdr Panes|prefix+Shift+hjkl|Swap pane with neighbor
 Herdr Panes|prefix+Tab|Cycle to next pane
+Herdr Agents|prefix+a|New agent tab: named by task, shell left, Claude right
 Herdr Panes|prefix+z|Toggle pane zoom
 Herdr Panes|prefix+[|Copy mode
 Herdr Panes|prefix+e|Open scrollback in $EDITOR
@@ -46,12 +47,12 @@ Herdr Workspaces|prefix+q|Detach
 Herdr Workspaces|prefix+Shift+r|Reload config
 Herdr Workspaces|prefix+?|Show all herdr keybindings
 Herdr Agents|Ctrl+A|Toggle the agent coordinator tab (in its folder's workspace)
-Herdr Agents|i (history pane)|Jump to the coordinator prompt (insert mode)
-Herdr Agents|]e / [e (history pane)|Next / previous feed event
-Herdr Agents|:HerdrAgent [pane] (history pane)|Lines naming an agent, in the location list
-Herdr Agents|:HerdrTag [tag] (history pane)|Sections tagged with an agent, in its color
-Herdr Agents|[d / ]d (history pane)|Previous / next day of the coordinator history (]d past the last: live)
-Herdr Agents|:HerdrDay [date] (history pane)|Open a day of the history (no date: live view)
-Herdr Agents|:HerdrTag! / :HerdrAgent! (history pane)|Search every day file
+Herdr Agents|i (history view)|Jump to the agent's prompt
+Herdr Agents|]e / [e (history view)|Next / previous feed event
+Herdr Agents|:HerdrAgent [pane] (history view)|Lines naming an agent, in the location list
+Herdr Agents|:HerdrTag [tag] (history view)|Sections tagged with an agent, in its color
+Herdr Agents|[d / ]d (history view)|Previous / next day of the coordinator history (]d past the last: live)
+Herdr Agents|:HerdrDay [date] (history view)|Open a day of the history (no date: live view)
+Herdr Agents|:HerdrTag! / :HerdrAgent! (history view)|Search every day file
 Herdr Agents|prefix+Shift+h|Focused agent's conversation in Neovim (popup)
 Herdr Agents|prefix+o|Jump to the agent behind the latest toast

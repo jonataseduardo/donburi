@@ -69,7 +69,7 @@ status_indicators = "symbols"
 agent_panel_sort = "spaces"
 # agent_panel_sort = "priority"
 # Agent labels stay off pane borders: herdr draws borders in one color, and
-# markers only appear where they can be colored (sidebar, history pane).
+# markers only appear where they can be colored (sidebar, history view).
 # show_agent_labels_on_pane_borders = true
 # prefix+c opens a tab immediately, like tmux new-window
 prompt_new_tab_name = false
@@ -178,15 +178,27 @@ height = "80%"
 # Ctrl+a: toggle the agent coordinator — a persistent Claude Code session on
 # Opus 5.5 at low effort (herdr agent "coordinator") in a "coordinator" tab of
 # its folder's workspace. Each Mac sets the folder in ~/.config/donburi/local.env
-# (HERDR_COORDINATOR_CWD; see coordinator.sh). The tab is modal: Neovim history
-# on top (normal mode, i to prompt), Claude prompt below (Ctrl+k back up). See
-# herdr/coordinator.md.
+# (HERDR_COORDINATOR_CWD; see coordinator.sh). The tab holds only the Claude
+# prompt, the one exception to the prefix+a layout below; prefix+shift+h shows
+# its history. See herdr/coordinator.md.
 # Takes Ctrl+a (line start) from shells, Claude Code and Neovim (increment).
 [[keys.command]]
 key = "ctrl+a"
 type = "shell"
 command = "~/.config/herdr/scripts/coordinator.sh"
 description = "toggle the agent coordinator"
+
+# prefix+a: start an agent the standard way. Every agent runs in the RIGHT
+# pane of a tab named after its task (never a bare number), with a shell on
+# the left. Asks for the task name, then opens that tab in the current
+# workspace and starts Claude on the right (scripts/agent-tab.sh).
+[[keys.command]]
+key = "prefix+a"
+type = "popup"
+command = "~/.config/herdr/scripts/agent-tab.sh"
+description = "new agent tab (shell left, Claude right)"
+width = "50%"
+height = "20%"
 
 # prefix+shift+h: the focused agent's Claude conversation in Neovim (read-only,
 # live); i jumps to its prompt, :q closes.

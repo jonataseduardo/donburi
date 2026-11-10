@@ -1,8 +1,8 @@
 #!/bin/bash
 # Live Neovim view of a herdr agent's Claude conversation: normal mode to read
 # and navigate with vim motions, i to jump to the agent's prompt (insert mode).
-# The coordinator's history pane runs it; prefix+shift+h opens it for the
-# focused agent in a popup. The coordinator's history is also kept as one file
+# prefix+shift+h opens it for the focused agent in a popup; on the
+# coordinator's tab (a single prompt pane) that is the coordinator's history. The coordinator's history is also kept as one file
 # per day (transcript.py --days), browsed with [d / ]d and :HerdrDay.
 #
 # Usage: transcript-view.sh [agent name or pane ID]   (default: coordinator)
@@ -10,13 +10,19 @@
 set -uo pipefail
 
 agent="${1:-${HERDR_ACTIVE_PANE_ID:-coordinator}}"
+coordinator="${HERDR_COORDINATOR_NAME:-coordinator}"
+# herdr can forget the coordinator's agent name (after /clear); its tab keeps it.
+if [[ -z "${1:-}" && -n "${HERDR_ACTIVE_TAB_ID:-}" ]] &&
+	[[ "$("${HERDR_BIN_PATH:-herdr}" tab get "$HERDR_ACTIVE_TAB_ID" 2>/dev/null | jq -r '.result.tab.label // empty' 2>/dev/null)" == "$coordinator" ]]; then
+	agent="$coordinator"
+fi
 scripts="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 state="${XDG_STATE_HOME:-$HOME/.local/state}/herdr/coordinator"
 out="$state/${agent//[^A-Za-z0-9_-]/_}.md"
 mkdir -p "$state"
 
 days=()
-if [[ "$agent" == "${HERDR_COORDINATOR_NAME:-coordinator}" ]]; then
+if [[ "$agent" == "$coordinator" ]]; then
 	days=(--days "$state/days")
 	export HERDR_TRANSCRIPT_DAYS="$state/days"
 fi

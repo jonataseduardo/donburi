@@ -6,12 +6,9 @@
 # agent (scripts/agent_watch.py), points you at the ones that need you, and
 # relays your messages to them. It lives in a "coordinator" tab of the workspace for
 # its repo (HERDR_COORDINATOR_CWD, e.g. ds-hq), next to that repo's other
-# agents, so the repo has one workspace. The tab is modal, like vim:
-#
-#   history (top)    Neovim in normal mode: read the conversation with vim motions
-#   prompt (bottom)  Claude Code, insert mode: type to the coordinator
-#
-# i in the history pane jumps to the prompt, Ctrl+k goes back up. Ctrl+a from
+# agents, so the repo has one workspace. The tab holds a single pane, the
+# Claude Code prompt: it is the one exception to the rule that agents run in
+# the right pane of a tab with a shell on the left. Ctrl+a from
 # anywhere switches to the coordinator's tab; from it, back to the tab you came
 # from. The first press creates the tab (and the workspace if needed), starts
 # Claude with herdr/coordinator.md appended to its system prompt and
@@ -19,8 +16,9 @@
 # and asks it to start the feed. The workspace is kept first in the sidebar and
 # the tab first in the workspace, so the coordinator is the top agent.
 #
-# The history pane has a darker background and an orange "◉ COORDINATOR"
-# banner, and Claude's status line repeats it (scripts/coordinator_status.py).
+# Claude's status line shows an orange "◉ COORDINATOR" banner
+# (scripts/coordinator_status.py). The history is still in Neovim with
+# prefix+shift+h (scripts/transcript-view.sh).
 #
 # Settings, read from ~/.config/donburi/local.env (one per Mac, not in the
 # repo; plain `NAME=value` lines in sh syntax), else from the environment:
@@ -90,26 +88,22 @@ if [[ -n "$tab" && "$focused_tab" == "$tab" ]]; then
 fi
 [[ -n "$focused_tab" ]] && echo "$focused_tab" >"$state_dir/previous-tab"
 
-# First press: the coordinator tab, with the history pane on top (70%) and the
-# prompt pane below; the repo's workspace too if it does not exist yet.
+# First press: the coordinator tab, a single prompt pane (no shell or history
+# split); the repo's workspace too if it does not exist yet.
 if [[ -z "$tab" ]]; then
 	if [[ -z "$ws" ]]; then
 		created=$("$herdr" workspace create --cwd "$cwd" --label "$workspace_label" --no-focus) ||
 			fail "could not create the '$workspace_label' workspace"
 		ws=$(jq -r '.result.workspace.workspace_id' <<<"$created")
-		history=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+		prompt=$(jq -r '.result.root_pane.pane_id' <<<"$created")
 		tab=$(jq -r '.result.root_pane.tab_id' <<<"$created")
 		"$herdr" tab rename "$tab" "$name" >/dev/null
 	else
 		created=$("$herdr" tab create --workspace "$ws" --cwd "$cwd" --label "$name" --no-focus) ||
 			fail "could not create the '$name' tab in '$workspace_label'"
 		tab=$(jq -r '.result.tab.tab_id' <<<"$created")
-		history=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+		prompt=$(jq -r '.result.root_pane.pane_id' <<<"$created")
 	fi
-	"$herdr" pane rename "$history" history >/dev/null
-	prompt=$("$herdr" pane split "$history" --direction down --ratio 0.7 --cwd "$cwd" --no-focus |
-		jq -r '.result.pane.pane_id // empty')
-	[[ -n "$prompt" ]] || fail "could not split the '$name' tab"
 	"$herdr" pane rename "$prompt" prompt >/dev/null
 fi
 
@@ -128,16 +122,7 @@ labelled() {
 	jq -r --arg t "$tab" --arg l "$1" \
 		'[.result.panes[] | select(.tab_id == $t and .label == $l)][0].pane_id // empty' <<<"$panes"
 }
-history=$(labelled history)
 prompt=$(labelled prompt)
-
-# Restart the history view if its pane is back at a shell prompt (e.g. after :q).
-if [[ -n "$history" ]]; then
-	shell=$("$herdr" pane process-info --pane "$history" |
-		jq -r '.result.process_info.foreground_processes[0].name // empty')
-	[[ "$shell" =~ ^(zsh|fish|sh)$ ]] &&
-		"$herdr" pane run "$history" "HERDR_COORDINATOR_NAME=$name $config_dir/scripts/transcript-view.sh $name" >/dev/null
-fi
 
 "$herdr" agent get "$name" >/dev/null 2>&1 && exit 0
 
@@ -160,7 +145,6 @@ if [[ -f "$starting" ]] && (($(date +%s) - $(stat -f %m "$starting") < 120)); th
 fi
 touch "$starting"
 trap 'rm -f "$starting"' EXIT
-[[ -n "$history" ]] && "$herdr" pane focus --direction down --pane "$history" >/dev/null 2>&1
 
 args=(--name "$name" --model "$model" --effort "$effort")
 [[ -f "$brief" ]] && args+=(--append-system-prompt-file "$brief")

@@ -180,12 +180,13 @@ workspace: the coordinator's tab sits next to any other agents there, and Ctrl+a
 reuses an existing workspace for the folder (it creates one only if none
 exists).
 
-**Modal, like vim.** The coordinator tab has two panes:
-
-| Pane | Mode | What it is |
-|------|------|------------|
-| `history` (top, 70%) | Normal | Neovim, read-only and live: the conversation as Markdown. All vim motions, `/` search, yank; `]]` / `[[` jump between turns, `zc`/`zo`/`zM`/`zR` fold turns and sessions; at the end it follows new output (like `less +F`) |
-| `prompt` (bottom) | Insert | Claude Code: type to the coordinator |
+**One pane.** The coordinator tab holds only the Claude Code prompt (pane
+`prompt`): no shell or Neovim split. It is the one exception to the rule that
+agents run in the right pane of a task-named tab (**Ctrl+b, then a**). Its
+conversation opens in Neovim with **Ctrl+b, then Shift+h**: read-only and live,
+as Markdown, with all vim motions, `/` search and yank; `]]` / `[[` jump between
+turns, `zc`/`zo`/`zM`/`zR` fold them, and at the end it follows new output (like
+`less +F`).
 
 **You always know you are in it.** The coordinator's color is herdr's orange
 accent (`#FF9E64`, surimiOrange), and no worker uses it:
@@ -196,11 +197,7 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
   tab first in it (`coordinator.sh` moves both on each **Ctrl+a**), so the
   coordinator is the top agent. Keeping it first shifts the other workspaces'
   **Ctrl+b, then Shift+1..9** numbers down by one.
-- **History pane.** One shade darker than Kanagawa's background (sumiInk0), with
-  a banner across the top: an orange `◉ COORDINATOR` block, the agent count with
-  blocked and working agents in herdr's state colors, and the `i` / **Ctrl+a**
-  hints. It refreshes every 3 seconds from `agent_watch.py --counts`.
-- **Prompt pane.** Claude's status line repeats the banner, with the model
+- **Prompt pane.** Claude's status line shows an orange `◉ COORDINATOR` banner, with the model
   (`herdr/scripts/coordinator_status.py`, set as `statusLine` in
   `herdr/coordinator-settings.json`, refreshed every 5 seconds). Your usual
   status line is unchanged in other sessions.
@@ -211,14 +208,14 @@ accent (`#FF9E64`, surimiOrange), and no worker uses it:
 | Key | Action |
 |-----|--------|
 | **Ctrl+a** | Switch to the coordinator's tab; from it, back to the tab you came from. The first press creates the tab (and its folder's workspace if needed), starts Claude and its feed |
-| **i** `a` `o` **Enter** (in `history`) | Jump to the prompt (insert mode) |
-| **]e** / **[e** (in `history`) | Next / previous feed event (blocked, finished, started, gone); takes a count |
-| `:HerdrAgent [pane or name]` (in `history`) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
-| `:HerdrTag [tag]` (in `history`) | The sections (turns and feed blocks) tagged with that agent, in its color. Every section that names an agent carries a tag such as `[▲ w5:p2 donburi]` at the start of its heading, and a bar in the agent's color down its lines. Tags come only from the text: pane IDs, the marker written before them (else the agent's live marker), agent names from feed lines, and the workspace a feed line names |
-| **[d** / **]d** (in `history`) | Previous / next day of the coordinator's history in the same pane; **]d** past the last day returns to the live view |
-| `:HerdrDay [date]` (in `history`) | Open a day (`2026-11-04`); Tab completes the days in `index.md`. Without a date, or with `today`, the live view |
-| `:HerdrTag! [tag]` / `:HerdrAgent! [target]` (in `history`) | The same search across every day file, in one location list with each entry's file |
-| **Ctrl+k** (in `prompt`) / **Ctrl+j** (in `history`) | Move between the panes (smart-splits) |
+| **Ctrl+b, then a** | New agent tab: asks for a short task name, opens a tab with that label in the current workspace, keeps a shell on the left and starts Claude on the right. Every agent, including the ones the coordinator starts, uses this layout |
+| **i** `a` `o` **Enter** (in the history view) | Close the view and jump to the agent's prompt |
+| **]e** / **[e** (in the history view) | Next / previous feed event (blocked, finished, started, gone); takes a count |
+| `:HerdrAgent [pane or name]` (in the history view) | Every line naming that agent (`w5:p2`, `api-impl`) in the location list, markers colored; without an argument, the pane on the current line. Tab completes the agents in the history |
+| `:HerdrTag [tag]` (in the history view) | The sections (turns and feed blocks) tagged with that agent, in its color. Every section that names an agent carries a tag such as `[▲ w5:p2 donburi]` at the start of its heading, and a bar in the agent's color down its lines. Tags come only from the text: pane IDs, the marker written before them (else the agent's live marker), agent names from feed lines, and the workspace a feed line names |
+| **[d** / **]d** (in the history view) | Previous / next day of the coordinator's history in the same pane; **]d** past the last day returns to the live view |
+| `:HerdrDay [date]` (in the history view) | Open a day (`2026-11-04`); Tab completes the days in `index.md`. Without a date, or with `today`, the live view |
+| `:HerdrTag! [tag]` / `:HerdrAgent! [target]` (in the history view) | The same search across every day file, in one location list with each entry's file |
 | **Ctrl+b, then Shift+h** | The focused agent's conversation in the same Neovim view, as a popup (`:q` closes) |
 | **Ctrl+b, then o** | Jump to the agent behind the latest toast (works without the coordinator) |
 
@@ -248,14 +245,12 @@ reusing their colors:
 The marker stays with the agent's terminal and appears only where it can be
 colored. In the herdr sidebar it sits next to the harness name on each agent's
 second row (`▲ claude`, the label colored by its marker through
-`[ui.sidebar.agents]` rules). In the Neovim history pane the coordinator's
+`[ui.sidebar.agents]` rules). In the Neovim history view the coordinator's
 replies and feed lines show it in color. Claude's own pane cannot color it, so
 each color also has its own shape, and pane borders show no agent labels. With
 more than eight agents markers repeat; `◉` is never reused. `agent_watch.py`
 sets them as herdr pane metadata (token `mark`, plus the label prefix, source
-`donburi-marks`): the coordinator's feed does, and so does the history pane's
-banner every 3 seconds, so a new agent gets its marker even when the feed is not
-running (a new or `/clear`-ed coordinator session that has not started its
+`donburi-marks`): the coordinator's feed does, so a new agent gets its marker once the feed runs (a new or `/clear`-ed coordinator session that has not started its
 Monitor yet). herdr forgets the coordinator's name after a `/clear`; the agent
 in the `coordinator` tab still gets `◉` and stays out of the feed. Pass
 `--no-marks` to `agent_watch.py` to turn markers off. The palette lives in three
