@@ -38,3 +38,4 @@ herdr/*.log
 herdr/*.sock.*
 herdr/session.json
 herdr/session-snapshots/
+herdr/release-notes.json

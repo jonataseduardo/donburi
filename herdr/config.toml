@@ -83,16 +83,17 @@ tab_bar_right = [
   # this Mac waits on the endpoint-security agents, and under load 2 s was not
   # always enough (git-branch.sh reads HEAD itself for the same reason).
   { type = "command", command = "~/.config/herdr/scripts/git-branch.sh", interval_seconds = 5, timeout_seconds = 4 },
-  # Prints nothing: tags workspaces outside a Git repository "no git" for the
-  # sidebar ([ui.sidebar.spaces]). herdr has no event for a folder change.
+  # Prints nothing: tags workspaces for the sidebar ([ui.sidebar.spaces]) and
+  # gives every agent its colored marker ([ui.sidebar.agents]), with or without
+  # the coordinator's feed. herdr has no event for a folder change.
   { type = "command", command = "python3 -B ~/.config/herdr/scripts/space_tags.py", interval_seconds = 5, timeout_seconds = 4 },
   { type = "command", command = "basename \"${HERDR_ACTIVE_PANE_CWD:-$PWD}\" | sed 's/^/ /'", interval_seconds = 5, timeout_seconds = 2 },
   { type = "datetime", format = " %H:%M" },
 ]
 
-# The second row is the harness (claude, codex...) and what it is doing. While
-# the coordinator runs, scripts/agent_watch.py prefixes each agent's label with
-# its marker ("▲ claude"); these rules color that label by its marker, from the
+# The second row is the harness (claude, codex...) and what it is doing.
+# scripts/space_tags.py (and the coordinator's feed) prefixes each agent's
+# label with its marker ("▲ claude"); these rules color that label by its marker, from the
 # Kanagawa palette (same list as MARKS in agent_watch.py and transcript.lua).
 # herdr joins tokens with " · ", so the marker is part of the label rather
 # than a token of its own.

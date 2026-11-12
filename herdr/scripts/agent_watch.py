@@ -273,9 +273,7 @@ def main(argv=None):
     if args.counts:
         try:
             agents = adopt_coordinator(call("agent.list")["agents"])
-            # The history pane's banner runs this every 3 seconds, so a new agent
-            # gets its marker even when the coordinator's feed is not running
-            # (a new or /clear-ed session that has not started its Monitor yet).
+            # Banners (transcript.lua) run this; space_tags.py paints markers too.
             if not args.no_marks:
                 paint(agents, assign_marks(agents, exclude), set())
             emit(json.dumps(counts(agents, exclude)))

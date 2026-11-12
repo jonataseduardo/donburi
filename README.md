@@ -250,8 +250,9 @@ replies and feed lines show it in color. Claude's own pane cannot color it, so
 each color also has its own shape, and pane borders show no agent labels. With
 more than eight agents markers repeat; `◉` is never reused. `agent_watch.py`
 sets them as herdr pane metadata (token `mark`, plus the label prefix, source
-`donburi-marks`): the coordinator's feed does, so a new agent gets its marker once the feed runs (a new or `/clear`-ed coordinator session that has not started its
-Monitor yet). herdr forgets the coordinator's name after a `/clear`; the agent
+`donburi-marks`): the coordinator's feed does, and so does
+`space_tags.py` from the tab bar every 5 seconds, so a new agent gets its
+marker even when the feed is not running. herdr forgets the coordinator's name after a `/clear`; the agent
 in the `coordinator` tab still gets `◉` and stays out of the feed. Pass
 `--no-marks` to `agent_watch.py` to turn markers off. The palette lives in three
 places that a test keeps in step: `MARKS` and `COORDINATOR_MARK` in `agent_watch.py`, the agent

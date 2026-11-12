@@ -8,7 +8,10 @@
   repository. herdr shows the branch from the folder of a workspace's first
   tab's root pane and leaves that row empty outside a repository.
 
-[ui.sidebar.spaces] in config.toml shows both. herdr has no event for a pane
+It also gives every agent its colored marker ("▲ claude", agent_watch.py), so
+markers show whether or not the coordinator's feed is running.
+
+[ui.sidebar.spaces] in config.toml shows both tags. herdr has no event for a pane
 changing folder, so config.toml runs this as a tab-bar command every few
 seconds: it prints nothing and only writes tokens that changed.
 """
@@ -16,7 +19,7 @@ seconds: it prints nothing and only writes tokens that changed.
 from pathlib import Path
 import sys
 
-from agent_watch import COORDINATOR_MARK, call, coordinator_name
+from agent_watch import COORDINATOR_MARK, adopt_coordinator, assign_marks, call, coordinator_name, paint
 
 COORDINATOR = "coordinator"
 NO_GIT = "no_git"
@@ -84,6 +87,8 @@ def main():
             call("workspace.report_metadata", {
                 "workspace_id": workspace_id, "source": SOURCE, "tokens": tokens,
             })
+        agents = adopt_coordinator(call("agent.list")["agents"])
+        paint(agents, assign_marks(agents), set())
     except (OSError, ValueError, RuntimeError, KeyError):
         pass  # herdr is restarting or busy; the next tick tries again
     return 0

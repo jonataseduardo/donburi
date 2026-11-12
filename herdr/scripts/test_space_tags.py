@@ -6,6 +6,7 @@ import tomllib
 import unittest
 from unittest.mock import patch
 
+import agent_watch
 import space_tags
 
 
@@ -92,21 +93,28 @@ class SpaceTagTests(unittest.TestCase):
             "tab.list": {"tabs": [tab("w1:t1"), tab("w2:t1")]},
             "pane.list": {"panes": [pane("w1:p1", "w1:t1", str(self.root / "plain")),
                                     pane("w2:p1", "w2:t1", str(self.root / "repo"))]},
+            "agent.list": {"agents": [{"pane_id": "w2:p2", "tab_id": "w2:t1", "terminal_id": "t1",
+                                       "agent": "claude"}]},
         }
-        reports = []
+        reports, marks = [], []
 
         def call(method, params=None):
+            if method == "pane.report_metadata":
+                marks.append(params)
+                return {}
             if method == "workspace.report_metadata":
                 reports.append(params)
                 return {}
             return replies[method]
 
         with patch.object(space_tags, "call", side_effect=call), \
+                patch.object(agent_watch, "call", side_effect=call), \
                 patch("sys.stdout") as stdout:
             self.assertEqual(space_tags.main(), 0)
         stdout.write.assert_not_called()
         self.assertEqual(reports, [{"workspace_id": "w1", "source": "donburi-spaces",
                                     "tokens": {"no_git": "no git"}}])
+        self.assertEqual([(m["pane_id"], m["display_agent"]) for m in marks], [("w2:p2", "● claude")])
 
     def test_main_is_quiet_when_herdr_is_down(self):
         with patch.object(space_tags, "call", side_effect=ConnectionRefusedError):
