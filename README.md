@@ -226,6 +226,12 @@ Ask it things such as:
 - "tell w9:p2 to rebase on main" (sends your message with `herdr agent prompt`)
 - "start a reviewer on ~/c/donburi" (creates a workspace and a worker agent)
 
+The coordinator opens workers with the `open-agent` Claude Code skill, kept in
+`herdr/skills/open-agent/`. `donburi setup` does not install it; link it on each
+Mac with
+`ln -s "$PWD/herdr/skills/open-agent" ~/.claude/skills/open-agent` (from the
+repo root).
+
 **Agent markers.** Every agent gets a marker: a small shape in a Kanagawa
 color, picked to sit next to herdr's own state glyphs (`× ◐ ✓ ○`) without
 reusing their colors:
