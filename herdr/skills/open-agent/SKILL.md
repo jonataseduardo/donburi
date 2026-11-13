@@ -1,6 +1,6 @@
 ---
 name: open-agent
-description: "Herdr coordinator: open a new worker coding agent for Jonatas in a project's herdr workspace (new tab, or new workspace if none, optional right split), start Claude there, and hand it the task. Use for \"open an agent on <repo>\", \"start a worker for X\", \"open a section on <repo>\", \"spin up claude in <project>\", \"put an agent on this\", \"open it in the right pane\". Requires HERDR_ENV=1."
+description: "Herdr coordinator: open a new worker coding agent for Jonatas in a project's herdr workspace (a task-named tab, or a new workspace if none, with the agent in the right pane and a shell on the left), start Claude there, and hand it the task. Use for \"open an agent on <repo>\", \"start a worker for X\", \"open a section on <repo>\", \"spin up claude in <project>\", \"put an agent on this\", \"open it in the right pane\". Requires HERDR_ENV=1."
 ---
 
 # Open a worker agent
