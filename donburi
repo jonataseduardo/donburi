@@ -990,7 +990,8 @@ cmd_reload() {
 cmd_update() {
     echo -e "${CYAN}--- update ---${NC}"
 
-    if [[ ! -d "$DONBURI_DIR/.git" ]]; then
+    # rev-parse, not a .git folder test: in a git worktree .git is a file.
+    if ! git -C "$DONBURI_DIR" rev-parse --git-dir &>/dev/null; then
         log_error "Not a git repository: $DONBURI_DIR"
         return 1
     fi
