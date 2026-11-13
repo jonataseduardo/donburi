@@ -1,0 +1,9 @@
+{
+  "editorMode": "vim",
+  "statusLine": {
+    "type": "command",
+    "command": "python3 ~/.config/herdr/scripts/statusline.py",
+    "refreshInterval": 5,
+    "hideVimModeIndicator": true
+  }
+}

@@ -39,3 +39,6 @@ herdr/*.sock.*
 herdr/session.json
 herdr/session-snapshots/
 herdr/release-notes.json
+
+# Python bytecode (status line scripts run without -B)
+__pycache__/

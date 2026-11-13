@@ -2,8 +2,8 @@
 """Claude Code status line for the herdr coordinator; uses only Python's stdlib.
 
 Set as `statusLine` in herdr/coordinator-settings.json. Prints an orange
-"◉ COORDINATOR" block (the same banner as the Neovim history pane above it),
-the model, and how many agents herdr has, highlighting blocked and working ones
+"◉ COORDINATOR" block (the same banner as the Neovim history view), Claude
+Code's vim mode (the settings hide its own indicator), the model, and how many agents herdr has, highlighting blocked and working ones
 in herdr's own state colors.
 """
 
@@ -12,6 +12,7 @@ import os
 import sys
 
 import agent_watch
+from statusline import mode_part, vim_mode
 
 RESET = "\033[0m"
 
@@ -27,8 +28,10 @@ BLOCKED = "\033[1m" + color("#FF5D62")  # herdr's blocked red
 WORKING = color("#E6C384")  # herdr's working yellow
 
 
-def status_line(model, counts):
+def status_line(model, counts, mode=""):
     parts = [f"{TITLE} {agent_watch.COORDINATOR_MARK[0]} COORDINATOR {RESET}"]
+    if mode:
+        parts.append(mode_part(mode))
     if model:
         parts.append(f"{MUTED}{model}{RESET}")
     if counts is None:
@@ -46,15 +49,17 @@ def status_line(model, counts):
 
 def main():
     try:
-        model = (json.load(sys.stdin).get("model") or {}).get("display_name") or ""
+        data = json.load(sys.stdin)
+        model = (data.get("model") or {}).get("display_name") or ""
+        mode = vim_mode(data)
     except (ValueError, AttributeError):
-        model = ""
+        model, mode = "", ""
     exclude = {os.environ["HERDR_PANE_ID"]} if os.environ.get("HERDR_PANE_ID") else set()
     try:
         counts = agent_watch.counts(agent_watch.call("agent.list")["agents"], exclude)
     except (OSError, ValueError, RuntimeError, KeyError):
         counts = None
-    print(status_line(model, counts))
+    print(status_line(model, counts, mode))
 
 
 if __name__ == "__main__":

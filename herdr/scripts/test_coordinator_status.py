@@ -20,6 +20,16 @@ class StatusLineTests(unittest.TestCase):
         self.assertEqual(plain(coordinator_status.status_line("", {"agents": 1, "idle": 1})),
                          " ◉ COORDINATOR  1 agent")
 
+    def test_vim_mode_follows_the_banner(self):
+        line = plain(coordinator_status.status_line("Opus 5.5", {"agents": 1}, "NORMAL"))
+        self.assertEqual(line, " ◉ COORDINATOR  NORMAL Opus 5.5 1 agent")
+
+    def test_settings_hide_claudes_own_vim_indicator(self):
+        import json
+        from pathlib import Path
+        settings = json.loads((Path(__file__).parent.parent / "coordinator-settings.json").read_text())
+        self.assertTrue(settings["statusLine"]["hideVimModeIndicator"])
+
     def test_unreachable_herdr(self):
         self.assertIn("herdr unavailable", plain(coordinator_status.status_line("Haiku", None)))
 

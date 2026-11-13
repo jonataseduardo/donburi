@@ -19,6 +19,8 @@ DONBURI="$REPO_DIR/donburi"
 ORIG_HOME="$HOME"
 TEST_HOME="$(mktemp -d)"
 export HOME="$TEST_HOME"
+# Never let setup touch the real Claude Code config.
+unset CLAUDE_CONFIG_DIR
 unset ZSH ZSH_CUSTOM 2>/dev/null || true
 
 cleanup() {

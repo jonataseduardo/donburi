@@ -5,7 +5,8 @@
   "statusLine": {
     "type": "command",
     "command": "python3 ~/.config/herdr/scripts/coordinator_status.py",
-    "refreshInterval": 5
+    "refreshInterval": 5,
+    "hideVimModeIndicator": true
   },
   "permissions": {
     "allow": [

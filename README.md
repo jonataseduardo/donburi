@@ -165,6 +165,32 @@ Usage history: `${XDG_STATE_HOME:-~/.local/state}/herdr/workspace-picker/usage.j
 After changing bindings, use **Ctrl+b, then
 Shift+r** to reload both client and server configuration.
 
+### Claude Code (global settings)
+
+`donburi setup claude` (also part of `donburi setup`) merges
+`claude/settings.json` into `~/.claude/settings.json` with jq
+(`claude/install.sh`). Only these keys are set; plugins, permissions, hooks and
+everything else in the file are kept, and the previous file is saved as
+`settings.json.donburi-backup`:
+
+| Key | Value |
+|-----|-------|
+| `editorMode` | `"vim"`: vim keys in the prompt |
+| `statusLine` | `herdr/scripts/statusline.py`, refreshed every 5 seconds, with Claude's own vim-mode indicator hidden |
+
+The status line is muted, one line per session:
+
+```
+NORMAL  ▲ api-impl  donburi/herdr  Opus 5.5  42%
+```
+
+the vim mode, the herdr agent's marker (in its color) and name when the session
+runs in a herdr pane, the folder and Git branch, the model, and how much of the
+context window is used. The coordinator keeps its own settings
+(`herdr/coordinator-settings.json`, passed with `--settings`, which wins over
+user settings): its line is the orange `◉ COORDINATOR` banner, with the vim mode
+after it.
+
 ### herdr Agent Coordinator
 
 **Ctrl+a** toggles your rolling assistant: a long-lived Claude Code session on

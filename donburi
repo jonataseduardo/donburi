@@ -440,6 +440,19 @@ setup_herdr() {
     create_symlink "$SRC_HERDR" "$DST_HERDR"
 }
 
+setup_claude() {
+    echo -e "${CYAN}--- Claude Code ---${NC}"
+
+    # Merges claude/settings.json into ~/.claude/settings.json (never replaces it)
+    if ! command -v jq &>/dev/null; then
+        log_warn "jq not found — skipping Claude Code settings (run: donburi setup claude)"
+    elif [[ "$DRY_RUN" == true ]]; then
+        log_info "Would merge claude/settings.json into ~/.claude/settings.json"
+    else
+        "$DONBURI_DIR/claude/install.sh" || log_warn "Failed to merge Claude Code settings (continuing)"
+    fi
+}
+
 setup_btop() {
     echo -e "${CYAN}--- btop ---${NC}"
 
@@ -555,6 +568,7 @@ setup_all() {
     setup_nvim
     setup_ghostty
     setup_herdr
+    setup_claude
     setup_zsh
     setup_btop
     setup_keybinds
@@ -988,7 +1002,7 @@ Usage: donburi <command> [options]
 
 Commands:
   setup [component]     Install configurations (default: all)
-                        Components: nvim, ghostty, herdr, zsh, btop, keybinds
+                        Components: nvim, ghostty, herdr, claude, zsh, btop, keybinds
   reload                Reload the running herdr server config
   meeting [action]      Toggle the lazy next-meeting widget (default: status)
                         Actions: on, off, toggle, status
@@ -1085,12 +1099,13 @@ case "$COMMAND" in
             nvim)       setup_nvim ;;
             ghostty)    setup_ghostty ;;
             herdr)      setup_herdr ;;
+            claude)     setup_claude ;;
             zsh)        setup_zsh ;;
             btop)       setup_btop ;;
             keybinds)   setup_keybinds ;;
             *)
                 log_error "Unknown component: $SETUP_COMPONENT"
-                echo "Available components: nvim, ghostty, herdr, zsh, btop, keybinds, all"
+                echo "Available components: nvim, ghostty, herdr, claude, zsh, btop, keybinds, all"
                 exit 1
                 ;;
         esac
