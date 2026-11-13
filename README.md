@@ -315,10 +315,13 @@ a line or two. The coordinator's own pane is excluded. Feed state is kept in
 the monitor (it expires after 30 minutes) neither repeats nor loses events.
 
 **History.** `herdr/scripts/transcript.py` renders Claude Code's session
-transcript (`~/.claude/projects/*/<session>.jsonl`, found through the session ID
-herdr reports for the agent) as Markdown: your prompts, Claude's replies, one
-line per tool call, feed events as small blocks; thinking and tool output are
-left out. The view keeps the agent's last five sessions, oldest first, and
+transcript (`~/.claude/projects/*/<session>.jsonl`) as Markdown. It finds the
+session through the ID herdr reports for the agent, which needs herdr's Claude
+integration (`donburi setup herdr` installs it: a `SessionStart` hook in
+`~/.claude/settings.json`); without it, through the record Claude Code keeps for
+the process in the agent's pane (`~/.claude/sessions/<pid>.json`). It renders
+your prompts, Claude's replies, one line per tool call, feed events as small
+blocks; thinking and tool output are left out. The view keeps the agent's last five sessions, oldest first, and
 switches to the new one after `/clear` or a restart.
 `herdr/scripts/transcript-view.sh [agent]` opens it in Neovim with
 `herdr/transcript.lua`; `transcript.py --session <id|path>` prints any

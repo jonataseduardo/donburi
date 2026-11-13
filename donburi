@@ -436,6 +436,21 @@ setup_herdr() {
         log_warn "Homebrew not found — skipping jq (needed for Ctrl+hjkl herdr navigation)"
     fi
 
+    # herdr's Claude integration (a SessionStart hook in Claude's settings.json)
+    # reports each Claude session to herdr; the coordinator's history uses it.
+    local claude_config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+    if ! command -v herdr &>/dev/null; then
+        log_warn "herdr not found — skipping its Claude integration"
+    elif [[ ! -d "$claude_config" ]]; then
+        log_info "No Claude Code config at $claude_config — skipping herdr's Claude integration (rerun after installing Claude Code)"
+    elif [[ "$DRY_RUN" == true ]]; then
+        log_info "Would install herdr's Claude integration (herdr integration install claude)"
+    elif herdr integration install claude >/dev/null; then
+        log_info "herdr Claude integration installed"
+    else
+        log_warn "Failed to install herdr's Claude integration (continuing)"
+    fi
+
     make_executable "$DONBURI_DIR/herdr/scripts" "*.sh"
     create_symlink "$SRC_HERDR" "$DST_HERDR"
 }

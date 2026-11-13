@@ -54,15 +54,40 @@ def find_transcript(session):
     return next(claude_dir().joinpath("projects").glob(f"*/{session}.jsonl"), None)
 
 
-def agent_session(target):
-    """The Claude session ID herdr reports for an agent, or None."""
+def herdr_result(*args):
+    """The `result` object of a herdr CLI call, or {}."""
     herdr = os.environ.get("HERDR_BIN_PATH", "herdr")
     try:
-        out = subprocess.run([herdr, "agent", "get", target], capture_output=True, text=True, timeout=5)
-        session = json.loads(out.stdout)["result"]["agent"].get("agent_session") or {}
+        out = subprocess.run([herdr, *args], capture_output=True, text=True, timeout=5)
+        result = json.loads(out.stdout)["result"]
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        return {}
+    return result if isinstance(result, dict) else {}
+
+
+def agent_session(target):
+    """The Claude session ID of a herdr agent, or None.
+
+    herdr reports it when its Claude integration is installed (`herdr
+    integration install claude`, a SessionStart hook). Without that, it is read
+    from the record Claude Code keeps for each running process
+    (~/.claude/sessions/<pid>.json), through the processes in the agent's pane.
+    """
+    agent = herdr_result("agent", "get", target).get("agent") or {}
+    session = agent.get("agent_session") or {}
+    if session.get("kind") == "id" and session.get("value"):
+        return session["value"]
+    if not agent.get("pane_id"):
         return None
-    return session.get("value") if session.get("kind") == "id" else None
+    info = herdr_result("pane", "process-info", "--pane", agent["pane_id"]).get("process_info") or {}
+    for process in info.get("foreground_processes") or []:
+        try:
+            record = json.loads((claude_dir() / "sessions" / f"{int(process['pid'])}.json").read_text())
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        if isinstance(record, dict) and record.get("sessionId"):
+            return record["sessionId"]
+    return None
 
 
 def local_time(entry, fmt, fallback):

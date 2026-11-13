@@ -120,6 +120,31 @@ class FileTests(unittest.TestCase):
             transcript.main(["--agent", "coordinator", "--out", str(out)])
         self.assertIn("hello coordinator", out.read_text())
 
+    def herdr(self, agent, processes=()):
+        """A fake herdr_result: `agent get` returns `agent`, `pane process-info` `processes`."""
+        def result(*args):
+            if args[:2] == ("agent", "get"):
+                return {"agent": agent}
+            if args[:2] == ("pane", "process-info"):
+                return {"process_info": {"foreground_processes": [{"pid": pid} for pid in processes]}}
+            return {}
+        return patch.object(transcript, "herdr_result", side_effect=result)
+
+    def test_agent_session_reported_by_herdr(self):
+        with self.herdr({"pane_id": "w1:p1", "agent_session": {"kind": "id", "value": "s1"}}, [42]):
+            self.assertEqual(transcript.agent_session("coordinator"), "s1")
+
+    def test_agent_session_from_claude_process_record_without_herdr_integration(self):
+        sessions = self.root / "claude/sessions"
+        sessions.mkdir(parents=True)
+        (sessions / "42.json").write_text(json.dumps({"pid": 42, "sessionId": "s2", "name": "coordinator"}))
+        with self.herdr({"pane_id": "w1:p1", "agent_session": None}, [7, 42]):
+            self.assertEqual(transcript.agent_session("coordinator"), "s2")
+        with self.herdr({"pane_id": "w1:p1", "agent_session": None}, [7]):
+            self.assertIsNone(transcript.agent_session("coordinator"))
+        with self.herdr({}):
+            self.assertIsNone(transcript.agent_session("missing"))
+
     def test_empty_history_has_placeholder(self):
         self.assertEqual(transcript.render([]), "_No conversation yet._\n")
 

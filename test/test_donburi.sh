@@ -36,6 +36,8 @@ trap cleanup EXIT
 
 # Seed a minimal .zshrc so zsh setup has something to back up
 echo "# placeholder" > "$TEST_HOME/.zshrc"
+# ...and a Claude Code config dir, so herdr setup installs its Claude integration
+mkdir -p "$TEST_HOME/.claude"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -238,6 +240,16 @@ assert_symlink "herdr symlink"      "$TEST_HOME/.config/herdr"      "$REPO_DIR/h
 assert_symlink "zsh symlink"        "$TEST_HOME/.zshrc"             "$REPO_DIR/zsh/zshrc"
 assert_symlink "zsh-donburi symlink" "$TEST_HOME/.donburi.zsh"      "$REPO_DIR/zsh/donburi.zsh"
 assert_symlink "btop symlink"       "$TEST_HOME/.config/btop"       "$REPO_DIR/btop"
+if command -v herdr &>/dev/null; then
+    if [[ -f "$TEST_HOME/.claude/hooks/herdr-agent-state.sh" ]] &&
+        grep -q "herdr-agent-state.sh" "$TEST_HOME/.claude/settings.json"; then
+        pass "herdr Claude integration installed"
+    else
+        fail "herdr Claude integration installed"
+    fi
+else
+    skip "herdr Claude integration installed" "herdr not on PATH"
+fi
 
 # --- Status after keybinds setup ---
 run "$DONBURI" setup keybinds
