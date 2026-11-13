@@ -13,6 +13,7 @@ import unittest
 REPO = Path(__file__).resolve().parent.parent
 INSTALL = REPO / "claude" / "install.sh"
 LAYER = json.loads((REPO / "claude" / "settings.json").read_text())
+KEYS = REPO / "claude" / "keybindings.json"
 
 
 class ClaudeSettingsTests(unittest.TestCase):
@@ -62,8 +63,55 @@ class ClaudeSettingsTests(unittest.TestCase):
     def test_dry_run_writes_nothing(self):
         result = self.install("--dry-run")
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(json.loads(result.stdout)["editorMode"], "vim")
+        settings, _ = json.JSONDecoder().raw_decode(result.stdout)
+        self.assertEqual(settings["editorMode"], "vim")
+        self.assertIn("would link", result.stdout)
         self.assertFalse((self.dir / "settings.json").exists())
+        self.assertFalse((self.dir / "keybindings.json").exists())
+
+    def transcript(self, data):
+        return next(b["bindings"] for b in data["bindings"] if b["context"] == "Transcript")
+
+    def test_keybindings_are_vim_scrolling_in_the_transcript(self):
+        keys = self.transcript(json.loads(KEYS.read_text()))
+        self.assertEqual(keys["j"], "scroll:lineDown")
+        self.assertEqual(keys["k"], "scroll:lineUp")
+        self.assertEqual(keys["g"], "scroll:top")
+        self.assertEqual(keys["shift+g"], "scroll:bottom")
+        self.assertEqual(keys["ctrl+u"], "scroll:halfPageUp")
+        self.assertNotIn("ctrl+d", keys)  # reserved: Claude Code always exits on it
+
+    def test_keybindings_are_linked_when_missing(self):
+        self.assertEqual(self.install().returncode, 0)
+        target = self.dir / "keybindings.json"
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(target.resolve(), KEYS.resolve())
+        self.assertIn("already linked", self.install().stdout)
+
+    def test_existing_keybindings_are_merged_not_clobbered(self):
+        self.dir.mkdir()
+        user = {"bindings": [
+            {"context": "Chat", "bindings": {"ctrl+e": "chat:externalEditor"}},
+            {"context": "Transcript", "bindings": {"d": None, "j": "transcript:exit"}},
+        ]}
+        (self.dir / "keybindings.json").write_text(json.dumps(user))
+        self.assertEqual(self.install().returncode, 0)
+        merged = json.loads((self.dir / "keybindings.json").read_text())
+        self.assertFalse((self.dir / "keybindings.json").is_symlink())
+        self.assertEqual(merged["bindings"][0], user["bindings"][0])
+        transcript = self.transcript(merged)
+        self.assertIsNone(transcript["d"])                  # the user's unbinding stays
+        self.assertEqual(transcript["j"], "transcript:exit")  # the user's key wins
+        self.assertEqual(transcript["k"], "scroll:lineUp")
+        self.assertEqual(json.loads((self.dir / "keybindings.json.donburi-backup").read_text()), user)
+        self.assertIn("keybindings already up to date", self.install().stdout)
+
+    def test_existing_keybindings_without_a_transcript_block_get_one(self):
+        self.dir.mkdir()
+        (self.dir / "keybindings.json").write_text('{"bindings": [{"context": "Chat", "bindings": {}}]}')
+        self.assertEqual(self.install().returncode, 0)
+        merged = json.loads((self.dir / "keybindings.json").read_text())
+        self.assertEqual(self.transcript(merged)["g"], "scroll:top")
 
 
 if __name__ == "__main__":

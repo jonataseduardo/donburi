@@ -191,6 +191,21 @@ context window is used. The coordinator keeps its own settings
 user settings): its line is the orange `◉ COORDINATOR` banner, with the vim mode
 after it.
 
+**Transcript keys.** `claude/install.sh` also installs `claude/keybindings.json`.
+When `~/.claude/keybindings.json` doesn't exist, it becomes a link to the repo
+file. When it exists, donburi's bindings are merged in, and any key you already
+bind (or unbind with `null`) keeps your setting. In the transcript (**Ctrl+o**):
+
+| Key | Action |
+|-----|--------|
+| `j` / `k` | Down / up one line |
+| `g` / `Shift+g` | Top / bottom (`gg` also lands at the top) |
+| `Ctrl+u` or `u` / `d` | Up / down half a screen |
+
+`Ctrl+d` can't be used: Claude Code reserves it for exit. The transcript has no
+search either; for `/` search and every other vim motion, open the conversation
+in Neovim with **Ctrl+b, then Shift+h** (`transcript-view.sh`).
+
 ### herdr Agent Coordinator
 
 **Ctrl+a** toggles your rolling assistant: a long-lived Claude Code session on
