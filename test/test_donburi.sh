@@ -250,6 +250,11 @@ if command -v herdr &>/dev/null; then
 else
     skip "herdr Claude integration installed" "herdr not on PATH"
 fi
+if command -v jq &>/dev/null; then
+    assert_symlink "open-agent skill symlink" "$TEST_HOME/.claude/skills/open-agent" "$REPO_DIR/herdr/skills/open-agent"
+else
+    skip "open-agent skill symlink" "jq not on PATH"
+fi
 
 # --- Status after keybinds setup ---
 run "$DONBURI" setup keybinds

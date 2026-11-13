@@ -14,6 +14,7 @@ REPO = Path(__file__).resolve().parent.parent
 INSTALL = REPO / "claude" / "install.sh"
 LAYER = json.loads((REPO / "claude" / "settings.json").read_text())
 KEYS = REPO / "claude" / "keybindings.json"
+SKILLS = REPO / "herdr" / "skills"
 
 
 class ClaudeSettingsTests(unittest.TestCase):
@@ -25,6 +26,9 @@ class ClaudeSettingsTests(unittest.TestCase):
 
     def install(self, *args):
         return subprocess.run([str(INSTALL), *args], env=self.env, capture_output=True, text=True)
+
+    def backups(self, name):
+        return sorted(self.dir.glob(f"{name}.donburi-backup-*"))
 
     def test_layer_has_the_global_keys(self):
         self.assertEqual(LAYER["editorMode"], "vim")
@@ -45,7 +49,20 @@ class ClaudeSettingsTests(unittest.TestCase):
         self.assertEqual(merged["permissions"], user["permissions"])
         self.assertEqual(merged["statusLine"], LAYER["statusLine"])  # replaced, not mixed
         self.assertEqual(merged["editorMode"], "vim")
-        self.assertEqual(json.loads((self.dir / "settings.json.donburi-backup").read_text()), user)
+        self.assertEqual([json.loads(b.read_text()) for b in self.backups("settings.json")], [user])
+
+    def test_every_change_keeps_its_own_backup(self):
+        self.dir.mkdir()
+        first = {"statusLine": {"type": "command", "command": "mine"}}
+        (self.dir / "settings.json").write_text(json.dumps(first))
+        self.assertEqual(self.install().returncode, 0)
+        second = {**LAYER, "editorMode": "normal"}
+        (self.dir / "settings.json").write_text(json.dumps(second))
+        self.assertEqual(self.install().returncode, 0)
+        saved = [json.loads(b.read_text()) for b in self.backups("settings.json")]
+        self.assertEqual(len(saved), 2)
+        self.assertIn(first, saved)  # the original survives a later run
+        self.assertIn(second, saved)
 
     def test_second_run_changes_nothing(self):
         self.assertEqual(self.install().returncode, 0)
@@ -68,6 +85,8 @@ class ClaudeSettingsTests(unittest.TestCase):
         self.assertIn("would link", result.stdout)
         self.assertFalse((self.dir / "settings.json").exists())
         self.assertFalse((self.dir / "keybindings.json").exists())
+        self.assertIn(f"would link {self.dir / 'skills/open-agent'}", result.stdout)
+        self.assertFalse((self.dir / "skills").exists())
 
     def transcript(self, data):
         return next(b["bindings"] for b in data["bindings"] if b["context"] == "Transcript")
@@ -103,7 +122,7 @@ class ClaudeSettingsTests(unittest.TestCase):
         self.assertIsNone(transcript["d"])                  # the user's unbinding stays
         self.assertEqual(transcript["j"], "transcript:exit")  # the user's key wins
         self.assertEqual(transcript["k"], "scroll:lineUp")
-        self.assertEqual(json.loads((self.dir / "keybindings.json.donburi-backup").read_text()), user)
+        self.assertEqual([json.loads(b.read_text()) for b in self.backups("keybindings.json")], [user])
         self.assertIn("keybindings already up to date", self.install().stdout)
 
     def test_existing_keybindings_without_a_transcript_block_get_one(self):
@@ -112,6 +131,23 @@ class ClaudeSettingsTests(unittest.TestCase):
         self.assertEqual(self.install().returncode, 0)
         merged = json.loads((self.dir / "keybindings.json").read_text())
         self.assertEqual(self.transcript(merged)["g"], "scroll:top")
+
+    def test_skills_are_linked_when_missing(self):
+        self.assertEqual(self.install().returncode, 0)
+        link = self.dir / "skills/open-agent"
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), SKILLS.resolve() / "open-agent")
+        self.assertIn("skill already linked", self.install().stdout)
+
+    def test_a_skill_already_there_is_left_alone(self):
+        mine = self.dir / "skills/open-agent"
+        mine.mkdir(parents=True)
+        (mine / "SKILL.md").write_text("my own")
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(mine.is_symlink())
+        self.assertEqual((mine / "SKILL.md").read_text(), "my own")
+        self.assertIn("already exists", result.stderr)
 
 
 if __name__ == "__main__":

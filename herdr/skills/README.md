@@ -1,16 +1,13 @@
 # Claude Code skills for herdr
 
 Skills the herdr coordinator uses. Claude Code loads them from
-`~/.claude/skills`, and `donburi setup` does not link them, so link each one
-on every Mac, from the repo root:
+`~/.claude/skills`. `donburi setup claude` (also part of `donburi setup`) links
+each folder here that has a `SKILL.md` as `~/.claude/skills/<name>`.
 
-```bash
-mkdir -p ~/.claude/skills
-ln -s "$PWD/herdr/skills/open-agent" ~/.claude/skills/open-agent
-```
-
-If `~/.claude/skills/open-agent` already exists as a plain folder, delete it
-first.
+It never replaces a skill of the same name that is already there. If
+`~/.claude/skills/open-agent` exists as a plain folder or another link, setup
+says so and leaves it; delete it and rerun `donburi setup claude` to use the
+repo's.
 
 | Skill | What it does |
 |-------|--------------|

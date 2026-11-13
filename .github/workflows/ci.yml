@@ -31,3 +31,6 @@ jobs:
 
       - name: Test herdr coordinator scripts
         run: python3 -m unittest discover -s herdr/scripts -p 'test_*.py'
+
+      - name: Test Claude Code settings layer
+        run: python3 test/test_claude_settings.py

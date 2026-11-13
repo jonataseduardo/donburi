@@ -458,11 +458,12 @@ setup_herdr() {
 setup_claude() {
     echo -e "${CYAN}--- Claude Code ---${NC}"
 
-    # Merges claude/settings.json into ~/.claude/settings.json (never replaces it)
+    # Merges claude/settings.json and claude/keybindings.json into ~/.claude
+    # (never replaces them) and links the herdr/skills folders into ~/.claude/skills
     if ! command -v jq &>/dev/null; then
         log_warn "jq not found — skipping Claude Code settings (run: donburi setup claude)"
     elif [[ "$DRY_RUN" == true ]]; then
-        log_info "Would merge claude/settings.json into ~/.claude/settings.json"
+        log_info "Would merge claude/settings.json and keybindings.json into ~/.claude and link herdr/skills"
     else
         "$DONBURI_DIR/claude/install.sh" || log_warn "Failed to merge Claude Code settings (continuing)"
     fi

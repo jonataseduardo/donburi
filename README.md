@@ -170,8 +170,9 @@ Shift+r** to reload both client and server configuration.
 `donburi setup claude` (also part of `donburi setup`) merges
 `claude/settings.json` into `~/.claude/settings.json` with jq
 (`claude/install.sh`). Only these keys are set; plugins, permissions, hooks and
-everything else in the file are kept, and the previous file is saved as
-`settings.json.donburi-backup`:
+everything else in the file are kept. Before any change the previous file is
+saved next to it as `settings.json.donburi-backup-<timestamp>` (the same goes
+for `keybindings.json`); earlier backups are never replaced:
 
 | Key | Value |
 |-----|-------|
@@ -268,10 +269,11 @@ Ask it things such as:
 - "start a reviewer on ~/c/donburi" (creates a workspace and a worker agent)
 
 The coordinator opens workers with the `open-agent` Claude Code skill, kept in
-`herdr/skills/open-agent/`. `donburi setup` does not install it; link it on each
-Mac with
-`ln -s "$PWD/herdr/skills/open-agent" ~/.claude/skills/open-agent` (from the
-repo root).
+`herdr/skills/open-agent/`. `donburi setup claude` links it as
+`~/.claude/skills/open-agent`, unless a skill of that name is already there
+(see `herdr/skills/README.md`). The skill finds a project's folder from the
+running agents' folders and next to the coordinator's own folder, so it works
+with each Mac's [per-machine settings](#per-machine-settings).
 
 **Agent markers.** Every agent gets a marker: a small shape in a Kanagawa
 color, picked to sit next to herdr's own state glyphs (`× ◐ ✓ ○`) without
