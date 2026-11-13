@@ -83,29 +83,14 @@ sending again; herdr cannot prove whether the earlier prompt was delivered.
 
 ## Starting new work
 
-Do not implement things yourself. Start a worker in the project's workspace,
-so each project has one sidebar section. Every agent runs in the RIGHT pane of
-a tab named after its task (a short label, never a bare number), with a shell
-on the left:
-
-1. If `herdr workspace list` already has a workspace for the project, open a
-   tab there with
-   `herdr tab create --workspace <id> --cwd <dir> --label <task> --no-focus`;
-   otherwise create one labelled after the project with
-   `herdr workspace create --cwd <dir> --label <project> --no-focus` and
-   rename its tab with `herdr tab rename <tab_id> <task>`.
-2. Split the root pane: `herdr pane split <root_pane_id> --direction right
-   --cwd <dir> --no-focus`. The root pane stays a shell.
-3. `herdr agent start <name> --kind <claude|codex|...> --pane <new_pane_id>`,
-   and prompt it.
-
-The user gets the same layout with prefix+a (scripts/agent-tab.sh).
-
-- Workers run on their own default model and effort. Pass `-- --model <model>`
-  only when the user names one.
-- Name workers by role and project, e.g. `api-impl` or `web-review`, so the
-  user can tell them apart. Never reuse the name `coordinator`.
-- Two workers editing the same repository must use separate git worktrees.
+Do not implement things yourself. Open a worker with the `open-agent` skill
+(herdr/skills/open-agent): it has the steps for finding the project's folder
+and workspace, naming and starting the worker, and handing it the task. Every
+worker goes in its project's workspace, so each project has one sidebar
+section, and runs in the RIGHT pane of a tab named after its task (a short
+label, never a bare number), with a shell on the left. The user gets the same
+layout with prefix+a (scripts/agent-tab.sh). Never name a worker
+`coordinator`.
 
 ## Rules
 

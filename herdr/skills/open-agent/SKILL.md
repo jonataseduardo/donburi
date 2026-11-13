@@ -11,8 +11,13 @@ every ID from JSON responses, never guess them.
 
 ## 1. Resolve the project directory
 
-- Projects live under `~/ia/<name>` (other roots seen: `~/c/<name>`, `~/candidate-cvs/...`).
-  `ls -d ~/ia/*<word>*` to match.
+Project roots differ per Mac (the coordinator's folder is set per Mac), so find
+the folder; never assume a root.
+
+- An agent may already work there: `herdr agent list` gives each agent's `cwd`
+  and `workspace_id`.
+- Otherwise look in your own folder, next to it, and in `~/c`:
+  `ls -d ./*<word>* ../*<word>* ~/c/*<word>* 2>/dev/null`.
 - If more than one dir matches (e.g. `anomaly_detector` vs `internal_anomaly_detector`)
   or none, ask Jonatas. Do not pick one.
 
@@ -22,7 +27,8 @@ every ID from JSON responses, never guess them.
 herdr workspace list
 ```
 
-- **Workspace already exists for that dir/label** → new tab:
+- **Workspace already exists for the project** (its label, or the `workspace_id`
+  of an agent in that folder) → new tab:
   `herdr tab create --workspace <wid> --cwd <dir> --label <short-task-label> --no-focus`
   → pane = `.result.root_pane.pane_id`
 - **None** → new workspace labelled after the project:
